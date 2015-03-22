@@ -1,0 +1,27 @@
+.openerp .oe_login .oe_login_bottom {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  text-shadow: 0 1px 1px #999999;
+  background-color: transparent;
+  background-image: none;
+  background-image: none;
+  background-image: none;
+  background-image: none;
+  background-image: none;
+  background-image: none;
+}
+
+.openerp .oe_login .oe_login_footer {
+  position: absolute;
+  bottom: -40px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+.openerp .oe_login .oe_login_footer a {
+  color: #8c1313;
+  margin: 0 8px;
+}

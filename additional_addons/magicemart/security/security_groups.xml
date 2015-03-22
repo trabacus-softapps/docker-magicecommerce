@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+        <!--        <!-\-	    Category	-\->
+        <record model="ir.module.category" id="module_category_magic">
+            <field name="name">Magic</field>            
+            <field name="sequence">1</field>
+        </record>-->
+        
+        <!-- Magicemart Users Category       -->
+        
+        <record model="ir.module.category" id="magicemart_module_category">
+            <field name="name">Magic</field>
+            <field name="description">Select This as User or Manager</field>
+            <field name="sequence">1</field>
+        </record>
+        
+        <record id="magicemart_group_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="category_id" ref="magicemart_module_category"/>
+            <field name="comment">the user will have access to his own data in the Magic.</field>
+        </record>
+        
+        <record id="magicemart_group_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="category_id" ref="magicemart_module_category"/>
+            <field name="implied_ids" eval="[(4, ref('magicemart_group_user'))]"/>
+            <field name="comment">the manager will have access to all records of everyone in the magic.</field>
+        </record>
+        
+        <!--        Magicemart Customer Portal Category-->
+        
+        <record model="ir.module.category" id="magicemart_portal_category">
+            <field name="name">Customer Portal</field>
+            <field name="description">Select This as User or Manager </field>
+            <field name="sequence">1</field>
+        </record>
+        
+        <record id="magicemart_portal_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="category_id" ref="magicemart_portal_category"/>
+            <field name="comment">the user will have access to his own data in the Portal.</field>
+        </record>
+        
+        <record id="magicemart_portal_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="category_id" ref="magicemart_portal_category"/>
+            <field name="implied_ids" eval="[(4, ref('magicemart_portal_user'))]"/>
+            <field name="comment">the manager will have access to all records of everyone in the Portal.</field>
+        </record>
+        
+        
+        <!--        Magicemart Suuplier Portal Category-->
+        
+        <record model="ir.module.category" id="magicemart_supplier_category">
+            <field name="name">Supplier Portal</field>
+            <field name="description">Select This as Suuplier </field>
+            <field name="sequence">1</field>
+        </record>
+        
+        <record id="magicemart_supplier_portal" model="res.groups">
+            <field name="name">Supplier Manager</field>
+            <field name="category_id" ref="magicemart_supplier_category"/>
+<!--            <field name="implied_ids" eval="[(4, ref('magicemart_supplier_category'))]"/>-->
+            <field name="comment">Suplier Can See his Records</field>
+        </record>
+        <!-- TO BE UNCOMMENT       -->
+        
+        <!--        <record model='ir.ui.menu' id='base.menu_reporting'>
+            <field name="groups_id" eval="[(6,0,[ref('base.group_erp_manager'),ref('magicemart.magicemart_group_user'),ref('magicemart.magicemart_group_manager')])]"/>
+        </record>
+        
+        <record model='ir.ui.menu' id='mail.mail_feeds_main'>
+            <field name="groups_id" eval="[(6,0,[ref('base.group_erp_manager'),ref('magicemart.magicemart_group_user'),ref('magicemart.magicemart_group_manager')])]"/>
+        </record>
+        
+        <record model='ir.ui.menu' id='hr.menu_hr_root'>
+            <field name="groups_id" eval="[(6,0,[ref('base.group_erp_manager'),ref('magicemart.magicemart_group_user'),ref('magicemart.magicemart_group_manager')])]"/>
+        </record>-->
+        
+    </data>
+</openerp>

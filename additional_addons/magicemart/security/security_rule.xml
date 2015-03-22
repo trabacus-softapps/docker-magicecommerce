@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+
+                
+        <!-- Filtering Records for Portal Manager while viewing sale order based upon the customer -->
+    
+    <record id="magicmart_sale_rule" model="ir.rule">
+        <field name="name">Customer Sale Order</field>
+        <field ref="sale.model_sale_order" name="model_id"/>
+        <field name="domain_force">[ ('partner_id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4,ref('magicemart.magicemart_portal_manager'))]"/>
+    </record> 
+                
+        <!-- Filtering Records for Portal Manager while viewing  invoices based upon the customer   --> 
+        
+        <record id="magicmart_invoice_rule" model="ir.rule">
+            <field name="name">Customer Invoices</field>
+            <field ref="account.model_account_invoice" name="model_id"/>
+            <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+            <field name="groups" eval="[(4,ref('magicemart.magicemart_portal_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+        </record>  
+        
+        
+        <!-- Filtering Records for Portal User when product is requested by customer --> 
+        
+        <record id="magicmart_user_request_rule" model="ir.rule">
+            <field name="name">Request</field>
+            <field ref="magicemart.model_m_portal_request" name="model_id"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4,ref('magicemart.magicemart_portal_user'))]"/>
+        </record> 
+        
+        
+        <!-- Filtering Records for Portal Manager when product is requested by customer  TO BE UNCOMMENT  --> 
+        
+        <record id="magicmart_manager_request_rule" model="ir.rule">
+            <field name="name">Request</field>
+            <field ref="magicemart.model_m_portal_request" name="model_id"/>
+            <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+            <field name="groups" eval="[(4,ref('magicemart.magicemart_portal_manager'))]"/>
+        </record>
+ 
+ 
+        <!-- Filtering Purchase Quotation for Suppliers   -->
+ 
+        <record id="magicmart_purchase_quotation_rule" model="ir.rule">
+            <field name="name">Supplier Purchase Quotation</field>
+            <field ref="purchase.model_purchase_order" name="model_id"/>
+            <field name="domain_force">[ ('partner_id', '=', user.partner_id.id)]</field>
+            <field name="groups" eval="[(4,ref('magicemart.magicemart_supplier_portal'))]"/>
+        </record> 
+ 
+        <!-- Filtering Supplier Invoices for Suppliers   -->
+ 
+        <record id="magicmart_supplier_invoice_rule" model="ir.rule">
+            <field name="name">Supplier Invoices</field>
+            <field ref="account.model_account_invoice" name="model_id"/>
+            <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+            <field name="groups" eval="[(4,ref('magicemart.magicemart_supplier_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+        </record>  
+ 
+<!-- NOT REQUIRED IN ODOO THIS FUNCTIONALITY DONE IN DOMAIN GET METHOD-->
+        
+<!--        <record id="magicmart_supplier_product_rule" model="ir.rule">
+            <field name="name">Supplier Products</field>
+            <field ref="product.model_product_product" name="model_id"/>
+            <field name="domain_force">[('id', 'in', [x.id for x in user.partner_id.product_ids])]</field>
+            <field name="groups" eval="[(4,ref('magicemart.magicemart_supplier_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+        </record>  -->
+        
+        
+        
+        <!-- Filtering Delivery Orders for Customer Portal   (Stock Picking)-->
+        
+        <record id="magicmart_customer_deliveryorder_rule" model="ir.rule">
+            <field name="name">Customer Delivery Orders</field>
+            <field ref="stock.model_stock_picking" name="model_id"/>
+            <field name="domain_force">[('partner_id','child_of',user.partner_id.id)]</field>
+            <field name="groups" eval="[(4,ref('magicemart.magicemart_portal_manager')),(4,ref('magicemart.magicemart_portal_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            
+        </record>  
+        
+        <!-- Filtering Delivery Orders for Customer Portal  (Stock Picking Out) -->
+        
+        <record id="magicmart_customer_deliveryorder_out_rule" model="ir.rule">
+            <field name="name">Customer Delivery Orders Out</field>
+            <field ref="stock.model_stock_picking" name="model_id"/>
+            <field name="domain_force">[('partner_id','child_of',user.partner_id.id)]</field>
+            <field name="groups" eval="[(4,ref('magicemart.magicemart_portal_manager')),(4,ref('magicemart.magicemart_portal_user'))]"/>
+            <field name="perm_read" eval="True"/>
+            
+        </record>  
+
+  
+    
+    <!--    ODOO STANDARD RULES CHANGES-->
+        
+        
+    
+        <record id="magicmart_min_ineventory_rule" model="ir.rule">
+            <field name="name">Minimum Inventory Rule</field>
+            <field name="model_id" search="[('model','=','stock.warehouse.orderpoint')]" model="ir.model"/>
+            <field name="domain_force">['|',('company_id','in',[x.id for x in user.company_ids]),('company_id','=',False)]</field>
+            <field name="groups" eval="[(4,ref('base.group_system')),(4,ref('magicemart.magicemart_group_user')),(4,ref('magicemart.magicemart_group_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>  
+
+        <record id="magicmart_stock_warehouse_rule" model="ir.rule">
+            <field name="name">Warehouse multi-company</field>
+            <field name="model_id" ref="stock.model_stock_warehouse"/>
+            <field name="domain_force">['|',('company_id','in',[x.id for x in user.company_ids]),('company_id','=',False)]</field>
+            <field name="groups" eval="[(4,ref('base.group_system')),(4,ref('magicemart.magicemart_group_user')),(4,ref('magicemart.magicemart_group_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>  
+
+        <record id="magicmart_picking_type_rule" model="ir.rule">
+            <field name="name">Stock Picking Type multi-company</field>
+            <field name="model_id" search="[('model','=','stock.picking.type')]" model="ir.model"/>
+            <field name="domain_force">['|', ('warehouse_id', '=', False), '|',('warehouse_id.company_id','=',False),('warehouse_id.company_id','in',[x.id for x in user.company_ids])]</field>
+            <field name="groups" eval="[(4,ref('base.group_system')),(4,ref('magicemart.magicemart_group_user')),(4,ref('magicemart.magicemart_group_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>  
+
+
+        <record id="magicmart_pricelist_version_rule" model="ir.rule">
+            <field name="name">product pricelist version company rule</field>
+            <field name="model_id" ref="product.model_product_pricelist_version"/>
+            <field name="domain_force">['|',('company_id','in',[x.id for x in user.company_ids]),('company_id','=',False)]</field>
+            <field name="groups" eval="[(4,ref('base.group_system')),(4,ref('magicemart.magicemart_group_user')),(4,ref('magicemart.magicemart_group_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>  
+
+
+        <record id="magicmart_pricelist_item_company_rule" model="ir.rule">
+            <field name="name">product pricelist item company rule</field>
+            <field name="model_id" ref="product.model_product_pricelist_item"/>
+            <field name="domain_force">['|',('company_id','in',[x.id for x in user.company_ids]),('company_id','=',False)]</field>
+            <field name="groups" eval="[(4,ref('base.group_system')),(4,ref('magicemart.magicemart_group_user')),(4,ref('magicemart.magicemart_group_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>  
+        
+        <record id="magicmart_product_pricelist_company_rule" model="ir.rule">
+            <field name="name">product pricelist company rule</field>
+            <field name="model_id" ref="product.model_product_pricelist"/>
+            <field name="domain_force">['|',('company_id','in',[x.id for x in user.company_ids]),('company_id','=',False)]</field>
+            <field name="groups" eval="[(4,ref('base.group_system')),(4,ref('magicemart.magicemart_group_user')),(4,ref('magicemart.magicemart_group_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>  
+     
+
+        <record model="ir.rule" id="magicmart_stock_warehouse_orderpoint_rule">
+            <field name="name">stock_warehouse.orderpoint multi-company</field>
+            <field name="model_id" search="[('model','=','stock.warehouse.orderpoint')]" model="ir.model"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|',('company_id','in',[x.id for x in user.company_ids]),('company_id','=',False)]</field>
+            <field name="groups" eval="[(4,ref('base.group_system')),(4,ref('magicemart.magicemart_group_user')),(4,ref('magicemart.magicemart_group_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record> 
+        
+        <record model="ir.rule" id="magicmart_purchase_order_comp_rule">
+            <field name="name">Purchase Order multi-company</field>
+            <field name="model_id" search="[('model','=','purchase.order')]" model="ir.model"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|',('company_id','in',[x.id for x in user.company_ids]),('company_id','=',False)]</field>
+        </record>
+        
+        <record model="ir.rule" id="magicmart_purchase_order_line_comp_rule">
+            <field name="name">Purchase Order Line multi-company</field>
+            <field name="model_id" search="[('model','=','purchase.order.line')]" model="ir.model"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|',('company_id','in',[x.id for x in user.company_ids]),('company_id','=',False)]</field>
+        </record>
+
+        <record model="ir.rule" id="magicmart_stock_location_path_comp_rule">
+            <field name="name">stock_location_path multi-company</field>
+            <field name="model_id" ref="stock.model_stock_location_path"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|',('company_id','=',False),('company_id','in',[x.id for x in user.company_ids])]</field>
+        </record>
+        
+        <record model="ir.rule" id="magicmart_stock_location_comp_rule">
+            <field name="name">Location multi-company</field>
+            <field name="model_id" ref="stock.model_stock_location"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|',('company_id','=',False),('company_id','in',[x.id for x in user.company_ids])]</field>
+        </record>
+
+    </data>
+</openerp>

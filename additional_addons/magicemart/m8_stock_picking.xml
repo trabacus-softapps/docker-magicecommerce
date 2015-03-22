@@ -1,0 +1,564 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+      
+        <!-- Adding partner_id field  in Stock Location Master -->
+        
+        <record id="m_view_location_form" model="ir.ui.view">
+            <field name="name">m.stock.location.form</field>
+            <field name="model">stock.location</field>
+            <field name="inherit_id" ref="stock.view_location_form"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="attributes">
+                    <attribute name="string">Customer</attribute>
+                </field>
+            </field>
+        </record>
+      
+        
+<!-- Adding DC No in Delivery Product Tree    THIS VIEW ID IS NOT IN ODOO   -->
+                
+<!--        <record id="m_view_move_tree_reception_picking" model="ir.ui.view">
+            <field name="name">stock.move.tree2</field>
+            <field name="model">stock.move</field>
+            <field name="priority" eval="6"/>
+            <field name="inherit_id" ref="stock.view_move_tree_reception_picking"/>
+            <field name="arch" type="xml">
+                
+                <xpath expr="//tree[@string='Moves']/field[@name='picking_id']" position="attributes">
+                    <attribute name="invisible">0</attribute>
+                    <attribute name="string">DC No.</attribute>
+                </xpath>
+            </field>
+        </record>      -->          
+        
+<!--        <record id="m_view_picking_out_form" model="ir.ui.view">
+            <field name="name">m.stock.picking.out.form</field>
+            <field name="model">stock.picking.out</field>
+            <field name="inherit_id" ref="stock.view_picking_out_form"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position = "after">
+                    <field name="contact_id" domain="[('parent_id','=',partner_id)]" attrs="{'readonly':[('state','in','done')]}"/>
+                </field>
+                <xpath expr="/form/header//button[@string='Print Delivery Slip']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <button name="button_cancel" position="after">
+                    <button name="%(action_delivery_challan)d" type="action" string="Print Delivery Challan" class="oe_highlight"/>
+                </button>
+            </field>
+        </record>-->
+
+<!--        <record id="m_view_picking_withcarrier_out_form" model="ir.ui.view">
+            <field name="name">m_delivery.stock.picking_withcarrier.out.form.view</field>
+            <field name="model">stock.picking.out</field>
+            <field name="inherit_id" ref="delivery.view_picking_withcarrier_out_form"/>
+            <field name="arch" type="xml">
+                <field name="carrier_tracking_ref" position="attributes">
+                <attribute name="string">Customer PO Reference</attribute>
+                    <attribute name="attrs">{'readonly':[('state','in','done')]}</attribute>
+                    <attribute name="required">1</attribute>
+                </field>
+                <field name="number_of_packages" position="before">
+                    <field name="vehicle" required="1"/>
+                </field>
+                <field name="number_of_packages" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                    <attribute name="attrs">{'readonly':[('state','in','done')]}</attribute>
+                </field>
+                <field name="carrier_id" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                    <attribute name="attrs">{'readonly':[('state','in','done')]}</attribute>
+                </field>
+            </field>
+        </record>-->
+        
+    <!--        TO remove standard Print Report button functionalities -->
+<!--        <record id="m_view_delivery_order_inherit_stock" model="ir.ui.view">
+            <field name="name">m.stock.picking.out.form</field>
+            <field name="model">stock.picking.out</field>
+            <field name="inherit_id" ref= "delivery.view_delivery_order_inherit_stock"/>
+            <field name="arch" type="xml">
+                <button states = "confirmed,assigned" position="attributes">
+                    <attribute name="invisible">1</attribute> 
+                </button>
+                <xpath expr="//button[@states='done']" position = "attributes">
+                
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                
+            </field>
+        </record>-->
+        
+<!--     To Add Available qty & Product Image in Stock move         -->
+        
+            <record id="m_view_move_picking_form" model="ir.ui.view">
+                <field name="name">m.stock.move.form</field>
+                <field name="model">stock.move</field>
+                <field name="inherit_id" ref="stock.view_move_picking_form"/>
+                <field name="arch" type="xml">
+                    <field name="product_packaging" position="after">
+                        <field name="available_qty" readonly="1" />
+                    </field>
+                    <field name="product_packaging" position="attributes">
+                        <attribute name="invisible">1</attribute>
+                    </field>
+                    <field name="product_id" position="attributes">
+                        <attribute name="on_change">onchange_product_id(product_id,location_id,location_dest_id, parent.partner_id)</attribute>
+                    </field>
+                    <xpath expr="//group/group/field[@name='date_expected']" position="after">
+                        <group col="2" colspan="1">
+                            <group>
+                                <h4>Product Image</h4>
+                            </group>
+                            <group >
+                                <field name="product_image" readonly="1" widget="image" class="oe_avatar oe_left" nolabel="1"/>
+                            </group>
+                        </group>
+                    </xpath>
+                    <xpath expr="//group/group/field[@name='name']" position="attributes">
+                        <attribute name="invisible">1</attribute>
+                    </xpath>
+                    
+                    <field name="location_id" position="attributes">
+                        <attribute name="on_change">onchange_location_id(location_id, location_dest_id)</attribute>
+                    </field>
+                    <field name="location_dest_id" position="attributes">
+                        <attribute name="on_change">onchange_location_id(location_id, location_dest_id)</attribute>
+                    </field>
+                    <group string="Locations" position="attributes">
+                        <attribute name="colspan">2</attribute>
+                        <attribute name="coln">2</attribute>
+                    </group>
+                    
+                                
+                </field>
+        </record>
+        
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						Filtering Current Day Records in Stock	
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        
+        <record id="m_view_picking_internal_search" model="ir.ui.view">
+            <field name="name">m.stock.picking.internal.search</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+            <field name="arch" type="xml">
+                <filter string="Done" position="after">
+                    <filter name="today" string="Today"
+                        domain="[('date','>=',context_today().strftime('%%Y-%%m-%%d 00:00:00'))]"/>
+                </filter>
+            </field>
+        </record>     
+        
+        <record id="stock.action_picking_tree_all" model="ir.actions.act_window">
+            <field name="name">Stock Operations</field>
+            <field name="res_model">stock.picking</field>
+            <field name="context">{
+                'contact_display': 'partner_address',
+                'search_default_today':1,
+                }
+            </field>
+            <field name="search_view_id" ref="m_view_picking_internal_search"/>
+        </record>
+        
+        <record id="stock.action_picking_tree_done" model="ir.actions.act_window">
+            <field name="name">Done Transfers</field>
+            <field name="res_model">stock.picking</field>
+            <field name="context">{
+                'search_default_picking_type_id': [active_id],
+                'default_picking_type_id': active_id,
+                'contact_display': 'partner_address',
+                'search_default_done': 1,
+                'search_default_today':1,
+                }
+            </field>
+            <field name="search_view_id" ref="m_view_picking_internal_search"/>
+        </record>
+        
+        <record id="stock.action_picking_tree_ready" model="ir.actions.act_window">
+            <field name="name">Ready Transfers</field>
+            <field name="res_model">stock.picking</field>
+            <field name="context">{
+                'search_default_picking_type_id': [active_id],
+                'default_picking_type_id': active_id,
+                'contact_display': 'partner_address',
+                'search_default_available': 1,
+                'search_default_today':1,
+                }
+            </field>
+            <field name="search_view_id" ref="m_view_picking_internal_search"/>
+        </record>
+        
+        <record id="stock.action_picking_tree_done_grouped" model="ir.actions.act_window">
+            <field name="name">Done Transfers by Date</field>
+            <field name="res_model">stock.picking</field>
+            <field name="context">{
+                'search_default_picking_type_id': [active_id],
+                'default_picking_type_id': active_id,
+                'contact_display': 'partner_address',
+                'search_default_done': 1,
+                'group_by': ['date'],
+                'search_default_today':1,
+                }
+            </field>
+            <field name="search_view_id" ref="m_view_picking_internal_search"/>
+        </record>
+        
+        <record id="stock.action_picking_tree_waiting" model="ir.actions.act_window">
+            <field name="name">Waiting Availability Transfers</field>
+            <field name="res_model">stock.picking</field>
+            <field name="context">{
+                'search_default_picking_type_id': [active_id],
+                'default_picking_type_id': active_id,
+                'contact_display': 'partner_address',
+                'search_default_waiting': 1,
+                'search_default_today':1,
+                }
+            </field>
+            <field name="search_view_id" ref="m_view_picking_internal_search"/>
+        </record>
+        
+        <record id="stock.action_picking_tree_late" model="ir.actions.act_window">
+            <field name="name">Late Transfers</field>
+            <field name="res_model">stock.picking</field>
+            <field name="context">{
+                'search_default_picking_type_id': [active_id],
+                'default_picking_type_id': active_id,
+                'contact_display': 'partner_address',
+                'search_default_late': 1,
+                'search_default_confirmed': 1,
+                'search_default_today':1,
+                }
+            </field>
+            <field name="search_view_id" ref="m_view_picking_internal_search"/>
+        </record>
+        
+        <record id="stock.action_picking_tree_backorder" model="ir.actions.act_window">
+            <field name="name">Backorders</field>
+            <field name="res_model">stock.picking</field>
+            <field name="context">{
+                'search_default_picking_type_id': [active_id],
+                'default_picking_type_id': active_id,
+                'contact_display': 'partner_address',
+                'search_default_backorder': 1,
+                'search_default_confirmed': 1,
+                'search_default_today':1,
+                }
+            </field>
+            <field name="search_view_id" ref="m_view_picking_internal_search"/>
+        </record>
+        
+        <record id="stock.action_picking_tree" model="ir.actions.act_window">
+            <field name="name">Transfers</field>
+            <field name="res_model">stock.picking</field>
+            <field name="context">{
+                'search_default_picking_type_id': [active_id],
+                'default_picking_type_id': active_id,
+                'contact_display': 'partner_address',
+                'search_default_today':1,
+                }
+                
+            </field>
+            <field name="search_view_id" ref="m_view_picking_internal_search"/>
+            
+        </record>
+        
+        
+        <!--  Hiding Weight and net weight fields     -->
+        <record id="m_view_picking_withweight_internal_move_form" model="ir.ui.view">
+            <field name="name">m.stock.picking_withweight.internal.move.form.view</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="delivery.view_picking_withweight_internal_move_form"/>
+            <field name="arch" type="xml">
+                <field name="weight" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+                <field name="weight_net" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+            </field>
+        </record>
+        
+<!--  Stock Picking in Form      -->
+<!--        <record id="m_view_picking_in_form" model="ir.ui.view">
+            <field name="name">m.stock.picking.in.form</field>
+            <field name="model">stock.picking.in</field>
+            <field name="inherit_id" ref="stock.view_picking_in_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_process']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>
+                
+                <xpath expr="//button[@name='button_cancel']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>
+                
+                <xpath expr="//button[@string='Return Products']" position="replace">
+                    <button name="%(stock.act_stock_return_picking)d" string="Return Products" states="done" type="action" context="{'picking_id':active_id}"/>
+                </xpath>
+                
+            </field>
+        </record>
+        -->
+                      
+        
+        <record id="m_view_move_withweight_form" model="ir.ui.view">
+            <field name="name">m.stock.move.form.weight</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="delivery.view_move_withweight_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div/field[@name='weight']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='weight_net']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                
+            </field>
+        </record>
+        
+<!-- Stock Picking        -->
+        
+        <record id="m_view_picking_form" model="ir.ui.view">
+            <field name="name">m.stock.picking.form</field>
+            <field name="model">stock.picking</field>
+            <field eval="12" name="priority"/>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+                
+                <!--             TO Show 2 button Deliver and Transfer     -->
+                <button string="Transfer" position="replace">
+                    <button name="do_enter_transfer_details"  string="Deliver" groups="stock.group_stock_user" type="object" class="oe_highlight"
+                        attrs="{'invisible':['|',('state','not in', ('assigned','partially','available')),('picking_type_code','not in',('internal','outgoing'))]}"/>
+                    
+                    <button name="do_enter_transfer_details"  string="Recieve" groups="stock.group_stock_user" type="object" class="oe_highlight"
+                        attrs="{'invisible':['|',('state','not in', ('assigned','partially','available')),('picking_type_code','in',('internal','outgoing'))]}"/>
+                </button>
+                
+<!--                <xpath expr="//field[@name='name']" position="attributes">
+                    <attribute name="readonly">0</attribute>
+                    <attribute name="attrs">{'readonly':[('state','not in',('draft','waiting'))]}</attribute>
+                </xpath>-->
+                
+                
+                <xpath expr="//notebook/page[@string='Products']" position="attributes">
+                    <attribute name="context">{'type':1 }</attribute>
+                </xpath>
+                <xpath expr="//field[@name='partner_id']" position="after">
+                </xpath>
+                <xpath expr="//field[@name='origin']" position="before">
+                    <field name="cust_po_ref"  attrs="{'required':[('picking_type_code','in','outgoing')],'invisible':[('picking_type_code','in',('internal','incoming'))]}"/>
+                    <field name="vehicle"   attrs="{'readonly':[('state','in','done')],'required':[('picking_type_code','in','outgoing')],'invisible':[('picking_type_code','in',('internal','incoming'))]}"/>
+                </xpath>
+                
+                <xpath expr="//button[@name='action_assign']" position="after">
+                    <button name="%(magicemart.action_delivery_challan)d" type="action" String="Print Delivery Challan"  class="oe_highlight" 
+                        groups="base.group_user,magicemart.magicemart_portal_manager"
+                        attrs="{'invisible':[('picking_type_code','in',('internal','incoming'))]}"/>
+                </xpath>     
+                
+                
+                <xpath expr="//button[@name='action_assign']" position="after">
+                    <button name="stock_internal_transfer" type="object" String="Print Stock Transfer" class="oe_highlight" 
+                        groups="base.group_user,magicemart.magicemart_portal_manager"
+                        attrs="{'invisible':[('picking_type_code','in',('incoming','outgoing'))]}"/>
+                </xpath>     
+                
+                <xpath expr="//button[@string='Mark as Todo']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>     
+                      
+                <xpath expr="//button[@name='action_cancel']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>    
+                      
+                <xpath expr="//button[@name='action_assign']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>           
+               
+                <xpath expr="//button[@name='force_assign']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>  
+                               
+                <xpath expr="//button[@name='action_cancel']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath> 
+
+                <xpath expr="//button[@name='do_unreserve']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath> 
+
+                <xpath expr="//notebook/page[@string='Additional Info']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath> 
+                
+
+            </field>
+        </record>
+        
+        <!-- Stock Picking        -->
+        <record id="m_view_picking_inherit_form2" model="ir.ui.view">
+            <field name="name">m.stock.picking.form.inherit</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock_account.view_picking_inherit_form2"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@string='Create Invoice']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>
+            </field>
+            
+        </record>
+        
+        <!-- Hide Create button Delivery Order Tree view for Customer Portal -->
+        
+        <record id="m_vpicktree" model="ir.ui.view">
+            <field name="name">m.stock.picking.tree</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.vpicktree"/>
+            <field name="groups_id" eval="[(4,ref('magicemart.magicemart_portal_manager')),(4,ref('magicemart.magicemart_portal_user'))]"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree[@string='Picking list']" position="attributes">
+                    <attribute name="create">false</attribute>
+                </xpath>
+            </field>
+        </record>
+                
+        <record id="m_view_picking_form2" model="ir.ui.view">
+            <field name="name">m.stock.picking.form</field>
+            <field name="model">stock.picking</field>
+            <field eval="12" name="priority"/>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="groups_id" eval="[(4,ref('magicemart.magicemart_portal_manager')),(4,ref('magicemart.magicemart_portal_user'))]"/>
+            <field name="arch" type="xml">
+                
+                <xpath expr="//form[@string='Transfer']" position="attributes">
+                    <attribute name="create">false</attribute>
+                </xpath>
+            </field>
+        </record>
+        
+        <record id="m_view_move_form" model="ir.ui.view">
+            <field name="name">stock.move.form</field>
+            <field name="model">stock.move</field>
+            <field eval="1" name="priority"/>
+            <field name="inherit_id" ref="stock.view_move_form"/>
+            <field name="arch" type="xml">
+                
+                <xpath expr="//button[@name='action_confirm']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>
+                
+                <xpath expr="//button[@name='action_done']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>
+                
+                <xpath expr="//button[@name='force_assign']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>
+                
+                <xpath expr="//button[@name='action_cancel']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>
+                
+            </field>
+        </record>
+        
+        
+        
+<!-- Stock Picking Out Inherited       -->
+<!--        <record id="m_view_picking_out_form" model="ir.ui.view">
+            <field name="name">m.stock.picking.out.form</field>
+            <field name="model">stock.picking.out</field>
+            <field name="inherit_id" ref="stock.view_picking_out_form"/>
+            <field name="arch" type="xml">
+                                          
+                <xpath expr="//button[@string='Return Products']" position="replace">
+                    <button name="%(stock.act_stock_return_picking)d" string="Return Products" states="done" type="action" context="{'picking_id':active_id}"/>
+                </xpath>
+                
+            </field>
+        </record>
+        -->
+        
+        <!--  Stock Return Line Wizard -->        
+<!--        <record id="m_view_stock_return_picking_form" model="ir.ui.view">
+            <field name="name">M Return lines</field>
+            <field name="model">stock.return.picking</field>
+            <field name="inherit_id" ref="stock.view_stock_return_picking_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='invoice_state']" position="attributes">
+                    <attribute name="on_change">onchange_invoicing(invoice_state,context)</attribute>
+                </xpath>
+            </field>
+        </record>-->
+        
+                
+<!--  Hide stock update button for Supplier Portal      -->
+        
+<!--        <record id="m_view_normal_procurement_locations_form" model="ir.ui.view">
+            <field name="name">m.product.normal.procurement.locations.inherit</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="stock.view_normal_procurement_locations_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='%(stock.action_view_change_product_quantity)d']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>
+            </field>
+        </record>-->
+        
+        
+<!--  Inheriting Internal Move Action    -->
+<!--        <record id="stock.action_picking_tree6" model="ir.actions.act_window">
+            <field name="context">{'default_type':'internal','contact_display': 'partner_address'}</field>
+        </record>-->
+        
+             
+<!--   To Remove std Report in Print Dropdown     -->
+        <delete model="ir.actions.report.xml" search="[('name','=','Delivery Slip'),('model','=','stock.picking.out')]"/>
+ 
+ 
+<!-- Button For Schedular   -->
+<!--        <record id="m_view_warehouse_orderpoint_form" model="ir.ui.view">
+            <field name="name">m.stock.warehouse.orderpoint.form</field>
+            <field name="model">stock.warehouse.orderpoint</field>
+            <field name="inherit_id" ref="stock.view_warehouse_orderpoint_form"/>
+            <field name="arch" type="xml">
+                <form>
+                    <button name="do_stock_reorder" type="object" string="Re-Ordering"/>
+                </form>
+            </field>
+        </record>-->
+        
+        
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						Scheduler to Less Stock Notification	
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        
+        <record forcecreate="True" id="lv_run_scheduler" model="ir.cron">
+            <field name="name">Less Stock Notification</field>
+            <field eval="True" name="active" />
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field eval="True" name="doall" />
+            <field eval="'stock.warehouse.orderpoint'" name="model" />
+            <field eval="'do_stock_reorder'" name="function" />
+            <field eval="'()'" name="args" />
+        </record>
+        
+        
+        
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        
+        
+    </data>
+</openerp>
+
+
+
+
+
+
+

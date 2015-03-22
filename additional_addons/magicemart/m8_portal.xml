@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+    <data>
+        
+        
+        <menuitem icon="terp-project" name="Customer Portal Admin" id="menu_magicemart_customer" sequence="501"  groups="magicemart.magicemart_portal_manager,magicemart.magicemart_portal_user" />
+        <menuitem name="Customer Portal" id="menu_portal_customer" parent="menu_magicemart_customer" sequence="1" groups="magicemart.magicemart_portal_manager,magicemart.magicemart_portal_user" />
+        
+        <menuitem name="Customer Portal Admin" id="menu_portal_customer_admin" parent="menu_magicemart_customer" sequence="2" groups="magicemart.magicemart_portal_manager" />
+        
+        
+        <menuitem name="Customer Portal Employee" id="portal_customer_employee" parent="menu_magicemart_customer" sequence="1" groups="magicemart.magicemart_portal_manager,magicemart.magicemart_portal_user" />
+        
+        
+        <menuitem name="Reports" id="portal_customer_reports" parent="menu_magicemart_customer" sequence="3" groups="magicemart.magicemart_portal_manager" />
+        
+        <menuitem name="Supplier" id="menu_magicemart_supplier"   sequence="502"  groups="magicemart.magicemart_supplier_portal" />
+        <menuitem name="Supplier" id="menu_supplier_portal" parent="menu_magicemart_supplier" sequence="1"  groups="magicemart.magicemart_supplier_portal" />
+        
+        <menuitem name="Reports" id="menu_supplier_sales_analysis" parent="menu_magicemart_supplier" sequence="2"  groups="magicemart.magicemart_supplier_portal" />
+        
+        
+<!--        <menuitem name="Events" parent="base.marketing_menu" id="event.event_main_menu"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" />
+        -->
+        
+
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+                  Top Messaging menu item Hiding For Customer and Supplier
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        
+        <menuitem name="Messaging"
+            id="mail.mail_feeds_main"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"
+            sequence="10"/>
+        
+        <!-- Left-side menu: Feeds -->
+        <menuitem id="mail.mail_feeds" name="Messaging" parent="mail.mail_feeds_main" sequence="10"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <!-- Inbox --> 
+        <menuitem action="mail.action_mail_inbox_feeds" id="mail.mail_inboxfeeds" parent="mail.mail_feeds" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <!-- To Me -->
+        <menuitem action="mail.action_mail_to_me_feeds" id="mail.mail_tomefeeds" parent="mail.mail_feeds" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <!-- To Do -->
+        
+        <menuitem action="mail.action_mail_star_feeds" id="mail.mail_starfeeds" parent="mail.mail_feeds" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <!-- archives -->
+        
+        <menuitem action="mail.action_mail_archives_feeds" id="mail.mail_archivesfeeds" parent="mail.mail_feeds" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <menuitem id="mail.mail_my_stuff" name="Organizer" parent="mail.mail_feeds_main" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" />
+        
+        <menuitem id="mail.mail_group_root" parent="mail.mail_feeds_main" sequence="12" name="My Groups" groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        <menuitem id="mail.mail_allgroups" parent="mail.mail_group_root" sequence="100" action="mail.action_view_groups" groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+
+
+
+<!--        <menuitem name="Forum" id="website_forum.menu_website_forum"
+            parent="mail.mail_feeds_main" sequence="50" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+-->
+        
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+                        Reporting Hiding For Customer and Supplier
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        <menuitem name="Reporting"
+            id="base.menu_reporting"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"
+            sequence="170"/>
+        <menuitem id="base.menu_reporting_dashboard" name="Dashboards" parent="base.menu_reporting" sequence="0" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <menuitem id="account.menu_finance_reporting" name="Accounting" parent="base.menu_reporting" sequence="35"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>  	
+        
+        <menuitem id="base.next_id_73" name="Purchase" parent="base.menu_reporting" sequence="10"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <menuitem action="purchase.action_purchase_order_report_all"
+            id="purchase.menu_action_purchase_order_report_all" parent="base.next_id_73" sequence="3"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+
+
+
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+                        Human Resources Top Menu Hiding For Customer and Supplier
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        
+        <menuitem name="Human Resources"
+            id="hr.menu_hr_root"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager,base.group_hr_user,base.group_hr_manager"
+            sequence="90"/>
+        
+        
+        <menuitem id="hr.menu_hr_reporting" parent="base.menu_reporting" name="Human Resources" sequence="40"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <menuitem id="hr.menu_hr_main" parent="hr.menu_hr_root" name="Human Resources" sequence="0"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <menuitem id="hr.menu_hr_configuration" name="Configuration" parent="hr.menu_hr_root" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" sequence="50"/>
+        
+        <menuitem id="hr.menu_hr_reporting_timesheet" name="Reports"
+            parent="hr.menu_hr_reporting" sequence="6" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <menuitem id="hr_attendance.menu_hr_time_tracking" name="Time Tracking" parent="hr.menu_hr_root" sequence="5"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+            <menuitem id="hr_attendance.menu_hr_attendance" name="Attendances" parent="hr.menu_hr_root" sequence="10" 
+                groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <menuitem action="hr_attendance.open_view_attendance" id="hr_attendance.menu_open_view_attendance" 
+            parent="hr_attendance.menu_hr_attendance" sequence="20" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" />
+        
+        <menuitem
+            action="hr_attendance.action_hr_attendance_graph"
+            id="hr_attendance.menu_hr_attendance_graph"
+            parent="hr.menu_hr_reporting"
+            sequence="3"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" />
+        
+<!--TO BE UNCOMENT-->
+
+<!--        <menuitem name="My Current Timesheet" id="hr_timesheet_sheet.menu_act_hr_timesheet_sheet_form_my_current" 
+            parent="hr_attendance.menu_hr_time_tracking" action="hr_timesheet_sheet.ir_actions_server_timsheet_sheet"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"  sequence="1"/>
+        -->
+        <menuitem id="hr_timesheet.menu_hr_working_hours" parent="hr_attendance.menu_hr_time_tracking" 
+            action="hr_timesheet.act_hr_timesheet_line_evry1_all_form"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" />
+        
+        <menuitem id="hr_expense.menu_hr_product" name="Expense Categories" parent="hr.menu_hr_configuration" 
+            action="hr_expense.hr_expense_product"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <menuitem id="hr_expense.next_id_49" name="Expenses" sequence="15" parent="hr.menu_hr_root"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" />
+        
+        <menuitem action="hr_expense.expense_all" id="hr_expense.menu_expense_all" name="Expenses" parent="hr_expense.next_id_49"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" />
+
+        <menuitem name="Leaves" parent="hr.menu_hr_root" id="hr_holidays.menu_open_ask_holidays" sequence="20"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <menuitem name="Leaves Summary" parent="hr_holidays.menu_open_ask_holidays" id="hr_holidays.menu_open_company_allocation"
+            action="hr_holidays.open_company_allocation" sequence="40"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <menuitem parent="hr_holidays.menu_open_ask_holidays" id="hr_holidays.menu_request_approve_allocation" 
+            action="hr_holidays.request_approve_allocation" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" />
+        
+        <menuitem sequence="3" id="hr.menu_open_view_attendance_reason_config" parent="hr.menu_hr_configuration" 
+            name="Leaves" groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <menuitem name="Leaves Types" action="hr_holidays.open_view_holiday_status" id="hr_holidays.menu_open_view_holiday_status" 
+            parent="hr.menu_hr_configuration" sequence="10"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <menuitem parent="hr_holidays.menu_open_ask_holidays" id="hr_holidays.menu_open_ask_holidays_new"
+            action="hr_holidays.open_ask_holidays" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <menuitem name="Appraisal" parent="hr.menu_hr_root" id="hr_evaluation.menu_eval_hr" sequence="25"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+<!--        TO BE UNCOMENT-->
+<!--        <menuitem id="hr_gamification.menu_hr_gamification" parent="hr.menu_hr_root" name="Engagement" sequence="40"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" />
+        -->
+        
+
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						Marketing Top menu item Hiding For Customer and Supplier
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        
+        <!-- Top menu item -->
+        <menuitem name="Marketing" id="base.marketing_menu" sequence="85"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <!-- Reporting for Marketing -->
+        <menuitem name="Marketing" id="base.marketing_reporting_menu" sequence="10"
+            parent="base.menu_reporting" groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" />
+        
+        
+        <!-- MENU ELEMENTS -->
+        
+        <!-- Left menu categories-->
+        <menuitem name="Surveys" id="survey.menu_surveys" parent="base.marketing_menu" sequence="25" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" />
+        
+        <menuitem name="Configuration" id="base.menu_marketing_config_root" parent="base.marketing_menu" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" sequence="30" />
+        
+        <!-- Left menu elements: Survey -->
+        <menuitem name="Surveys" id="survey.menu_survey_form" action="survey.action_survey_form" parent="survey.menu_surveys" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" sequence="1"/>
+        
+        <menuitem name="Answers" id="survey.menu_survey_type_form1" action="survey.action_survey_user_input" 
+            parent="survey.menu_surveys" sequence="1"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <!-- Left menu elements: Technical Configuration -->
+        <menuitem name="Surveys" id="survey.menu_surveys_configuration" parent="base.menu_marketing_config_root" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" sequence="25" />
+        
+        <menuitem name="Pages" id="survey.menu_survey_page_form1" action="survey.action_survey_page_form" parent="survey.menu_surveys_configuration" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" sequence="1"/>
+        
+        <menuitem name="Questions" id="survey.menu_survey_question_form1" action="survey.action_survey_question_form" parent="survey.menu_surveys_configuration" 
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" sequence="2"/>
+        
+        <menuitem name="Labels" id="survey.menu_survey_label_form1" action="survey.action_survey_label_form" parent="survey.menu_surveys_configuration"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" sequence="3"/>
+        
+        <menuitem name="User Input Lines" id="survey.menu_survey_response_line_form" action="survey.action_survey_user_input_line" parent="survey.menu_surveys_configuration"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" sequence="4"/>
+
+
+<!--TO BE UNCOMENT-->
+        <!-- Marketing / Mass Mailing -->
+<!--        <menuitem name="Mass Mailing" id="mass_mailing.mass_mailing_campaign"
+            parent="base.marketing_menu" sequence="1"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>-->
+        
+        <!-- Marketing / Mailing Lists -->
+<!--        <menuitem name="Mailing Lists" id="mass_mailing.mass_mailing_list"
+            parent="base.marketing_menu" sequence="2"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        -->
+        <!-- Marketing / Configuration -->
+<!--        <menuitem name="Configuration" id="mass_mailing.marketing_configuration"
+            parent="base.marketing_menu" sequence="99"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+-->
+
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						Association Top menu item Hiding For Customer and Supplier
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        
+        <menuitem name="Association"
+            id="base.menu_association"
+            groups="base.group_user"
+            sequence="45"/>
+        <menuitem name="Configuration" id="base.menu_event_config" parent="base.menu_association" sequence="30"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        <menuitem name="Association" id="base.menu_report_association" parent="base.menu_reporting" sequence="23"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+
+        <menuitem name="Association" id="base.menu_association" icon="terp-calendar" sequence="10"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+<!--        <menuitem name="Members" id="membership.menu_membership" sequence="0" parent="base.menu_association"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        -->
+        <menuitem name="Configuration" id="base.menu_marketing_config_association"
+            parent="base.menu_association" sequence="30"
+            groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+
+        
+        
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						Customer Portal Users and Managers Product Request	
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        
+        <record id="magicemart_request_product_tree" model="ir.ui.view">
+            <field name="name">magicemart_request_product_tree</field>
+            <field name="model">m.portal.request</field>
+            <field name="arch" type="xml">
+                <tree string="Request Product">
+                    <field name="emp_name" />
+                    <field name="emp_no" />
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="magicemart_request_product_form" model="ir.ui.view">
+            <field name="name">magicemart_request_product_form</field>
+            <field name="model">m.portal.request</field>
+            <field name="arch" type="xml">
+                <form string="Request Product" version="7.0">
+                    <header>
+                        <button name="get_product_request" states="draft" string="Submit"  type="object" class="oe_highlight" />
+                        <field name="state" widget="statusbar" nolabel="1" statusbar_visible="draft,done" statusbar_colors='{"draft":"blue","done":"blue"}'/>
+                    </header>
+                    <sheet>
+                        <group col="4" colspan="2">
+                            <field name="emp_name" attrs="{'readonly':[('state','=','done')]}"/>
+                            <field name="emp_no" attrs="{'readonly':[('state','=','done')]}"/>
+                            <field name="user_id"  invisible= "1" />
+                            <field name="partner_id"   invisible= "1" />
+                        </group>
+                        <separator string="Products"/>
+                        <field name="product_ids" widget="one2many_list" nolabel="1" attrs="{'readonly':[('state','=','done')]}" >
+                            <tree string=" Product Lines" editable="top">
+                                <field name="product_id"/>
+                                <field name="product_qty"/>
+                            </tree>
+                        </field>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        
+        <record id="action_magicemart_request_product" model="ir.actions.act_window">
+            <field name="name">Request Product</field>
+            <field name="res_model">m.portal.request</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            
+        </record>
+        
+        <menuitem name="Request" id="menu_portal_customer_request"  action="action_magicemart_request_product" parent="portal_customer_employee"  sequence="2" groups="magicemart.magicemart_portal_user" />
+        
+
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						Delivery Orders for Customer Portal Admin 
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        
+        <record id="m_action_picking_type_custportal" model="ir.actions.act_window">
+            <field name="name">Customer Delivery Orders</field>
+            <field name="res_model">stock.picking</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">list,form</field>
+            <field name="domain" eval="[('picking_type_code', '=', 'outgoing')]"/>
+        </record>
+        
+                
+        <menuitem name="Delivery Orders" id="menu_portal_customer_delivery_order"  action="m_action_picking_type_custportal"
+            parent="menu_portal_customer_admin"  sequence="2" groups="magicemart.magicemart_portal_manager" />
+
+        
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						Customer Portal Returned DO's (i.e., Incomingshipment) 
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        <record id="m_return_incmoingshipment" model="ir.actions.act_window">
+            <field name="name">Customer Return</field>
+            <field name="res_model">stock.picking</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">list,form</field>
+            <field name="domain" eval="[('return_st','=',True)]"/>
+        </record>
+
+        
+        
+        <menuitem action="m_return_incmoingshipment" id="m_picking_tree" parent="menu_portal_customer_admin"  name="Customer Return" sequence="4" groups="magicemart.magicemart_portal_manager,base.group_system"/>
+        
+        
+        
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						Customer Portal Products	
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        
+        <record model="ir.actions.act_window" id="action_portal_product">
+            <field name="name">Products</field>
+            <field name="res_model">product.product</field>
+            <field name="view_mode">tree,form,kanban</field>
+            <field name="view_id" eval="False"/>
+            <field name="search_view_id" ref="product.product_search_form_view"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to see a products for the particular company.
+                </p>
+            </field>
+        </record>
+        
+        <record id="action_portal_product_tree" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="product.product_product_tree_view"/>
+            <field name="act_window_id" ref="action_portal_product"/>
+        </record>
+        
+        <record id="action_portal_product_form" model="ir.actions.act_window.view">
+            <field eval="3" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="product.product_normal_form_view"/>
+            <field name="act_window_id" ref="action_portal_product"/>
+        </record>
+        
+        <record id="action_portal_product_kanban" model="ir.actions.act_window.view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">kanban</field>
+            <field name="view_id" ref="stock.product_template_kanban_stock_view"/>
+            <field name="act_window_id" ref="action_portal_product"/>
+        </record>
+        
+        <menuitem name="Products" id="menu_portal_customer_products" parent="portal_customer_employee" 
+            action="magicemart.action_portal_product" sequence="3" groups="magicemart.magicemart_portal_manager,magicemart.magicemart_portal_user" />
+        
+        
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						Supplier Portal Products	
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        
+        <record model="ir.actions.act_window" id="action_supplier_portal_product">
+            <field name="name">Products</field>
+            <field name="res_model">product.product</field>
+            <field name="view_mode">tree,form,kanban</field>
+            <field name="view_id" eval="False"/>
+            <field name="search_view_id" ref="product.product_search_form_view"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to see a products for the particular company.
+                </p>
+            </field>
+        </record>
+        
+        <record id="action_supplier_portal_product_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="product.product_product_tree_view"/>
+            <field name="act_window_id" ref="action_supplier_portal_product"/>
+        </record>
+        
+        <record id="action_supplier_portal_product_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="product.product_normal_form_view"/>
+            <field name="act_window_id" ref="action_supplier_portal_product"/>
+        </record>
+        
+        <record id="action_supplier_portal_product_kanban" model="ir.actions.act_window.view">
+            <field name="sequence" eval="3"/>
+            <field name="view_mode">kanban</field>
+            <field name="view_id" ref="stock.product_template_kanban_stock_view"/>
+            <field name="act_window_id" ref="action_supplier_portal_product"/>
+        </record>
+        
+        <menuitem name="Products" id="menu_supplier_portal_product"  parent="menu_supplier_portal" 
+            action="action_supplier_portal_product"  sequence="2" groups="magicemart.magicemart_supplier_portal" />
+        
+        
+    </data>
+</openerp>    

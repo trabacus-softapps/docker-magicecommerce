@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+    <data>
+
+        <!-- Product item used by /shop and /shop/cart -->
+        <template id="m_products_item" inherit_id="website_sale.products_item"  name="Product item">
+            <xpath expr="//div[@itemscope='itemscope']/section/div[@itemprop='offers']/b/span[@t-field='product.price']" position="replace">
+                <span t-field="product.pricelist_amt" style="white-space: nowrap;"  t-field-options='{
+                    "widget": "monetary",
+                    "display_currency": "user_id.partner_id.property_product_pricelist.currency_id"
+                    }'>
+                </span>
+            </xpath>
+        </template>
+        
+        
+        <template id="m_product_price" inherit_id="website_sale.product_price">
+            <xpath expr="//span[@class='text-danger oe_default_price']" position="replace">
+                <span class="text-danger oe_default_price" style="text-decoration: line-through; white-space: nowrap;"
+                    t-field="product.pricelist_amt"
+                    t-field-options='{
+                    "widget": "monetary",
+                    "from_currency": "website.currency_id",
+                    "display_currency": "user_id.partner_id.property_product_pricelist.currency_id"
+                    }'/>
+                <b class="oe_price" style="white-space: nowrap;"
+                    t-field="product.pricelist_amt"
+                    t-field-options='{
+                    "widget": "monetary",
+                    "display_currency": "user_id.partner_id.property_product_pricelist.currency_id"
+                    }'/>
+            </xpath>
+            
+<!--            <xpath expr="//span[@itemprop='price']" position="replace">
+                <span itemprop="price" style="display:none;" t-esc="product.pricelist_amt"/>
+            </xpath>
+            
+            <xpath expr="//span[@t-field='product.lst_price']" position="replace">
+                <span t-field="product.pricelist_amt and product.pricelist_amt or product.list_price"
+                    t-field-options='{
+                    "widget": "monetary",
+                    "display_currency": "website.pricelist_id.currency_id"
+                    }'/>
+            </xpath>
+            
+        </template>-->
+        
+<!--        <template id="m_cart" inherit_id="website_sale.cart" name="Shopping Cart">
+            <xpath expr="//tbody/t/tr/td[@name='price']" position="replace">
+
+                <td class="text-center" name="price">
+                    <t t-if="(line.price_unit - line.price_reduce) &gt; 1">
+                        <del class="text-danger" style="white-space: nowrap;"
+                            t-field="line.product_id.lst_price" t-field-options='{
+                            "widget": "monetary",
+                            "from_currency": "website.currency_id",
+                            "display_currency": "user_id.partner_id.property_product_pricelist.currency_id"
+                            }'/>&amp;nbsp;
+                    </t>
+                    <span t-field="line.price_reduce" style="white-space: nowrap;" t-field-options='{
+                        "widget": "monetary",
+                        "display_currency": "user_id.partner_id.property_product_pricelist.currency_id"
+                        }'/>
+                </td>
+            </xpath>-->
+        
+        </template>
+        
+        <template id="m_product" name="Product" inherit_id="website_sale.product">
+            <xpath expr="//input[@name='product_id']" position="replace">
+                <input type="hidden" class="product_id" name="product_id" t-att-value="int(product.product_variant_ids[0]) if len(product.product_variant_ids) == 1 else variants"/>
+            </xpath>        
+        </template>
+        
+        <template id="m_product_variants" inherit_id="website_sale.product_variants" >
+            <xpath expr="//input[@name='product_id']" position="replace">
+                <input type="hidden" t-if="len(product.product_variant_ids) == 1" name="product_id" t-att-value="product.product_variant_ids[0].id if len(product.product_variant_ids) == 1 else variants" />
+            </xpath>
+        </template>        
+    </data>
+</openerp>

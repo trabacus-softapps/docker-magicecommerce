@@ -1,0 +1,10 @@
+import controllers
+import wizard
+import m8_user
+import m8_portal
+import m8_partner
+import m8_sale
+import m8_config
+import m8_stock_picking
+import m8_purchase
+import m8_account_invoice

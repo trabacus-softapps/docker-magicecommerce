@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+     
+        
+        <!-- ******************************************************************************
+	Email Template ( Recording Rules)
+	****************************************************************************** -->
+        
+        <record id="email_template_record_rule" model="mail.template">
+            <field name="name">Recording Rules</field>
+            <field name="email_from">${object.company_id.email or ''}</field>
+            <field name="subject">${'Stock Re-Order Information'}</field>
+            <field name="email_to"/>
+            <field name="model_id" ref="magicemart.model_stock_warehouse_orderpoint"/>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html">
+                <![CDATA[
+				<div style="font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: rgb(255, 255, 255); ">
+                
+                <br/>
+                <p><b>Dear Sir,</b></p>
+                
+                <p>Product have reached the re-order level point</p>
+                <p>Kindly check the Stock and Request for Purchase.</p>
+                <br/>
+                <table cellspacing="1" border="1" cellpadding="4">
+	    		    <tr>
+    	    		    <th>Products Name</th>
+    	    		    <th>Minimum Quantity</th>
+	    		    </tr>
+	    		    <tr>
+                        <td width="20%%"><pre>${object.prod_body}</pre></td>
+                        <td width="20%%"><pre>${object.minqty_body}</pre></td>
+	                </tr>
+                </table>
+                <br/>
+              
+				<span>
+				% if object.company_id.website:
+				<div>
+				Web :&nbsp;<a href="${object.company_id.website}">${object.company_id.website}</a>
+				</div>
+				% endif
+				<p></p>
+				</div>
+               
+				]]>
+            </field>
+            
+        </record>
+        
+        
+        <!-- ******************************************************************************
+								Email Template - Customer Portal
+	****************************************************************************** -->
+        
+        <!--Email template To Send Quotation-->
+        
+        <record id="email_template_send_quotation" model="mail.template">
+            <field name="name">Sale Order - Send By Email(Customer Portal)</field>
+            <field name="email_from">${(object.partner_id.email or 'noreply@localhost')|safe}</field>
+            <field name="subject">${object.partner_id.name} ${object.state in ('draft', 'sent') and 'Quotation' or 'Order'} (Ref ${object.name or 'n/a' })</field>
+            <field name="email_recipients">${(object.company_id.partner_id.id or 'sales@magicemart.com')|safe}</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="auto_delete" eval="True"/>
+            <field name="lang">${object.partner_id.lang}</field>
+            <field name="body_html">
+                <![CDATA[
+					<div style="font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: rgb(255, 255, 255); ">
+					
+					    <p>Hello ${object.company_id.name},</p>
+					    
+					    <p>Here is your ${object.state in ('draft', 'sent') and 'quotation' or 'order confirmation'} from ${object.partner_id.name}: </p>
+					    
+					    <p style="border-left: 1px solid #8e0000; margin-left: 30px;">
+					       &nbsp;&nbsp;<strong>REFERENCES</strong><br />
+					       &nbsp;&nbsp;Order number: <strong>${object.name}</strong><br />
+					       &nbsp;&nbsp;Order total: <strong>${object.amount_total} ${object.pricelist_id.currency_id.name}</strong><br />
+					       &nbsp;&nbsp;Order date: ${object.date_order}<br />
+					       % if object.origin:
+					       &nbsp;&nbsp;Order reference: ${object.origin}<br />
+					       % endif
+					       % if object.client_order_ref:
+					       &nbsp;&nbsp;Your reference: ${object.client_order_ref}<br />
+					       % endif
+					       % if object.user_id:
+					       &nbsp;&nbsp;Your contact: <a href="mailto:${object.user_id.email or ''}?subject=Order%20${object.name}">${object.user_id.name}</a>
+					       % endif
+					    </p>
+					    
+					    <p>If you have any question, do not hesitate to contact us.</p>
+					    <p>Thank you </p>
+					    <br/>
+					    <br/>
+					    </div>
+            ]]>
+            </field>
+        </record>
+        
+        
+        <!-- ******************************************************************************
+								Email Template - Supplier Portal
+	****************************************************************************** -->
+        <!--Email template To Send Purchase Quotation-->
+        
+        <record id="email_template_supplier_quotation" model="mail.template">
+            <field name="name">Purchase Order - Send By Email(Supplier Portal)</field>
+            <field name="email_from">${(object.partner_id.email or 'noreply@localhost')|safe}</field>
+            <field name="subject">${object.partner_id.name} ${object.state in ('draft', 'sent') and 'Quotation' or 'Order'} (Ref ${object.name or 'n/a' })</field>
+            <field name="email_recipients">${(object.company_id.partner_id.id or 'sales@magicemart.com')|safe}</field>
+            <field name="model_id" ref="purchase.model_purchase_order"/>
+            <field name="auto_delete" eval="True"/>
+            <field name="lang">${object.partner_id.lang}</field>
+            <field name="body_html">
+                <![CDATA[
+					<div style="font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: rgb(255, 255, 255); ">
+					
+					    <p>Hello ${object.company_id.name},</p>
+					    
+					    <p>Here is your ${object.state in ('draft', 'sent') and 'quotation' or 'order confirmation'} from ${object.partner_id.name}: </p>
+					    
+					    <p style="border-left: 1px solid #8e0000; margin-left: 30px;">
+					       &nbsp;&nbsp;<strong>REFERENCES</strong><br />
+					       &nbsp;&nbsp;Purchase Quotation date: ${object.date_order}<br />
+					       &nbsp;&nbsp;Purchase Order number: <strong>${object.name}</strong><br />
+					       &nbsp;&nbsp;Purchase Order total Amount: <strong>${object.amount_total}</strong><br />
+					    </p>
+					    
+					    <p>If you have any question, do not hesitate to contact us.</p>
+					    <p>Thank you </p>
+					    
+					    % if object.partner_id.website:
+						<div>
+						Web :&nbsp;<a href="${object.partner_id.website}">${object.partner_id.website}</a>
+						% endif
+						</div>
+					    <br/>
+					    <br/>
+					    </div>
+            ]]>
+            </field>
+        </record>
+        
+        <!-- ******************************************************************************
+						Email Template ( MRP Change Notififation)
+	****************************************************************************** -->
+        
+        <record id="email_template_mrp_rule" model="mail.template">
+            <field name="name">MRP Notification</field>
+            <field name="email_from">${object.create_uid.company_id.email or ''}</field>
+            <field name="subject">${'Information about the product ('}${object.name} ${') price change'}</field>
+            <field name="email_to"/>
+            <field name="model_id" ref="product.model_product_product"/>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html">
+                <![CDATA[
+				<div style="font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: rgb(255, 255, 255); ">
+                
+                <br/>
+                <p><b>Dear Customer,</b></p>
+                
+                <p>Product MRP has been Changed</p>
+                <br/>
+                <table cellspacing="1" border="1" cellpadding="4">
+	    		    <tr>
+    	    		    <th>Products Name</th>
+    	    		    <th>Old Price</th>
+    	    		    <th>New Price</th>
+	    		    </tr>
+	    		    <tr>
+                        <td width="20%%"><pre>${object.name}</pre></td>
+                        <td width="20%%"><pre>${object.list_price_old}</pre></td>
+                        <td width="20%%"><pre>${object.list_price}</pre></td>
+	                </tr>
+                </table>
+                <br/>
+                
+                <span>
+				% if object.create_uid.company_id.website:
+				<div>
+				Web :&nbsp;<a href="${object.create_uid.company_id.website}">${object.create_uid.company_id.website}</a>
+				</div>
+				% endif
+				<p></p>
+				</div>
+                
+				
+				]]>
+            </field>
+            
+        </record>
+        
+    </data>
+</openerp>

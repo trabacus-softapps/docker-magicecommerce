@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+    <data>
+        
+        
+        <!--	
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       				Hiding Quotation Template
+  		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        -->  
+        <record model="ir.ui.view" id="m_sale_order_form_quote">
+            <field name="name">m.sale.order.form.payment</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="website_quote.sale_order_form_quote"/>
+            <field name="arch" type="xml">
+                
+                <field name="template_id" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+        
+                <field name="validity_date" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+                <xpath expr="//page[@string='Suggested Products']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+            </field>
+        </record>
+        
+        <record id="m_view_quotation_tree" model="ir.ui.view">
+            <field name="name">m.sale.order.tree</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_quotation_tree"/>
+            <field name="priority">4</field>
+            <field name="arch" type="xml">
+                <xpath expr="//tree[@string='Quotation']" position="attributes">
+                    <attribute name="colors">grey:state=='cancel';blue:state in ('draft','waiting_date','manual');red:state in ('sent','invoice_except','shipping_except')</attribute>
+                </xpath>
+            </field>
+        </record>
+        
+        <record id="m_view_order_tree" model="ir.ui.view">
+            <field name="name">m.sale.order.tree</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_tree"/>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+                <xpath expr="//tree[@string='Sales Orders']" position="attributes">
+                    <attribute name="colors">green:state=='progress';grey:state=='cancel';blue:state in ('draft','waiting_date','manual');red:state in ('sent','invoice_except','shipping_except')</attribute>
+                </xpath>
+            </field>
+        </record>
+        
+        <!--	
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       				Hiding Delivery Method Field for Customer & Supplier
+  		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        -->  
+        <record id="m_view_order_withcarrier_form" model="ir.ui.view">
+            <field name="name">m.delivery.sale.order_withcarrier.form.view</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="delivery.view_order_withcarrier_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@style='width: 65%%']" position="attributes">
+                   <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+            </field>
+        </record>
+  
+        <!--	
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       				Hiding Margin Field for Customer & Supplier
+  		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        -->  
+        <record model="ir.ui.view" id="m_sale_margin_sale_order">
+            <field name="name">m.sale.order.margin.view.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale_margin.sale_margin_sale_order"/>
+            <field name="arch" type="xml">
+                <field name="margin" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </field>
+            </field>
+        </record>
+       
+       
+        <record model="ir.ui.view" id="m_sale_margin_sale_order_line">
+            <field name="name">m.sale.order.line.margin.view.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale_margin.sale_margin_sale_order_line"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='order_line']/form//field[@name='purchase_price']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+            </field>
+        </record>
+       
+       
+        <record model="ir.ui.view" id="m_sale_margin_sale_order_line_form">
+            <field name="name">m.sale.order.line.tree.margin.view.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale_margin.sale_margin_sale_order_line_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='order_line']/tree//field[@name='purchase_price']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+            </field>
+        </record>
+        
+        <!--	
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       				Sale Order Form View
+  		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        -->  
+        
+        <record id="m_view_order_form" model="ir.ui.view">    
+            <field name="name">m.sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref = "sale.view_order_form"/>
+            <field name="arch" type="xml">
+                
+                <field name="partner_id" position = "after">
+                    <field name="contact_id" domain="[('parent_id','=',partner_id)]" context="{'show_contact':1}" attrs="{'readonly':['|',('state','in','done'),('lock_it','=',True)]}"/>
+                    <field name="sent_portal" invisible= "1"/>
+                    <field name="lock_it" invisible="1"/>
+                </field>
+                
+<!--                <xpath expr="//sheet/h1/field[@name='name']" position="attributes">
+                    <attribute name="readonly">0</attribute>
+                    <attribute name="attrs">{'readonly':[('state','not in',('draft','sent'))]}</attribute>
+                </xpath>-->
+                
+<!--                <xpath expr="//field[@name='pricelist_id']" position="after">
+                    <field name="do_name" attrs="{'readonly':[('state','not in',('draft','sent'))]}"/>
+                </xpath>-->
+                
+                <xpath expr="//field[@name='partner_id']" position="attributes">
+                    <attribute name="domain">[('is_company','=',True),('customer','=',True)]</attribute>
+                    <attribute name="on_change">onchange_partner_id(partner_id)</attribute>
+                </xpath>
+                
+                
+                <xpath expr="//notebook/page/field[@name='order_line']/tree/field[@name='name']" position="attributes">
+                    <attribute name="invisible">1</attribute>   
+                </xpath>
+                
+                <xpath expr="//notebook/page/field[@name='order_line']/tree/field[@name='sequence']" position="before">
+                    <field name="product_image" widget="image"/>
+                </xpath>
+                
+                
+                <xpath expr="//notebook/page/field[@name='order_line']/tree/field[@name='name']" position="after">
+                    <field name="reference"/>
+                </xpath>
+                
+                <xpath expr="//field[@name='partner_id']" position="attributes">
+                    <attribute name="attrs">{'readonly':[('lock_it','=',True)]}</attribute>
+<!--                    <attribute name="context">{'show_user':1}</attribute>-->
+                </xpath>
+                
+                <xpath expr="//field[@name='partner_invoice_id']" position="attributes">
+                    <attribute name="attrs">{'readonly':[('lock_it','=',True)]}</attribute>   
+                </xpath>
+
+                <xpath expr="//field[@name='partner_shipping_id']" position="attributes">
+                    <attribute name="attrs">{'readonly':[('lock_it','=',True)]}</attribute>   
+                </xpath>
+                
+                <xpath expr="//field[@name='date_order']" position="attributes">
+                    <attribute name="attrs">{'readonly':[('lock_it','=',True)]}</attribute>   
+                </xpath>
+                
+                
+                <xpath expr="//field[@name='client_order_ref']" position="attributes">
+                    <attribute name="attrs">{'readonly':[('lock_it','=',True)]}</attribute>   
+                </xpath>
+                
+                <xpath expr="//field[@name='pricelist_id']" position="attributes">
+                    <attribute name="attrs">{'readonly':[('lock_it','=',True)]}</attribute>   
+                </xpath>
+                
+                <xpath expr="//field[@name='order_line']" position="attributes">
+                    <attribute name="attrs">{'readonly':[('lock_it','=',True)]}</attribute>   
+                </xpath>
+
+                <xpath expr="//field[@name='user_id']" position="attributes">
+                    <attribute name="attrs">{'readonly':[('lock_it','=',True)]}</attribute>   
+                </xpath>
+                
+                <xpath expr="//field[@name='payment_term']" position="attributes">
+                    <attribute name="attrs">{'readonly':[('lock_it','=',True)]}</attribute>   
+                </xpath>
+                
+                <xpath expr="//field[@name='fiscal_position']" position="attributes">
+                    <attribute name="attrs">{'readonly':[('lock_it','=',True)]}</attribute>   
+                </xpath>
+                
+                <xpath expr="//form[@string='Sales Order']/sheet/notebook/page[@string='Other Information']" position="attributes">
+                    <attribute name="groups">base.group_erp_manager,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                  </xpath>
+                
+                <field name="product_id" position="after">
+                    <field name="reference"/>
+                </field>  
+                <xpath expr="//notebook/page/field[@name='order_line']/form//field[@name='product_id']" position="replace">
+                    <field name="product_id"  context="{'partner_id':False, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'warehouse':parent.warehouse_id, 'uom':product_uom}"
+                        groups="base.group_user,magicemart.magicemart_portal_manager"
+                        on_change="product_id_change(parent.pricelist_id, product_id, product_uom_qty, product_uom, product_uos_qty, product_uos, name, parent.partner_id, False, True, parent.date_order, False, parent.fiscal_position, False, context)"/>   
+                </xpath>
+                
+
+                <xpath expr="//notebook/page[@string='Other Information']/group/group/field[@name='client_order_ref']" position="attributes">
+                    <attribute name="attrs">{'readonly':[('state','in','done')]}</attribute>
+                </xpath>
+
+                <xpath expr="//form[@string='Sales Order']/sheet/notebook/page[@string='Order Lines']/field[@name='order_line']/form[@string='Sales Order Lines']/group/group/field[@name='th_weight']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//form[@string='Sales Order']/sheet/notebook/page[@string='Order Lines']/field[@name='order_line']/form[@string='Sales Order Lines']/group/group/field[@name='tax_id']" position="after">
+                    <field name="available_qty" readonly="1" />
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Order Lines']/field[@name='order_line']/form[@string='Sales Order Lines']/group/group[2]" position="inside">
+                    <group col="2" colspan="1">
+                        <group>
+                            <h4>Product Image</h4>
+                        </group>
+                        <group >
+                            <field name="product_image" readonly="1" widget="image" class="oe_avatar oe_left" nolabel="1"/>
+                        </group>
+                    </group>
+                </xpath>
+    
+
+                <xpath expr="//form[@string='Sales Order']/sheet/notebook/page[@string='Order Lines']/field[@name='order_line']/form[@string='Sales Order Lines']//field[@name='price_unit']" position="after">
+                    <field name="sale_mrp"/>
+                </xpath>
+                
+                <xpath expr="//div[@name='discount']/field[@name='discount']" position="attributes">
+                    <attribute name="readonly">1</attribute>
+                </xpath>
+                
+                <xpath expr="//page[@string='Other Information']" position="after">
+                    <page string="Terms and Conditions" groups="base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager">
+                        <form string="Terms and Conditions">
+                            <field name="terms" placeholder="Terms and Conditions..." />
+                        </form>
+                    </page>
+                </xpath>
+                          
+<!--                <button name="print_quotation" string="Print" type="object" states="draft" class="oe_highlight" invisible='1' />
+                <button name="print_quotation" string="Print" type="object" states="sent,progress,manual" invisible='1'/>
+                -->
+                <button name="action_quotation_send" position="after">
+                    <button name="%(magicemart.action_sales_quotation)d" type="action" String="Print Sale Quotation" states="draft" class="oe_highlight" groups="base.group_user,magicemart.magicemart_portal_manager"/>
+                </button>
+                
+                <button name="action_quotation_send" position="after">
+                    <button name="%(magicemart.action_sales_quotation)d" type="action" String="Print Sale Quotation" states="sent"  groups="base.group_user,magicemart.magicemart_portal_manager"/>
+                </button>
+                <button name="action_button_confirm" states="draft" string="Confirm Sale" position='attributes'>
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </button>
+                
+                <button name="action_button_confirm" states="sent" string="Confirm Sale" class="oe_highlight" position='attributes'>
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </button>  
+                
+                <xpath expr="//button[@name='cancel']" position="replace">
+                    <button name="cancel" states="draft,sent" string="Cancel Quotation" groups="base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user"/>
+                </xpath>
+                
+                <button name="action_view_invoice" string="View Invoice" type="object" class="oe_highlight"
+                    attrs="{'invisible': [('invoice_exists', '=', False)]}"  position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </button>
+                
+                
+            </field>
+        </record>
+        
+        <record id="m_view_order_form_inherit" model="ir.ui.view">
+            <field name="name">sale.order.form.sale.stock</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale_stock.view_order_form_inherit"/>
+            <field name="arch" type="xml">
+              <xpath expr="//page[@string='Order Lines']/field[@name='order_line']/form[@string='Sales Order Lines']/group/group/field[@name='product_packaging']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                                               
+                <xpath expr="//page[@string='Order Lines']/field[@name='order_line']/form[@string='Sales Order Lines']/group/group/field[@name='address_allotment_id']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//button[@name='action_cancel']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>
+                <xpath expr="//button[@name='action_view_delivery']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>
+               
+                <xpath expr="//field[@name='order_line']/tree//field[@name='product_id']" position="replace">
+                    <field name="product_id"
+                        context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom, 'warehouse':parent.warehouse_id}"
+                        on_change="product_id_change_with_wh(parent.pricelist_id,product_id,product_uom_qty,False,product_uos_qty,False,name,parent.partner_id, False, True, parent.date_order, product_packaging, parent.fiscal_position, False, parent.warehouse_id, context)"/>
+                </xpath>
+                
+                
+            </field>
+        </record>
+         
+        <!--	
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       				Sale Order Search View
+  		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        -->        
+        <record id="view_sales_order_filter" model="ir.ui.view">
+            <field name="name">sale.order.list.select</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+            <field name="arch" type="xml">
+                <field name="project_id" position="after">
+                    <field name="date_order"/>
+                    <field name="date_from" filter_domain="[('date_order','&gt;=',self)]"/>
+                </field>
+                <filter string="Done" position="after">
+                    <filter name="today" string="Today"
+                        domain="[('date_order','>=',context_today().strftime('%%Y-%%m-%%d 00:00:00'))]"/>
+                </filter>
+                <xpath expr="field[@name='partner_id']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>
+                
+                <xpath expr="field[@name='user_id']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>
+                
+            </field>
+        </record>
+        
+        <!--	
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       		Sale Order Action		
+  		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^	
+        -->
+        <record id="sale.action_orders" model="ir.actions.act_window">
+            <field name="name">Sales Orders</field>
+            <field name="search_view_id" ref="sale.view_sales_order_filter"/>
+           <field name="context">{'search_default_today':1}</field>
+           
+        </record>
+        
+        <!--	
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       		Sale Quotation Action		
+  		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^	
+        -->
+        <record id="sale.action_quotations" model="ir.actions.act_window">
+            <field name="name">Quotations</field>
+            <field name="view_id" ref="sale.view_quotation_tree"/>
+            <field name="context">{'search_default_today':1}</field>
+            <field name="search_view_id" ref="view_sales_order_filter"/>
+        </record>
+        
+<!--    To Remove std Report    -->
+        
+        <delete model="ir.actions.report.xml" search="[('name','=','Quotation / Order'),('model','=','sale.order')]"/>
+        
+        
+<!--	
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       				Customer Portal   
+  		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^	
+-->
+               
+        <record model="ir.actions.act_window" id="action_portal_orders">
+            <field name="name">Orders</field>
+            <field name="res_model">sale.order</field>
+            <field name="view_mode">tree,form,calendar,graph</field>
+            <field name="view_id" eval="False"/>
+            <field name="search_view_id" ref="view_sales_order_filter"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to see all sale order made by particular customer.
+                </p>
+            </field>
+        </record>
+        
+        <record id="action_portal_orders_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="sale.view_order_tree"/>
+            <field name="act_window_id" ref="action_portal_orders"/>
+        </record>
+        
+        <record id="action_portal_orders_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="sale.view_order_form"/>
+            <field name="act_window_id" ref="action_portal_orders"/>
+        </record>
+        
+        <menuitem name="Orders" id="menu_portal_customer_orders"   parent="menu_portal_customer_admin" action="action_portal_orders"  sequence="1" groups="magicemart.magicemart_portal_manager" />        
+    </data>
+</openerp>    
+
+
