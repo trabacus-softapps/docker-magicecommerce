@@ -68,7 +68,9 @@ magicemart_group_user_mail_message,mail.message,mail.model_mail_message,magicema
 magicemart_group_user_mail_group,mail.group,mail.model_mail_group,magicemart_group_user,TRUE,FALSE,FALSE,FALSE
 magicemart_group_user_account_move_reconcile,account.move.reconcile,account.model_account_move_reconcile,magicemart_group_user,TRUE,FALSE,FALSE,FALSE
 magicemart_group_user_ir_attachment,ir.attachment,base.model_ir_attachment,magicemart_group_user,TRUE,FALSE,FALSE,FALSE
-,,,,,,,
+magicemart_sale_quote_template,sale.quote.template,website_quote.model_sale_quote_template,magicemart_group_user,TRUE,TRUE,TRUE,TRUE
+magicemart_sale_quote_option,sale.quote.option,website_quote.model_sale_quote_option,magicemart_group_user,TRUE,TRUE,TRUE,TRUE
+magicemart_sale_quote_line,sale.quote.line,website_quote.model_sale_quote_line,magicemart_group_user,TRUE,TRUE,TRUE,TRUE
 ,,,,,,,
 ,,,,,,,
 magicemart_stock_warehouse_orderpoint_portaluser,stock.warehouse,stock.model_stock_warehouse,magicemart_portal_user,TRUE,FALSE,FALSE,FALSE
@@ -88,7 +90,9 @@ magicemart_portal_user_stock_move,stock.move,stock.model_stock_move,magicemart_p
 magicemart_portal_user_stock_location,stock.location,stock.model_stock_location,magicemart_portal_user,TRUE,FALSE,FALSE,FALSE
 magicemart_portal_user_account_move_reconcile,account.move.reconcile,account.model_account_move_reconcile,magicemart_portal_user,TRUE,FALSE,FALSE,FALSE
 magicemart_portal_user_account_analytic_default,account.analytic.default,account_analytic_default.model_account_analytic_default,magicemart_portal_user,TRUE,FALSE,FALSE,FALSE
-,,,,,,,
+magicemart_portal_user_sale_quote_template,sale.quote.template,website_quote.model_sale_quote_template,magicemart_portal_user,TRUE,TRUE,TRUE,TRUE
+magicemart_portal_user_sale_quote_line,sale.quote.line,website_quote.model_sale_quote_line,magicemart_portal_user,TRUE,TRUE,TRUE,TRUE
+magicemart_portal_user_sale_quote_option,sale.quote.option,website_quote.model_sale_quote_option,magicemart_portal_user,TRUE,TRUE,TRUE,TRUE
 ,,,,,,,
 magicemart_sale_order_portalmanager,sale.order,sale.model_sale_order,magicemart_portal_manager,TRUE,TRUE,TRUE,FALSE
 magicemart_sale_order_line_portalmanager,sale.order.line,sale.model_sale_order_line,magicemart_portal_manager,TRUE,TRUE,TRUE,FALSE
@@ -128,8 +132,9 @@ magicemart_m_product_line_portalmanager,m.product.line,magicemart.model_m_produc
 magicemart_portal_manager_account_move_reconcile,account.move.reconcile,account.model_account_move_reconcile,magicemart_portal_manager,TRUE,FALSE,FALSE,FALSE
 magicemart_portal_manager_stock_production_lot,stock.production.lot,stock.model_stock_production_lot,magicemart_portal_manager,TRUE,TRUE,TRUE,TRUE
 magicemart_portal_manager_account_analytic_default,account.analytic.default,account_analytic_default.model_account_analytic_default,magicemart_portal_manager,TRUE,TRUE,TRUE,TRUE
-,,,,,,,
-,,,,,,,
+magicemart_portal_manager_sale_quote_template,sale.quote.template,website_quote.model_sale_quote_template,magicemart_portal_manager,TRUE,TRUE,TRUE,TRUE
+magicemart_portal_manager_sale_quote_line,sale.quote.line,website_quote.model_sale_quote_line,magicemart_portal_manager,TRUE,TRUE,TRUE,TRUE
+magicemart_portal_manager_sale_quote_option,sale.quote.option,website_quote.model_sale_quote_option,magicemart_portal_manager,TRUE,TRUE,TRUE,TRUE
 ,,,,,,,
 ,,,,,,,
 magicemart_group_manager_account_invoice,account.invoice,account.model_account_invoice,magicemart_group_manager,TRUE,TRUE,TRUE,TRUE
@@ -201,6 +206,9 @@ magicemart_group_manager_mail_message,mail.message,mail.model_mail_message,magic
 magicemart_group_manager_mail_group,mail.group,mail.model_mail_group,magicemart_group_manager,TRUE,TRUE,TRUE,TRUE
 magicemart_group_manager_account_move_reconcile,account.move.reconcile,account.model_account_move_reconcile,magicemart_group_manager,TRUE,TRUE,TRUE,TRUE
 magicemart_group_manager_ir_attachment,ir.attachment,base.model_ir_attachment,magicemart_group_manager,TRUE,TRUE,TRUE,TRUE
+magicemart_group_manager_sale_quote_template,sale.quote.template,website_quote.model_sale_quote_template,magicemart_group_manager,TRUE,TRUE,TRUE,TRUE
+magicemart_group_manager_sale_quote_line,sale.quote.line,website_quote.model_sale_quote_line,magicemart_group_manager,TRUE,TRUE,TRUE,TRUE
+magicemart_group_manager_sale_quote_option,sale.quote.option,website_quote.model_sale_quote_option,magicemart_group_manager,TRUE,TRUE,TRUE,TRUE
 ,,,,,,,
 ,,,,,,,
 magicemart_supplier_portal_product_category,product.category,product.model_product_category,magicemart_supplier_portal,TRUE,TRUE,TRUE,TRUE

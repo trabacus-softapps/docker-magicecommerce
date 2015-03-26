@@ -80,7 +80,7 @@ class account_invoice(osv.osv):
     _inherit = 'account.invoice'
     
     def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
-        
+         
         if context is None:
             context = {}
         res = super(account_invoice, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=False)
@@ -90,24 +90,24 @@ class account_invoice(osv.osv):
           ( select id from ir_module_category where name = 'Customer Portal' ) and name = 'Manager') and uid = """+str(uid))
         portal_user = cr.fetchone() 
         portal_group = portal_user and portal_user[0]
-        
+         
         if uid == portal_group:
             for node in doc.xpath("//field[@name='partner_id']"):
                 node.set('options', "{'no_open' : true}")
                 setup_modifiers(node, res['fields']['partner_id'])
                 res['arch'] = etree.tostring(doc)
-            
+             
             for node in doc.xpath("//field[@name='contact_id']"):
                 node.set('options', "{'no_open' : true}")
                 setup_modifiers(node, res['fields']['contact_id'])
                 res['arch'] = etree.tostring(doc)
-                    
+                     
         cr.execute("""select uid from res_groups_users_rel where gid=
           (select id  from res_groups where category_id in 
           ( select id from ir_module_category where name = 'Supplier Portal' ) ) and uid = """+str(uid))
         sup_portal = cr.fetchone() 
         supportal_group = sup_portal and sup_portal[0]
-        
+         
         if uid == supportal_group:
             for node in doc.xpath("//field[@name='partner_id']"):
                 node.set('options', "{'no_open' : true}")

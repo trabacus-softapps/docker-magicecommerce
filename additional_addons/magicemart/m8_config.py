@@ -550,7 +550,6 @@ class ir_rule(osv.osv):
                         
                     """)
                     prod_ids = cr.fetchall()
-                    print"Count Prod_id--------",len(prod_ids)
                     
                     
                     if prod_ids:

@@ -343,54 +343,54 @@ class sale_order(osv.osv):
             'context': ctx,
         }        
         
-#     def create(self, cr, uid, vals, context = None):
-#         print "sale",uid, context.get("uid") 
-#         if not context:
-#             context = {}
-#         partner_obj = self.pool.get("res.partner")
-#         warehouse_obj = self.pool.get('stock.warehouse')
-#         uid = context.get("uid",uid)
-#         
-#         if vals.get('warehouse_id',False):
-#             warehouse = warehouse_obj.browse(cr, uid, vals.get('warehouse_id'))
-#             
-#             #to select sub company shop
-#             if not warehouse.company_id.parent_id:
-#                 raise osv.except_osv(_('User Error'), _('You must select sub company sale warehouse !'))
-#             partner_id = vals.get('partner_id',False)
-#             partner = partner_obj.browse(cr, uid, partner_id)
-#             vals.update({
-# #                          'pricelist_id':partner.property_product_pricelist.id,
-#                          'company_id':warehouse.company_id.id,
-#                         })
-#         print "vals=-------",vals
-# #         if vals.get('name', '/') == '/':
-# #             raise osv.except_osv(_('Warrning'), _('You must Enter the Sale Order Number!'))
-#         
-#         return super(sale_order, self).create(cr, uid, vals, context = context)
-#      
-#     def write(self, cr, uid, ids, vals, context = None):
-#         if not context:
-#             context = {}
-#         partner_obj = self.pool.get("res.partner")
-#         warehouse_obj = self.pool.get('stock.warehouse')
-#         case = self.browse(cr, uid, ids[0])
-#         
-#         if vals.get('warehouse_id',case.warehouse_id.id):
-#             warehouse = warehouse_obj.browse(cr, uid, vals.get('warehouse_id',case.warehouse_id.id))
-#             if not warehouse.company_id.parent_id:
-#                 raise osv.except_osv(_('User Error'), _('You must select sub company sale Warehouse !'))
-#             
-#         if vals.get('partner_id', case.partner_id):
-#             partner_id = vals.get('partner_id', case.partner_id.id)
-#             partner = partner_obj.browse(cr, uid, partner_id)
-#             vals.update({
-# #                          'pricelist_id':partner.property_product_pricelist.id,
-#                          'company_id':warehouse.company_id.id,
-#                          })
-# 
-#         return super(sale_order, self).write(cr, uid, ids, vals, context = context)
-#     
+    def create(self, cr, uid, vals, context = None):
+        print "sale",uid, context.get("uid") 
+        if not context:
+            context = {}
+        partner_obj = self.pool.get("res.partner")
+        warehouse_obj = self.pool.get('stock.warehouse')
+        uid = context.get("uid",uid)
+         
+        if vals.get('warehouse_id',False):
+            warehouse = warehouse_obj.browse(cr, uid, vals.get('warehouse_id'))
+             
+            #to select sub company shop
+            if not warehouse.company_id.parent_id:
+                raise osv.except_osv(_('User Error'), _('You must select sub company sale warehouse !'))
+            partner_id = vals.get('partner_id',False)
+            partner = partner_obj.browse(cr, uid, partner_id)
+            vals.update({
+#                          'pricelist_id':partner.property_product_pricelist.id,
+                         'company_id':warehouse.company_id.id,
+                        })
+        print "vals=-------",vals
+#         if vals.get('name', '/') == '/':
+#             raise osv.except_osv(_('Warrning'), _('You must Enter the Sale Order Number!'))
+         
+        return super(sale_order, self).create(cr, uid, vals, context = context)
+      
+    def write(self, cr, uid, ids, vals, context = None):
+        if not context:
+            context = {}
+        partner_obj = self.pool.get("res.partner")
+        warehouse_obj = self.pool.get('stock.warehouse')
+        case = self.browse(cr, uid, ids[0])
+         
+        if vals.get('warehouse_id',case.warehouse_id.id):
+            warehouse = warehouse_obj.browse(cr, uid, vals.get('warehouse_id',case.warehouse_id.id))
+            if not warehouse.company_id.parent_id:
+                raise osv.except_osv(_('User Error'), _('You must select sub company sale Warehouse !'))
+             
+        if vals.get('partner_id', case.partner_id):
+            partner_id = vals.get('partner_id', case.partner_id.id)
+            partner = partner_obj.browse(cr, uid, partner_id)
+            vals.update({
+#                          'pricelist_id':partner.property_product_pricelist.id,
+                         'company_id':warehouse.company_id.id,
+                         })
+ 
+        return super(sale_order, self).write(cr, uid, ids, vals, context = context)
+     
     #inherited
     def action_button_confirm(self, cr, uid, ids, context=None):
         case = self.browse(cr, uid, ids[0])
@@ -460,7 +460,7 @@ class sale_order_line(osv.osv):
             res[line.id] = {'price_total':0.0,'price_subtotal':0.0}
             price = line.price_unit  #* (1 - (line.discount or 0.0) / 100.0)
             taxes = tax_obj.compute_all(cr, uid, line.tax_id, price, line.product_uom_qty, line.product_id, line.order_id.partner_id)
-            print "Taxes......", taxes
+#             print "Taxes......", taxes
             cur = line.order_id.pricelist_id.currency_id
             res[line.id]['price_subtotal'] = cur_obj.round(cr, uid, cur, taxes['total'])
             
@@ -735,6 +735,12 @@ class sale_order_line(osv.osv):
             
         location_ids = loc_obj.search(cr, uid,[('company_id','=', company_id),('name','=','Stock')])
         
+        if res.get("tax_id"):
+            vals.update({
+                         'tax_id' : [(6, 0, res['tax_id'])],
+                         
+                         })
+        
         if location_ids:
             location_ids = location_ids[0]
         product = vals.get('product_id', False)
@@ -788,6 +794,11 @@ class sale_order_line(osv.osv):
 #                          'price_unit': res.get("price_unit") and res.get("price_unit") or 1
                           
                          })
+            if res.get("tax_id"):
+                vals.update({
+                             'tax_id' : [(6, 0, res['tax_id'])],
+                             
+                             })
             return super(sale_order_line, self).write(cr, uid, [case.id], vals, context=context)
      
     

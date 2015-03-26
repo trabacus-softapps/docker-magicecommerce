@@ -846,7 +846,7 @@ class stock_warehouse(osv.osv):
         if vals is None:
             vals = {}
         result = {}
-        
+        result = super(stock_warehouse,self).write(cr, uid, ids, vals, context=context)
         for warehouse in self.browse(cr, uid, ids, context):
             
             if warehouse.id in (2,3,4):
@@ -858,6 +858,6 @@ class stock_warehouse(osv.osv):
                     and not warehouse.pack_type_id and not warehouse.out_type_id:    
                     self.create_sequences_and_picking_types(cr, uid, warehouse, context=context)
     
-        return super(stock_warehouse,self).write(cr, uid, ids, vals, context=context)
+        return result
   
 stock_warehouse()
