@@ -708,6 +708,7 @@ class sale_order_line(osv.osv):
         move_obj = self.pool.get("stock.move")
         sale_obj = self.pool.get("sale.order")
         prod_obj = self.pool.get("product.product")
+        tax_obj = self.pool.get("account.tax")
         order_id = vals.get('order_id')
         case = sale_obj.browse(cr, uid,order_id )
         company_id = case.warehouse_id.company_id.id
@@ -735,11 +736,15 @@ class sale_order_line(osv.osv):
             
         location_ids = loc_obj.search(cr, uid,[('company_id','=', company_id),('name','=','Stock')])
         
+        comp_id = vals.get("company_id",case.company_id)
         if res.get("tax_id"):
-            vals.update({
-                         'tax_id' : [(6, 0, res['tax_id'])],
-                         
-                         })
+            tax = tax_obj.browse(cr, uid, res.get("tax_id"))
+            for t in tax:
+                if t.company_id.id == comp_id.id:
+                    vals.update({
+                                 'tax_id' : [(6, 0, [t.id])],
+                                 
+                                 })
         
         if location_ids:
             location_ids = location_ids[0]
@@ -763,6 +768,7 @@ class sale_order_line(osv.osv):
         loc_obj = self.pool.get("stock.location")
         move_obj = self.pool.get("stock.move")
         prod_obj = self.pool.get("product.product")
+        tax_obj = self.pool.get("account.tax")
         
         for case in self.browse(cr, uid, ids):
             if vals.get('price_unit',case.price_unit)<= 0.0:
@@ -795,10 +801,14 @@ class sale_order_line(osv.osv):
                           
                          })
             if res.get("tax_id"):
-                vals.update({
-                             'tax_id' : [(6, 0, res['tax_id'])],
-                             
-                             })
+                comp_id = vals.get("company_id",case.company_id)
+                tax = tax_obj.browse(cr, uid, res.get("tax_id"))
+                for t in tax:
+                    if t.company_id.id == comp_id.id:
+                        vals.update({
+                                     'tax_id' : [(6, 0, [t.id])],
+                                     
+                                     })
             return super(sale_order_line, self).write(cr, uid, [case.id], vals, context=context)
      
     

@@ -267,15 +267,16 @@ class account_invoice(osv.osv):
             cr.execute("update account_invoice_line set company_id ="+str(case.company_id.id) +" where invoice_id ="+ str(case.id))
         return res 
     
-    def action_date_assign(self, cr, uid, ids, *args):
-        case = self.browse(cr, uid, ids[0])
-        
-        for ln in case.invoice_line:
-            for t in ln.invoice_line_tax_id:
-                if t.company_id.id != case.company_id.id :
-                    raise osv.except_osv(_('Configuration Error!'),_('Please define the taxes which is related to the company \n "%s" !')%(case.company_id.name))
-        return super(account_invoice, self).action_date_assign(cr, uid, ids, *args)
-      
+    # TO BE UNCOMENT LATER
+#     def action_date_assign(self, cr, uid, ids, *args):
+#         case = self.browse(cr, uid, ids[0])
+#         
+#         for ln in case.invoice_line:
+#             for t in ln.invoice_line_tax_id:
+#                 if t.company_id.id != case.company_id.id :
+#                     raise osv.except_osv(_('Configuration Error!'),_('Please define the taxes which is related to the company \n "%s" !')%(case.company_id.name))
+#         return super(account_invoice, self).action_date_assign(cr, uid, ids, *args)
+#       
     
 #    To Update company_id in account_voucher wizzard
     def invoice_pay_customer(self, cr, uid, ids, context=None):
