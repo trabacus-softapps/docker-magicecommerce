@@ -123,15 +123,15 @@ class stock_picking(osv.osv):
 
 
     # for Old Records
-    def write(self, cr, uid, ids, vals, context=None):
-        move_obj = self.pool.get("stock.move")
-        case = self.browse(cr, uid, ids)
-        move_ids = move_obj.search(cr, uid, [('picking_id','in', ids)])
-        move_obj.write(cr, uid, move_ids, {'date':vals.get('date',case.date),
-                                           'date_expected' : vals.get('min_date', case.min_date)
-                                           }, context=context)
-        return super(stock_picking, self).write(cr, uid, ids, vals, context=context)
-         
+#     def write(self, cr, uid, ids, vals, context=None):
+#         move_obj = self.pool.get("stock.move")
+#         case = self.browse(cr, uid, ids)
+#         move_ids = move_obj.search(cr, uid, [('picking_id','in', ids)])
+#         move_obj.write(cr, uid, move_ids, {'date':vals.get('date',case.date),
+#                                            'date_expected' : vals.get('min_date', case.min_date)
+#                                            }, context=context)
+#         return super(stock_picking, self).write(cr, uid, ids, vals, context=context)
+#          
     
     # Check Availability
     def action_assign(self, cr, uid, ids, *args):
@@ -186,9 +186,9 @@ class stock_picking(osv.osv):
             if invoice_line_vals:
                 invoice_line_vals['invoice_id'] = invoices[key]
                 invoice_line_vals['origin'] = origin
-            
+                print "Invoice Line vals-----------Before",invoice_line_vals 
                 invln_id = move_obj._create_invoice_line_from_vals(cr, uid, move1, invoice_line_vals, context=context)
-            
+                print "Invoice Line Vals-----------After",invoice_line_vals
         wiz_id = context.get('wiz_id',False)
 #             if wiz_id:
 #                 wiz_id = wiz_id[0]
@@ -204,7 +204,7 @@ class stock_picking(osv.osv):
             
         for move in moves:
             move_obj.write(cr, uid, move.id, {'invoice_state': 'invoiced'}, context=context)
-
+        print "invoices.values()..........._invoice_create_line",invoices.values()
         invoice_obj.button_compute(cr, uid, invoices.values(), context=context, set_total=(inv_type in ('in_invoice', 'in_refund')))
         return invoices.values()
      
@@ -285,7 +285,9 @@ class stock_invoice_onshipping(osv.osv_memory):
         context.get('active_ids').sort()
         pick_obj = self.pool.get("stock.picking")
         accinv_obj = self.pool.get("account.invoice")
+#         print "Invoice_id---------Before",invoice_id
         invoice_id = super(stock_invoice_onshipping, self).create_invoice(cr, uid, ids, context)
+        print "Invoice_id---------After",invoice_id
         if invoice_id:
             for pick_id in context.get('active_ids', []):
                 pick = pick_obj.browse(cr, uid, pick_id)
@@ -649,11 +651,26 @@ class stock_move(osv.osv):
         soline_obj = self.pool.get("sale.order.line")
         invline_obj = self.pool.get("account.invoice.line")
         stkrtn_obj = self.pool.get("stock.return.picking")
+        so_obj = self.pool.get("sale.order")
+        sl_obj = self.pool.get("sale.order.line")
         update_line = False
         if not context:
             context = {}
-
+           
+           
         inv_lines = super(stock_move,self)._get_invoice_line_vals(cr, uid, move, partner, inv_type, context=context)
+
+        # updating tax for old dc's (coz, for old records procurement_id will not be there) TO BE UNCOMENT AFTER PROCESSING ALL OLD DCS   
+        if  not move.procurement_id:    
+            sale_tax = []
+            cr.execute("select sale_line_id from stock_move where id=" + str(move.id))
+            sl_id = cr.fetchone()
+            if sl_id: 
+                for tax in  sl_obj.browse(cr, uid, sl_id[0]).tax_id:
+                    sale_tax.append(tax.id)
+                if sale_tax:
+                    inv_lines.update({'invoice_line_tax_id' : [(6, 0, sale_tax)]})
+
         
         hstry = stkrtn_obj.default_get(cr, uid,  ['product_return_moves', 'move_dest_exists', 'invoice_state'], context=context)
 
@@ -778,86 +795,86 @@ class stock_warehouse_orderpoint(osv.osv):
 stock_warehouse_orderpoint()
 
 # TO be Comment After Going To Live
-
-class stock_warehouse(osv.osv):
-    _inherit = "stock.warehouse"
-    
-    def _create_locations_4oldRecords(self, cr, uid, ids, vals, context=None):
-        if context is None:
-            context = {}
-        if vals is None:
-            vals = {}
-            
-        data_obj = self.pool.get('ir.model.data')
-        seq_obj = self.pool.get('ir.sequence')
-        picking_type_obj = self.pool.get('stock.picking.type')
-        location_obj = self.pool.get('stock.location')
-        result = {}
-        
-        for warehouse in self.browse(cr, uid, ids, context):
-            # need Check Condition if Location Created Means Dont create again
-            if not warehouse.wh_input_stock_loc_id and not warehouse.wh_qc_stock_loc_id \
-                and not warehouse.wh_pack_stock_loc_id and not warehouse.wh_output_stock_loc_id:
-                #create view location for warehouse
-                loc_vals = {
-                        'name': _(vals.get('code', warehouse.code)),
-                        'usage': 'view',
-                        'location_id': data_obj.get_object_reference(cr, uid, 'stock', 'stock_location_locations')[1],
-                }
-                if vals.get('company_id', warehouse.company_id.id):
-                    loc_vals['company_id'] = vals.get('company_id', warehouse.company_id.id)
-                wh_loc_id = location_obj.create(cr, uid, loc_vals, context=context)
-                vals['view_location_id'] = wh_loc_id
-                
-                #create all location
-                def_values = self.default_get(cr, uid, {'reception_steps', 'delivery_steps'})
-                reception_steps = vals.get('reception_steps',  def_values['reception_steps'])
-                delivery_steps = vals.get('delivery_steps', def_values['delivery_steps'])
-                context_with_inactive = context.copy()
-                context_with_inactive['active_test'] = False
-                
-                sub_locations = [
-                    {'name': _('Stock'), 'active': True, 'field': 'lot_stock_id'},
-                    {'name': _('Input'), 'active': reception_steps != 'one_step', 'field': 'wh_input_stock_loc_id'},
-                    {'name': _('Quality Control'), 'active': reception_steps == 'three_steps', 'field': 'wh_qc_stock_loc_id'},
-                    {'name': _('Output'), 'active': delivery_steps != 'ship_only', 'field': 'wh_output_stock_loc_id'},
-                    {'name': _('Packing Zone'), 'active': delivery_steps == 'pick_pack_ship', 'field': 'wh_pack_stock_loc_id'},
-                ]
-                for values in sub_locations:
-                    loc_vals = {
-                        'name': values['name'],
-                        'usage': 'internal',
-                        'location_id': wh_loc_id,
-                        'active': values['active'],
-                    }
-                    if vals.get('company_id', warehouse.company_id.id):
-                        loc_vals['company_id'] = vals.get('company_id', warehouse.company_id.id)
-                    location_id = location_obj.create(cr, uid, loc_vals, context=context_with_inactive)
-                    vals[values['field']] = location_id
-                self.write(cr, uid, ids, vals, context=context)
-                
-                new_objects_dict = self.create_routes(cr, uid, warehouse.id, warehouse, context=context)
-                self.write(cr, uid, ids, new_objects_dict, context=context)
-            return True
-  # TO be Comment After Going To Live  
-    def write(self, cr, uid, ids, vals, context=None):
-        if context is None:
-            context = {}
-        if vals is None:
-            vals = {}
-        result = {}
-        result = super(stock_warehouse,self).write(cr, uid, ids, vals, context=context)
-        for warehouse in self.browse(cr, uid, ids, context):
-            
-            if warehouse.id in (2,3,4):
-                if ('wh_input_stock_loc_id' not in vals or 'wh_qc_stock_loc_id' not in vals or  
-                    'wh_output_stock_loc_id' not in vals or 'wh_pack_stock_loc_id' not in vals ):
-                    self._create_locations_4oldRecords(cr, uid, [warehouse.id], vals, context)
-                    
-                if not warehouse.in_type_id and not warehouse.int_type_id and not warehouse.pick_type_id \
-                    and not warehouse.pack_type_id and not warehouse.out_type_id:    
-                    self.create_sequences_and_picking_types(cr, uid, warehouse, context=context)
-    
-        return result
-  
-stock_warehouse()
+# 
+# class stock_warehouse(osv.osv):
+#     _inherit = "stock.warehouse"
+#     
+#     def _create_locations_4oldRecords(self, cr, uid, ids, vals, context=None):
+#         if context is None:
+#             context = {}
+#         if vals is None:
+#             vals = {}
+#             
+#         data_obj = self.pool.get('ir.model.data')
+#         seq_obj = self.pool.get('ir.sequence')
+#         picking_type_obj = self.pool.get('stock.picking.type')
+#         location_obj = self.pool.get('stock.location')
+#         result = {}
+#         
+#         for warehouse in self.browse(cr, uid, ids, context):
+#             # need Check Condition if Location Created Means Dont create again
+#             if not warehouse.wh_input_stock_loc_id and not warehouse.wh_qc_stock_loc_id \
+#                 and not warehouse.wh_pack_stock_loc_id and not warehouse.wh_output_stock_loc_id:
+#                 #create view location for warehouse
+#                 loc_vals = {
+#                         'name': _(vals.get('code', warehouse.code)),
+#                         'usage': 'view',
+#                         'location_id': data_obj.get_object_reference(cr, uid, 'stock', 'stock_location_locations')[1],
+#                 }
+#                 if vals.get('company_id', warehouse.company_id.id):
+#                     loc_vals['company_id'] = vals.get('company_id', warehouse.company_id.id)
+#                 wh_loc_id = location_obj.create(cr, uid, loc_vals, context=context)
+#                 vals['view_location_id'] = wh_loc_id
+#                 
+#                 #create all location
+#                 def_values = self.default_get(cr, uid, {'reception_steps', 'delivery_steps'})
+#                 reception_steps = vals.get('reception_steps',  def_values['reception_steps'])
+#                 delivery_steps = vals.get('delivery_steps', def_values['delivery_steps'])
+#                 context_with_inactive = context.copy()
+#                 context_with_inactive['active_test'] = False
+#                 
+#                 sub_locations = [
+#                     {'name': _('Stock'), 'active': True, 'field': 'lot_stock_id'},
+#                     {'name': _('Input'), 'active': reception_steps != 'one_step', 'field': 'wh_input_stock_loc_id'},
+#                     {'name': _('Quality Control'), 'active': reception_steps == 'three_steps', 'field': 'wh_qc_stock_loc_id'},
+#                     {'name': _('Output'), 'active': delivery_steps != 'ship_only', 'field': 'wh_output_stock_loc_id'},
+#                     {'name': _('Packing Zone'), 'active': delivery_steps == 'pick_pack_ship', 'field': 'wh_pack_stock_loc_id'},
+#                 ]
+#                 for values in sub_locations:
+#                     loc_vals = {
+#                         'name': values['name'],
+#                         'usage': 'internal',
+#                         'location_id': wh_loc_id,
+#                         'active': values['active'],
+#                     }
+#                     if vals.get('company_id', warehouse.company_id.id):
+#                         loc_vals['company_id'] = vals.get('company_id', warehouse.company_id.id)
+#                     location_id = location_obj.create(cr, uid, loc_vals, context=context_with_inactive)
+#                     vals[values['field']] = location_id
+#                 self.write(cr, uid, ids, vals, context=context)
+#                 
+#                 new_objects_dict = self.create_routes(cr, uid, warehouse.id, warehouse, context=context)
+#                 self.write(cr, uid, ids, new_objects_dict, context=context)
+#             return True
+#   # TO be Comment After Going To Live  
+#     def write(self, cr, uid, ids, vals, context=None):
+#         if context is None:
+#             context = {}
+#         if vals is None:
+#             vals = {}
+#         result = {}
+#         result = super(stock_warehouse,self).write(cr, uid, ids, vals, context=context)
+#         for warehouse in self.browse(cr, uid, ids, context):
+#             
+#             if warehouse.id in (2,3,4):
+#                 if ('wh_input_stock_loc_id' not in vals or 'wh_qc_stock_loc_id' not in vals or  
+#                     'wh_output_stock_loc_id' not in vals or 'wh_pack_stock_loc_id' not in vals ):
+#                     self._create_locations_4oldRecords(cr, uid, [warehouse.id], vals, context)
+#                     
+#                 if not warehouse.in_type_id and not warehouse.int_type_id and not warehouse.pick_type_id \
+#                     and not warehouse.pack_type_id and not warehouse.out_type_id:    
+#                     self.create_sequences_and_picking_types(cr, uid, warehouse, context=context)
+#     
+#         return result
+#   
+# stock_warehouse()

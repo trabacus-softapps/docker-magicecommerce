@@ -156,6 +156,7 @@ class account_invoice(osv.osv):
         
         for case in self.browse(cr, uid, ids):
             txt=''
+            res[case.id] = ''
             if case.amount_total:
                 txt += amount_to_text_softapps._100000000_to_text(int(round(case.amount_total)))        
                 res[case.id] = txt     
@@ -170,7 +171,7 @@ class account_invoice(osv.osv):
     _columns = {
                 'contact_id'          : fields.many2one('res.partner','Contact Person'),
                 'amt_in_words'        : fields.function(_amt_in_words, method=True, string="Amount in Words", type="text", 
-                    store=True, multi='all'),
+                    store=True),
                 'transport'            : fields.char("Customer PO Reference", size=50),
                 'vehicle'              : fields.char("Vehicle", size=20),
                 'dc_ref'               : fields.char("DC Reference", size=200),
@@ -197,7 +198,8 @@ class account_invoice(osv.osv):
         
         for case in self.browse(cr, uid, ids):
             if case.state == 'draft':
-                self.write(cr, uid, ids,{'internal_number':False})
+                if case.internal_number:
+                    self.write(cr, uid, ids,{'internal_number':False})
                 pick_ids = pick_obj.search(cr, uid,[('invoice_id','=',case.id)])
                 pick_obj.write(cr, uid,pick_ids,{'invoice_state':'2binvoiced'})
                 
