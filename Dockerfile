@@ -1,6 +1,7 @@
 FROM softapps/docker-odoobase
 MAINTAINER Arun T K <arun.kalikeri@xxxxxxxx.com>
 ADD additional_addons/pentaho_reports /opt/odoo/additional_addons/pentaho_reports
+ADD additional_addons/attachment_large_object /opt/odoo/additional_addons/attachment_large_object
 ADD additional_addons/account_financial_report_webkit  /opt/odoo/additional_addons/account_financial_report_webkit
 ADD additional_addons/account_financial_report_webkit_xls /opt/odoo/additional_addons/account_financial_report_webkit_xls
 ADD additional_addons/magicemart /opt/odoo/additional_addons/magicemart
