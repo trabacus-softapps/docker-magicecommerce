@@ -25,3 +25,9 @@
   color: #8c1313;
   margin: 0 8px;
 }
+
+/*Pager for One2Many */
+.oe_form_field_one2many .oe-header-title,.oe_form_field_one2many .oe-view-manager-search-view,.oe_form_field_one2many .oe-view-manager-switch,.oe_form_field_one2many .oe-search-options
+{
+    display:none !important;
+} 
