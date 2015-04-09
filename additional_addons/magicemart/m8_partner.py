@@ -11,12 +11,22 @@ from openerp.osv.orm import setup_modifiers
 class res_partner(osv.osv):
     _inherit = 'res.partner'
     
+    
+    def part_address(self, cr, uid, ids, field_name, args, context=None):
+        res = {}
+        for case in self.browse(cr, uid, ids):
+                res[case.id] = str(case.street and case.street or '') + str(case.street2 and case.street2 or '') + str(case.city and case.city or '') + str(case.state_id and case.state_id.name or '')  + str(case.zip and case.zip or '')
+        return res
+    
     _columns = {
             'seq_num'       :   fields.char("Reference", size=20),
             'source_location_id'    :   fields.many2one("stock.location",'Source Location'),
             'dest_location_id'      :   fields.many2one("stock.location",'Destination Location') ,              
-            'product_ids'           : fields.many2many('product.product', 'res_partner_prod_rel', 'partner_id', 'product_id', 'Products'),               
+            'product_ids'           :   fields.many2many('product.product', 'res_partner_prod_rel', 'partner_id', 'product_id', 'Products'),
+            
+            'address'               :   fields.function(part_address, string ="Address", store=False, type = "char"),                
            }
+    
     
     # sales Pricelist Read only for Portal Customer & Supplier
     def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):

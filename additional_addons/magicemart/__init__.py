@@ -8,3 +8,4 @@ import m8_config
 import m8_stock_picking
 import m8_purchase
 import m8_account_invoice
+import m8_invoice

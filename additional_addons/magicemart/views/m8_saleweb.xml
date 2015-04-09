@@ -5,7 +5,7 @@
         <!-- Product item used by /shop and /shop/cart -->
         <template id="m_products_item" inherit_id="website_sale.products_item"  name="Product item">
             <xpath expr="//div[@itemscope='itemscope']/section/div[@itemprop='offers']/b/span[@t-field='product.price']" position="replace">
-                <span t-field="product.pricelist_amt" style="white-space: nowrap;"  t-field-options='{
+                <span t-field="product.discount_amt" style="white-space: nowrap;"  t-field-options='{
                     "widget": "monetary",
                     "display_currency": "user_id.partner_id.property_product_pricelist.currency_id"
                     }'>
@@ -24,7 +24,7 @@
                     "display_currency": "user_id.partner_id.property_product_pricelist.currency_id"
                     }'/>
                 <b class="oe_price" style="white-space: nowrap;"
-                    t-field="product.pricelist_amt"
+                    t-field="product.discount_amt"
                     t-field-options='{
                     "widget": "monetary",
                     "display_currency": "user_id.partner_id.property_product_pricelist.currency_id"

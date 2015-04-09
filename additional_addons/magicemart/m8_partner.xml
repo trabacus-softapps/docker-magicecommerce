@@ -2,6 +2,26 @@
 <openerp>
     <data>
         
+        <record id="m_view_partner_tree" model="ir.ui.view">
+            <field name="name">m.res.partner.tree</field>
+            <field name="model">res.partner</field>
+            <field eval="8" name="priority"/>
+            <field name="inherit_id" ref = "base.view_partner_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='display_name']" position="before">
+                    <field name="seq_num" string = 'Code'/>
+                </xpath>
+                
+                <xpath expr="//field[@name='display_name']" position="after">
+                    <field name="address"/>
+                    <field name="vat"/>
+                    <field name='property_payment_term'/>
+                </xpath>
+                
+            </field>
+        </record>
+        
+        
         <!--	
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
        				Partner Form View  

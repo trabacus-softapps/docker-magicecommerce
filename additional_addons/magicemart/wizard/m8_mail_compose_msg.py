@@ -45,7 +45,7 @@ class mail_compose_message(osv.TransientModel):
             'mail_compose_message_res_partner_bcc_rel',
             'wizard_id', 'partner_id', 'Recipients-BCC'),
                 }
-    
+     
     def onchange_attachments(self, cr, uid, ids, m_attachment_id, attachment_ids, context=None):
         res = {}
         s = set()
@@ -63,7 +63,7 @@ class mail_compose_message(osv.TransientModel):
         user_obj = self.pool.get('res.users')
         for user in user_obj.browse(cr, uid, [uid]):
             USERPASS = user.password
-              
+                
         partner_obj = self.pool.get('res.partner')
         model_obj = context.get('active_model', False)
         data = context.get('active_res_id', False)
@@ -75,22 +75,22 @@ class mail_compose_message(osv.TransientModel):
         vlus = super(mail_compose_message, self).onchange_template_id(cr, uid, ids, template_id, composition_mode, model, res_id, context=context)
         if vlus:
             res = vlus['value']
-                 
+                   
             if not context:
                 return vlus
-              
+                
             if model_obj == 'sale.order':
                 if template_id:
                     if temp_name.name == 'Sales Order - Send by Email' or temp_name.name == 'Sale Order - Send By Email(Customer Portal)':
                         for ln in sale_obj.browse(cr, uid, [res_id]):
                             id = ln.id
-                          
+                            
             if model_obj == 'purchase.order':
                   if template_id:
                       if temp_name.name in ('Purchase Order - Send by Email', "Purchase Order - Send By Email(Supplier Portal)"):
                           for ln in po_obj.browse(cr, uid, [res_id]):
                               id = ln.id
-            return {'value':res}
+            return vlus
                     
 #                         report_name = "Sales Quotation" +" - "+ ln.name 
 #                         report_service = "report." + 'Sales Quotation'
@@ -185,23 +185,23 @@ class mail_compose_message(osv.TransientModel):
         context = context or {}
         sale_obj = self.pool.get('sale.order')
         res = super(mail_compose_message, self).send_mail(cr, uid, ids, context=context)
-        
+         
         cr.execute("""select uid from res_groups_users_rel where gid=
                       (select id  from res_groups where category_id in 
                       ( select id from ir_module_category where name = 'Customer Portal' ) and name = 'Manager') and uid = """+str(uid))
         print "ctx", context
         portal_user = cr.fetchone() 
         portal_group = portal_user and portal_user[0]
-        
+         
         if uid == portal_group:
             if context.get('active_id', False):
                 sale_obj.write(cr, uid, [context.get('active_id')], {'sent_portal':True})
-                
+                 
         if context.get('default_model') == 'sale.order' and context.get('default_res_id') and context.get('mark_so_as_sent'):
                 context = dict(context, mail_post_autofollow=True)
                 wf_service = netsvc.LocalService("workflow")
                 wf_service.trg_validate(uid, 'sale.order', context['default_res_id'], 'quotation_sent', cr)
-                
+                 
         return True
-    
+     
 mail_compose_message()

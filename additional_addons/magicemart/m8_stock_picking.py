@@ -285,17 +285,18 @@ class stock_invoice_onshipping(osv.osv_memory):
         context.get('active_ids').sort()
         pick_obj = self.pool.get("stock.picking")
         accinv_obj = self.pool.get("account.invoice")
-#         print "Invoice_id---------Before",invoice_id
-        invoice_id = super(stock_invoice_onshipping, self).create_invoice(cr, uid, ids, context)
-        print "Invoice_id---------After",invoice_id
-        if invoice_id:
+        invoice_ids = super(stock_invoice_onshipping, self).create_invoice(cr, uid, ids, context)
+        for inv in invoice_ids:
             for pick_id in context.get('active_ids', []):
                 pick = pick_obj.browse(cr, uid, pick_id)
-                pick_obj.write(cr, uid, [pick_id], {'invoice_id':invoice_id[0]})
-                onchange_company = accinv_obj.onchange_company_id(cr, uid, invoice_id, pick.company_id.id, pick.partner_id.id, 'out_invoice', [0, 0, False], False)
-                accinv_obj.write(cr, uid, invoice_id, onchange_company['value'])
+                pick_obj.write(cr, uid, [pick_id], {'invoice_id':inv})
                 
-        return invoice_id
+                inv_browse = accinv_obj.browse(cr, uid, [inv])
+                  
+                onchange_company = accinv_obj.onchange_company_id(cr, uid, inv, pick.company_id.id, pick.partner_id.id, inv_browse.type, [0, 0, False], False)
+                accinv_obj.write(cr, uid, inv, onchange_company['value'])
+                
+        return invoice_ids
     
 stock_invoice_onshipping()
     
@@ -409,7 +410,7 @@ class stock_return_picking(osv.osv_memory):
         # Cancel assignment of existing chained assigned moves
         moves_to_unreserve = []
         for move in pick.move_lines:
-            to_check_moves = [move.move_dest_id]
+            to_check_moves = [move.move_dest_id] if move.move_dest_id.id else []
             while to_check_moves:
                 current_move = to_check_moves.pop()
                 if current_move.state not in ('done', 'cancel') and current_move.reserved_quant_ids:
@@ -707,7 +708,7 @@ class stock_move(osv.osv):
                             inv_lines.update({
                                                  'reference'    :   sol.reference or '',
                                                  # Commented for Pricelist Concept
-#                                                  'discount'     :   0.00,
+                                                'discount'     :   0.00,
                                                  })
                             
                  
@@ -742,7 +743,7 @@ class stock_warehouse_orderpoint(osv.osv):
         case = self.browse(cr, uid, ids)[0]
         mail_obj = self.pool.get("mail.mail")
         partner_obj = self.pool.get("res.partner")
-        email_obj = self.pool.get('email.template')
+        email_obj = self.pool.get('mail.template')
          
         cr.execute("""
                         select distinct rp.email
@@ -761,8 +762,8 @@ class stock_warehouse_orderpoint(osv.osv):
          
         template = self.pool.get('ir.model.data').get_object(cr, uid, 'magicemart', 'email_template_record_rule')
         email_obj.write(cr, uid, [template.id], {'email_to'      :  to_emails[:-1]})
-        assert template._name == 'email.template'
-        mail_id = self.pool.get('email.template').send_mail(cr, uid, template.id, case.id, True, context=context)
+        assert template._name == 'mail.template'
+        mail_id = self.pool.get('mail.template').send_mail(cr, uid, template.id, case.id, True, context=context)
         return True
 
     """

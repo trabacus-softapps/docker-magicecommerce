@@ -4,7 +4,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
 from openerp import models, fields, api, _
-from openerp.osv import fields,osv
+from openerp.osv import fields,osv  
 from openerp.osv.orm import setup_modifiers
 import openerp.addons.decimal_precision as dp
 from openerp.tools.translate import _
@@ -237,37 +237,37 @@ class account_invoice(osv.osv):
             'name' : case.number and 'sales invoice - ' + case.number or 'sales invoice',
         }
     
-    
-    def create(self, cr, uid, vals, context = None):
-        today = time.strftime("%Y-%m-%d")
-        
-        if not vals.get("date_invoice", ''):
-            vals.update({
-                         "date_invoice" : today, 
-                         })
-        comp_obj = self.pool.get('res.company')
-        
-        if vals.get('company_id', False):
-            for c in comp_obj.browse(cr, uid, [vals.get('company_id', False)]):
-                if not c.parent_id:
-                    raise osv.except_osv(_('User Error'), _('You must select sub company sale shop !'))
-        return super(account_invoice,self).create(cr, uid, vals, context)
-    
-    def write(self, cr, uid, ids, vals, context = None):
-        res =False
-        ln_ids=[]
-        ln_obj = self.pool.get('account.invoice.line')
-        case = self.browse(cr, uid, ids)
-         # (for Old Records)
-#         if vals.get('number'):
+    # Version 7
+#     def create(self, cr, uid, vals, context = None):
+#         today = time.strftime("%Y-%m-%d")
+#         
+#         if not vals.get("date_invoice", ''):
 #             vals.update({
-#                          'internal_number':vals.get('number',case.number)
-#                         })
-        res = super(account_invoice, self).write(cr, uid, ids, vals, context = context)
-         
-        for case in self.browse(cr, uid, ids):
-            cr.execute("update account_invoice_line set company_id ="+str(case.company_id.id) +" where invoice_id ="+ str(case.id))
-        return res 
+#                          "date_invoice" : today, 
+#                          })
+#         comp_obj = self.pool.get('res.company')
+#         
+#         if vals.get('company_id', False):
+#             for c in comp_obj.browse(cr, uid, [vals.get('company_id', False)]):
+#                 if not c.parent_id:
+#                     raise osv.except_osv(_('User Error'), _('You must select sub company sale shop !'))
+#         return super(account_invoice,self).create(cr, uid, vals, context)
+    # Version 7
+#     def write(self, cr, uid, ids, vals, context = None):
+#         res =False
+#         ln_ids=[]
+#         ln_obj = self.pool.get('account.invoice.line')
+#         case = self.browse(cr, uid, ids)
+#          # (for Old Records)
+# #         if vals.get('number'):
+# #             vals.update({
+# #                          'internal_number':vals.get('number',case.number)
+# #                         })
+#         res = super(account_invoice, self).write(cr, uid, ids, vals, context = context)
+#          
+#         for case in self.browse(cr, uid, ids):
+#             cr.execute("update account_invoice_line set company_id ="+str(case.company_id.id) +" where invoice_id ="+ str(case.id))
+#         return res 
     
     # TO BE UNCOMENT LATER
 #     def action_date_assign(self, cr, uid, ids, *args):
@@ -898,8 +898,5 @@ class account_bank_statement_line(osv.osv):
 account_bank_statement_line()
 
 
-
-
-
-
-
+        
+                    

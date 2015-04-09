@@ -27,6 +27,11 @@ class sale_order(osv.osv):
             context = {}
         res = super(sale_order, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar,submenu=False)
         doc = etree.XML(res['arch'])
+# #         print 'res[',res['arch']
+#         if view_type == 'form' :
+#             print res['fields']['warehouse_id']
+#             res['fields']['order_line']['views']['form']['fields']['price_unit'].update({'readonly' : False, 'states' : {}})
+#             doc1 = etree.XML(res['fields']['order_line']['views']['form']['arch'])
          
         cr.execute("""select uid from res_groups_users_rel where gid in
                       (select id  from res_groups where category_id in 
@@ -66,7 +71,14 @@ class sale_order(osv.osv):
                     node.set('options', "{'no_open' : true}")
                     setup_modifiers(node, res['fields']['warehouse_id'])
                     res['arch'] = etree.tostring(doc)
-                     
+                    
+#                 for node in doc1.xpath("//field[@name='price_unit']"):
+#                     print 'cameeee'
+#                     node.set('readonly','1')
+#                     setup_modifiers(node,res['fields']['order_line']['views']['form']['arch']['price_unit'])
+#                     res['fields']['order_line']['views']['form']['arch'] = etree.tostring(doc1)
+#                 print res['fields']
+#         if view_type == 'form' :print 'aaaaa', res['fields']['order_line']['views']['form']['fields']['price_unit']    
         return res
     
     def _get_default_warehouse(self, cr, uid, context=None):
@@ -297,7 +309,7 @@ class sale_order(osv.osv):
         
         if uid == portal_group:
             try:
-                template_id = ir_model_data.get_object_reference(cr, uid, 'magicemart', 'email_template_edi_sale')[1]
+                template_id = ir_model_data.get_object_reference(cr, uid, 'magicemart', 'email_template_send_quotation')[1]
             except ValueError:
                 template_id = False
             try:
@@ -363,9 +375,6 @@ class sale_order(osv.osv):
 #                          'pricelist_id':partner.property_product_pricelist.id,
                          'company_id':warehouse.company_id.id,
                         })
-        print "vals=-------",vals
-#         if vals.get('name', '/') == '/':
-#             raise osv.except_osv(_('Warrning'), _('You must Enter the Sale Order Number!'))
          
         return super(sale_order, self).create(cr, uid, vals, context = context)
       
@@ -374,6 +383,12 @@ class sale_order(osv.osv):
             context = {}
         partner_obj = self.pool.get("res.partner")
         warehouse_obj = self.pool.get('stock.warehouse')
+        
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        if not ids:
+            return []
+        
         case = self.browse(cr, uid, ids[0])
          
         if vals.get('warehouse_id',case.warehouse_id.id):
@@ -429,6 +444,8 @@ class sale_order_line(osv.osv):
     _name = 'sale.order.line'
     _inherit = 'sale.order.line'
     _description = 'Sales Order Line'
+    
+    
     
     def _get_order(self, cr, uid, ids, context=None):
         result = {}
@@ -670,9 +687,9 @@ class sale_order_line(osv.osv):
             available_qty = prod_obj._product_available(cr, uid, [product], None, False, context)
             available_qty = available_qty[product].get('qty_available',0)
             # Commented for Pricelist Concept
-#             if pricelist_id.name == 'Public Pricelist' or not res['value'].get('price_unit'):
-#                 unit_amt = prod.discount and prod.list_price - ((prod.discount/100) *  prod.list_price) or prod.list_price
-#                 res['value']['discount'] = prod.discount
+            if pricelist_id.name == 'Public Pricelist' or not res['value'].get('price_unit'):
+                unit_amt = prod.discount and prod.list_price - ((prod.discount/100) *  prod.list_price) or prod.list_price
+                res['value']['discount'] = prod.discount
          
         if not res['value'].get('price_unit') and product:
             res['value']['price_unit'] = unit_amt and unit_amt or prod.list_price
@@ -690,8 +707,8 @@ class sale_order_line(osv.osv):
             res['value']['purchase_price'] = prod.standard_price or 0.00
              
         # Commented for Pricelist Concept 
-#         if unit_amt :
-#             res['value']['price_unit'] = unit_amt
+        if unit_amt :
+            res['value']['price_unit'] = unit_amt
             
         return res
     
@@ -720,15 +737,15 @@ class sale_order_line(osv.osv):
         if case.warehouse_id:  # shop is nothing but company_id
             context.update({'warehouse':case.warehouse_id.id})
         # Commented for Pricelist Concept   
-#         if res.get('discount'):
-#             vals.update({
-#                     'discount' : res.get('discount') and res.get('discount') or 0.00, 
-#                      })
-#             
-#         if res.get('price_unit'):
-#             vals.update({
-#                     'price_unit' : res.get('price_unit') and res.get('price_unit') or 0.00, 
-#                      })
+        if res.get('discount'):
+            vals.update({
+                    'discount' : res.get('discount') and res.get('discount') or 0.00, 
+                     })
+             
+        if res.get('price_unit'):
+            vals.update({
+                    'price_unit' : res.get('price_unit') and res.get('price_unit') or 0.00, 
+                     })
         if res.get("price_unit"):
             vals.update({'price_unit':res.get("price_unit")})
             if not vals.get('price_unit')or not res.get('price_unit'):
@@ -796,8 +813,8 @@ class sale_order_line(osv.osv):
             vals.update({
                          'available_qty' : available_qty,
                          # Commented for Pricelist Concept
-#                          'discount' : res.get('discount') and res.get('discount')  or 0,
-#                          'price_unit': res.get("price_unit") and res.get("price_unit") or 1
+                        'discount' : res.get('discount') and res.get('discount')  or 0,
+                        'price_unit': res.get("price_unit") and res.get("price_unit") or 1
                           
                          })
             if res.get("tax_id"):

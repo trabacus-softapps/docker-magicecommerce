@@ -6,6 +6,7 @@ from openerp import http
 from openerp.http import request
 import openerp
 from openerp.tools.translate import _
+from openerp.addons.website.models.website import slug
 import openerp.addons.website_sale.controllers.main as WSmain
 
 

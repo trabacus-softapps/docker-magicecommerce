@@ -233,63 +233,63 @@ class purchase_order(osv.osv):
 #         return res
 #     
     # Send by Mail For Supplier Portal
-    def wkf_send_rfq(self, cr, uid, ids, context=None):
-        '''
-        This function opens a window to compose an email, with the edi purchase template message loaded by default
-        '''
-        ir_model_data = self.pool.get('ir.model.data')
-        cr.execute("""select uid from res_groups_users_rel where gid=
-              (select id  from res_groups where category_id in 
-              ( select id from ir_module_category where name = 'Supplier Portal' ) and name = 'Supplier Manager') and uid = """+str(uid))
-        portal_user = cr.fetchone() 
-        portal_group = portal_user and portal_user[0]
-        
-        if uid == portal_group:
-            try:
-                template_id = ir_model_data.get_object_reference(cr, uid, 'magicemart', 'email_template_supplier_quotation')[1]
-            except ValueError:
-                template_id = False
-            try:
-                compose_form_id = ir_model_data.get_object_reference(cr, uid, 'mail', 'email_compose_message_wizard_form')[1]
-            except ValueError:
-                compose_form_id = False 
-            ctx = dict(context)
-            ctx.update({
-                'default_model': 'purchase.order',
-                'default_res_id': ids[0],
-                'default_use_template': bool(template_id),
-                'default_template_id': template_id,
-                'default_composition_mode': 'comment',
-            })
-        else:
-               
-            try:
-                template_id = ir_model_data.get_object_reference(cr, uid, 'purchase', 'email_template_edi_purchase')[1]
-            except ValueError:
-                template_id = False
-            try:
-                compose_form_id = ir_model_data.get_object_reference(cr, uid, 'mail', 'email_compose_message_wizard_form')[1]
-            except ValueError:
-                compose_form_id = False 
-            ctx = dict(context)
-            ctx.update({
-                'default_model': 'purchase.order',
-                'default_res_id': ids[0],
-                'default_use_template': bool(template_id),
-                'default_template_id': template_id,
-                'default_composition_mode': 'comment',
-            })
-        return {
-            'type': 'ir.actions.act_window',
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'mail.compose.message',
-            'views': [(compose_form_id, 'form')],
-            'view_id': compose_form_id,
-            'target': 'new',
-            'context': ctx,
-        }
-    
+#     def wkf_send_rfq(self, cr, uid, ids, context=None):
+#         '''
+#         This function opens a window to compose an email, with the edi purchase template message loaded by default
+#         '''
+#         ir_model_data = self.pool.get('ir.model.data')
+#         cr.execute("""select uid from res_groups_users_rel where gid=
+#               (select id  from res_groups where category_id in 
+#               ( select id from ir_module_category where name = 'Supplier Portal' ) and name = 'Supplier Manager') and uid = """+str(uid))
+#         portal_user = cr.fetchone() 
+#         portal_group = portal_user and portal_user[0]
+#         
+#         if uid == portal_group:
+#             try:
+#                 template_id = ir_model_data.get_object_reference(cr, uid, 'magicemart', 'email_template_supplier_quotation')[1]
+#             except ValueError:
+#                 template_id = False
+#             try:
+#                 compose_form_id = ir_model_data.get_object_reference(cr, uid, 'mail', 'email_compose_message_wizard_form')[1]
+#             except ValueError:
+#                 compose_form_id = False 
+#             ctx = dict(context)
+#             ctx.update({
+#                 'default_model': 'purchase.order',
+#                 'default_res_id': ids[0],
+#                 'default_use_template': bool(template_id),
+#                 'default_template_id': template_id,
+#                 'default_composition_mode': 'comment',
+#             })
+#         else:
+#                
+#             try:
+#                 template_id = ir_model_data.get_object_reference(cr, uid, 'purchase', 'email_template_edi_purchase')[1]
+#             except ValueError:
+#                 template_id = False
+#             try:
+#                 compose_form_id = ir_model_data.get_object_reference(cr, uid, 'mail', 'email_compose_message_wizard_form')[1]
+#             except ValueError:
+#                 compose_form_id = False 
+#             ctx = dict(context)
+#             ctx.update({
+#                 'default_model': 'purchase.order',
+#                 'default_res_id': ids[0],
+#                 'default_use_template': bool(template_id),
+#                 'default_template_id': template_id,
+#                 'default_composition_mode': 'comment',
+#             })
+#         return {
+#             'type': 'ir.actions.act_window',
+#             'view_type': 'form',
+#             'view_mode': 'form',
+#             'res_model': 'mail.compose.message',
+#             'views': [(compose_form_id, 'form')],
+#             'view_id': compose_form_id,
+#             'target': 'new',
+#             'context': ctx,
+#         }
+#     
 # Overriden Updating PO company ID to incommingshipment
     # Overriden for updating in_name from PO (for Old Records)
     def action_picking_create(self, cr, uid, ids, context=None):

@@ -271,6 +271,15 @@
                         <field name="discount_amt" />    
                     </group>
                 </xpath>
+                
+                
+                <xpath expr = "//sheet" position = "before">
+                    <header>
+                        <button name="send_mail_prod_tmpl" string = "Send Mail" type="object" confirm="Are you sure to send mail" groups="base.group_system,magicemart.magicemart_group_manager" class="oe_highlight"/>
+                    </header>
+                    
+                </xpath>
+                
             </field>
         </record>
         

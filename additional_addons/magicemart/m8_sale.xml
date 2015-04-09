@@ -2,7 +2,6 @@
 <openerp>
     <data>
         
-        
         <!--	
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
        				Hiding Quotation Template
@@ -124,6 +123,10 @@
                     <field name="sent_portal" invisible= "1"/>
                     <field name="lock_it" invisible="1"/>
                 </field>
+<!--                
+                <xpath expr="//notebook/page/field[@name='order_line']/form/group/group/field[@name='price_unit']" position="attributes">
+                    <attribute name="string">PRAVEEN</attribute>
+                </xpath>-->
                 
 <!--                <xpath expr="//sheet/h1/field[@name='name']" position="attributes">
                     <attribute name="readonly">0</attribute>
@@ -190,6 +193,10 @@
                 <xpath expr="//field[@name='payment_term']" position="attributes">
                     <attribute name="attrs">{'readonly':[('lock_it','=',True)]}</attribute>   
                 </xpath>
+                
+<!--                <xpath expr="//field[@name='currency_id']" position="after">
+                    <field name="warehouse_id" on_change="onchange_warehouse_id(warehouse_id)" options="{'no_create': True}" groups="stock.group_locations"/>
+                </xpath>-->
                 
                 <xpath expr="//field[@name='fiscal_position']" position="attributes">
                     <attribute name="attrs">{'readonly':[('lock_it','=',True)]}</attribute>   
@@ -275,6 +282,8 @@
                     <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
                 </button>
                 
+               
+                
                 
             </field>
         </record>
@@ -304,6 +313,7 @@
                         on_change="product_id_change_with_wh(parent.pricelist_id,product_id,product_uom_qty,False,product_uos_qty,False,name,parent.partner_id, False, True, parent.date_order, product_packaging, parent.fiscal_position, False, parent.warehouse_id, context)"/>
                 </xpath>
                 
+<!--                <xpath expr="//field[@name='warehouse_id']" position="replace"/>-->
                 
             </field>
         </record>

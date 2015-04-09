@@ -146,6 +146,21 @@ class product_template(osv.osv):
 
 
     
+    # Send Email for MRP Changes for customers
+    def send_mail_prod_tmpl(self,cr, uid, ids, context=None):
+        prod_obj = self.pool.get("product.product")
+        temp = self.browse(cr, uid, ids)
+        if temp:
+            prod_ids = prod_obj.search(cr, uid, [('product_tmpl_id', '=', temp.id)])
+            if  prod_ids:
+                prod_id = prod_ids[0]
+                prod_obj.send_mail(cr, uid, prod_id, context )
+                
+        return True
+    
+            
+
+    
     
 product_template()
 
@@ -423,7 +438,7 @@ class product_product(osv.osv):
         case = self.browse(cr, uid, ids)[0]
         mail_obj = self.pool.get("mail.mail")
         partner_obj = self.pool.get("res.partner")
-        email_obj = self.pool.get('email.template')
+        email_obj = self.pool.get('mail.template')
         wiz_obj = self.pool.get('mail.compose.message')
         
         if context is None:
