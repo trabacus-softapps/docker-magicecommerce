@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="m_product_search_form_view_stock" model="ir.ui.view">
+            <field name="name">m.product.search.stock.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="stock.product_search_form_view_stock"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='location_id']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manage</attribute>
+                </xpath>
+                <xpath expr="//field[@name='warehouse_id']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manage</attribute>
+                </xpath>
+                
+                <xpath expr="//field[@name='pricelist_id']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manage</attribute>
+                </xpath>
+            </field>
+        </record>
+        
+        
+        
+        <record id="m_view_company_form" model="ir.ui.view">
+            <field name="name">res.company.form</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='company_registry']" position="after">
+                    <field name="sign"/>
+                </xpath>
+            </field>
+        </record>     
+<!-- Invisible Warning Tab in Product master for Customers       -->
+        <record id="m_product_warning_form_view" model="ir.ui.view">
+            <field name="name">m.product.warning.form.inherit</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="warning.product_warning_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@string='Warnings']" position="attributes">
+                    <attribute name="groups">base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+            </field>
+        </record>
+    	
+        <!--  Product master Tree-->
+    	<record id="m_view_product_tree" model="ir.ui.view">    
+            <field name="name">m.view.product.tree</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref = "product.product_product_tree_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree[@string='Products']" position="attributes">
+                    <attribute name="create">true</attribute>   
+                </xpath>
+                
+                <xpath expr="//tree[@string='Products']/field[@name='lst_price']" position="after">
+                    <field name="discount" string="Discount(%%)" 
+                        groups="base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager,magicemart.magicemart_portal_user,magicemart.magicemart_portal_manager"/>
+                    <field name="discount_amt"
+                        groups="base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager,magicemart.magicemart_portal_user,magicemart.magicemart_portal_manager"/>
+                </xpath>
+                
+                <xpath expr="//tree[@string='Products']/field[@name='lst_price']" position="attributes">
+                    <attribute name="string">MRP Price</attribute>
+                </xpath>
+                
+                <field name="default_code" position="before">
+                    <field name="image" widget="image" string="Image"/>
+                </field>
+                
+                    
+                <field name="default_code" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+                
+            </field>
+        </record>
+        
+        <record id="m_view_product_form" model="ir.ui.view">    
+            <field name="name">m.view.product.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref = "product.product_normal_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form[@string='Product']" position="attributes">
+                    <attribute name="create">true</attribute>  
+                    <attribute name="edit">true</attribute>  
+                </xpath>
+                
+                <xpath expr = "//sheet" position = "before">
+                    <header>
+                        <button name="send_mail" string = "Send Mail" type="object" confirm="Are you sure to send mail" groups="base.group_system,magicemart.magicemart_group_manager" class="oe_highlight"/>
+                    </header>
+                </xpath>
+                
+                <xpath expr="//page[@string='Procurements']" position="attributes">
+                    <attribute name="groups">base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager,magicemart.magicemart_supplier_portal</attribute>
+                </xpath>        
+                <xpath expr="//page[@string='Inventory']" position="attributes">
+                    <attribute name="groups">base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager,magicemart.magicemart_supplier_portal</attribute>
+                    </xpath>    
+                
+                <xpath expr="//page[@string='Sales']" position="attributes">
+                    <attribute name="groups">base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//page[@string='Information']" position="attributes">
+                    <attribute name="groups">base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager,magicemart.magicemart_portal_user,magicemart.magicemart_portal_manager</attribute>
+                </xpath>        
+                
+                <xpath expr="//field[@name='list_price']" position="attributes">
+                    <attribute name = "string">MRP</attribute>
+                </xpath>
+                
+                <!--<xpath expr="//page[@string='Accounting']" position="attributes">
+                    <attribute name="groups">base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>  
+                <xpath expr="//page[@string='Warnings']" position="attributes">
+                    <attribute name="groups">base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>  -->
+              
+            </field>
+        </record>
+        
+<!-- Enable Information Tab and hide 2 Buttons for portal user & Manager       -->
+        
+        <record model="ir.ui.view" id="m_product_form_view_procurement_button">
+            <field name="name">m.product.product.procurement</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="procurement.product_form_view_procurement_button"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@string='Request Procurement']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//button[@string='Orderpoints']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+            </field>
+        </record>
+        
+        <!-- Hide Receiption count & Delivery Count for Portal User & Manager      -->        
+        
+        <record model="ir.ui.view" id="product_kanban_stock_view">
+            <field name="name">M Product Kanban Stock</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="stock.product_kanban_stock_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='reception_count']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//field[@name='delivery_count']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+
+                <xpath expr="//div[@name='tags']" position="attributes">
+                    <a name="%(stock.action_receive_move)d" type="action" t-if="record.reception_count.raw_value>0">
+                        <t t-esc="record.reception_count.value"/> Receptions
+                    </a>
+                    <a name="%(stock.action_deliver_move)d" type="action" t-if="record.delivery_count.raw_value>0">
+                        <t t-esc="record.delivery_count.value"/> Deliveries
+                    </a>
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+
+            </field>
+        </record>             
+    	
+        <record id="m_product_template" model="ir.ui.view">
+            <field name="name">m.product.template</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref = "product.product_normal_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='list_price']" position="attributes">
+                    <attribute name="on_change">onchange_discper(discount, list_price)</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Information']/group" position="after">
+                    <separator/>
+                    <group col="2" colspan="4">
+                    <label for="discount"/>
+                    <div name="discount">
+                        <field name="discount" class="oe_inline" on_change=" onchange_discper(discount, list_price)" />%%
+                    </div>
+                        <field name="discount_amt" />    
+                    </group>
+                  </xpath>
+            </field>    
+        </record>
+        
+           <record model="ir.actions.act_window" id="action_portal_product">
+            <field name="name">Products</field>
+            <field name="res_model">product.product</field>
+            <field name="view_mode">tree,form,kanban</field>
+            <field name="view_id" eval="False"/>
+            <field name="search_view_id" ref="product.product_search_form_view"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to see a products for the particular company.
+                </p>
+            </field>
+        </record>
+        
+        <record id="action_portal_product_tree" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="product.product_product_tree_view"/>
+            <field name="act_window_id" ref="action_portal_product"/>
+        </record>
+        
+        <record id="action_portal_product_form" model="ir.actions.act_window.view">
+            <field eval="3" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="product.product_normal_form_view"/>
+            <field name="act_window_id" ref="action_portal_product"/>
+        </record>
+        
+        <record id="action_portal_product_kanban" model="ir.actions.act_window.view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">kanban</field>
+            <field name="view_id" ref="product.product_kanban_view"/>
+            <field name="act_window_id" ref="action_portal_product"/>
+        </record>
+        
+        
+        
+        
+<!-- To Create Prtner in Satandard Partner Ledger       -->
+        <record id="m_account_pl_view" model="ir.ui.view">
+            <field name="name">Partner Ledger</field>
+            <field name="model">account.partner.ledger</field>
+            <field name="inherit_id" ref="account.account_partner_ledger_view"/>
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//field[@name='result_selection']" position="after">
+                        <field name="partner_id"/>
+                    </xpath>
+                </data>
+            </field>
+        </record>
+        
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						Supplier Portal Products	
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        
+        <record model="ir.actions.act_window" id="action_supplier_portal_product">
+            <field name="name">Products</field>
+            <field name="res_model">product.product</field>
+            <field name="view_mode">tree,form,kanban</field>
+            <field name="view_id" eval="False"/>
+            <field name="search_view_id" ref="product.product_search_form_view"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to see a products for the particular company.
+                </p>
+            </field>
+        </record>
+        
+        <record id="action_supplier_portal_product_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="product.product_product_tree_view"/>
+            <field name="act_window_id" ref="action_supplier_portal_product"/>
+        </record>
+        
+        <record id="action_supplier_portal_product_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="product.product_normal_form_view"/>
+            <field name="act_window_id" ref="action_supplier_portal_product"/>
+        </record>
+        
+        <record id="action_supplier_portal_product_kanban" model="ir.actions.act_window.view">
+            <field name="sequence" eval="3"/>
+            <field name="view_mode">kanban</field>
+            <field name="view_id" ref="product.product_kanban_view"/>
+            <field name="act_window_id" ref="action_supplier_portal_product"/>
+        </record>
+        
+        <menuitem name="Products" id="menu_supplier_portal_product"  parent="menu_supplier_portal" 
+            action="action_supplier_portal_product"  sequence="2" groups="magicemart.magicemart_supplier_portal" />
+        
+        
+       
+       
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						Prouducts to Create Orders	
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+      
+        <!--  Product master Tree 
+        <record id="order_view_product_tree1" model="ir.ui.view">    
+            <field name="name">order.view.product.tree</field>
+            <field name="model">product.product</field>
+             <field eval="10" name="priority"/>
+            <field name="arch" type="xml">
+                <tree string="Products Order" editable="top">
+                    <field name="default_code" readonly="1"/>
+                    <field name="name" readonly="1"/>
+                    <field name="categ_id" invisible="1" readonly="1"/>
+                    <field name="type" invisible="1" readonly="1"/>
+                    <field name="variants" groups="product.group_product_variant" readonly="1"/>
+                    <field name="uom_id" string="Unit of Measure" groups="product.group_uom" readonly="1"/>
+                    <field name="qty_available" readonly="1"/>
+                    <field name="virtual_available" readonly="1"/>
+                    <field name="lst_price" readonly="1"/>
+                    <field name="price" invisible="not context.get('pricelist',False)" readonly="1"/>
+                    <field name="standard_price" invisible="1" readonly="1"/>
+                    <field name="state" readonly="1"/>
+                    <field name="company_id" groups="base.group_multi_company" invisible="1"/>
+                    <field name="prod_qty" context="{'prod_qty': self}"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_order_product">
+            <field name="name">Products New</field>
+            <field name="res_model">product.product</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="order_view_product_tree1"/>
+            <field name="search_view_id" ref="product.product_search_form_view"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to see a products for the particular company.
+                </p>
+            </field>
+        </record>
+        
+        <record id="action_order_product_tree" model="ir.actions.act_window.view">
+            <field name="sequence">6</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="order_view_product_tree1"/>
+            <field name="act_window_id" ref="action_order_product"/>
+        </record>
+        
+        <menuitem name="Products New" id="menu_portal_order_products" parent="menu_portal_customer" action="action_order_product" sequence="4" groups="magicemart.magicemart_portal_manager" />
+        -->
+        
+        <record id="product_order_tree_view" model="ir.ui.view">
+            <field name ="name">product_order_tree_view</field>
+            <field name ="model">order.product.wiz</field>
+            <field name ="arch" type ="xml">
+                <form string="Order Product" version="7.0">
+                    <separator string="Order Products"/>
+                    <group>
+                        <field name="product_ids">
+                            <tree editable = "top">
+                                <field name="image" widget="image" readonly="1"/>
+                                <field name="product_id" readonly="1"/>
+                                <field name="prod_qty" required = "1"/>
+                            </tree>
+                        </field>
+                    </group>
+                    <footer>
+                        <button name="create_orders" string="Create" type="object"
+                            class="oe_highlight"/>
+                        <button string="Cancel" special="cancel" type="object" class="oe_highlight"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <act_window name="Create Quotation" res_model="order.product.wiz"
+            src_model="product.product" view_mode="form" target="new" 
+            key2="client_action_multi" id="action_order_products"/>
+        
+        
+    </data>
+</openerp> 

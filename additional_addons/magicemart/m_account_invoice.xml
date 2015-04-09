@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+    <data>
+        <record id="m_invoice_form" model="ir.ui.view">
+            <field name="name">magic.account.invoice.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref = "account.invoice_form"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position = "after">
+                    <field name="contact_id" domain="[('parent_id','=',partner_id)]" attrs="{'readonly':[('state', 'not in',('draft'))]}"/>
+                </field>
+                <field name="origin" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+                <field name="account_id" position="after">
+                    <field name="dc_ref" string="Dc Reference" attrs="{'readonly':[('state', 'not in',('draft'))]}"/>
+                    <field name="transport" attrs="{'readonly':[('state', 'not in',('draft'))]}"/>
+                    <field name="vehicle" attrs="{'readonly':[('state', 'not in',('draft'))]}"/>
+                </field>
+                <xpath expr="//notebook/page[@string='Invoice Lines']/field[@name='invoice_line']/tree[@string='Invoice Lines']/field[@name='product_id']" position="after">
+                    <field name="reference"/>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Other Info']/group/group/field[@name='company_id']" position="replace">
+                    <field name="fiscal_position" widget="selection"/>
+                </xpath>
+                
+                <xpath expr="//sheet[@string='Invoice']//group/group/field[@name='fiscal_position']" position="replace">
+                    <field name="company_id" widget="selection" on_change="onchange_company_id(company_id,partner_id,type,invoice_line,currency_id)" groups="base.group_multi_company"/>
+                </xpath>
+<!--                <xpath expr="//sheet[@string='Invoice']//group/group/field[@name='fiscal_position']" position="attributes">
+                    <attribute name="on_change">onchange_company_id(company_id,partner_id,type,invoice_line,currency_id)</attribute>
+                </xpath>-->
+                
+                <xpath expr="//button[@name='invoice_cancel']" position="attributes">
+                    <attribute name="group">magicemart_group_manager</attribute>
+                </xpath>
+                <xpath expr="//field[@name='journal_id']" position="attributes">
+                    <attribute name="widget">""</attribute>
+                    <attribute name="domain">[('company_id','=',company_id),('type','=','sale')]</attribute>
+                    <attribute name="options">{'limit': 10, 'create': false, 'create_edit': false,'no_open':True}</attribute>
+                </xpath>
+                
+                <xpath expr="//button[@name='invoice_print']" position="replace">
+                    <button name="%(action_customer_invoice)d" type="action" String="Print Invoice" class="oe_highlight" groups="base.group_user,magicemart.magicemart_portal_manager"/>
+                </xpath>
+                
+                <xpath expr="//page[@string='Payments']" position="after">
+                    <page string="Terms and Condition" groups="base.group_user">
+                        <form string="Terms and Condition">
+                            <separator/>
+                            <field name="terms" attrs="{'readonly':[('state', 'in',('open', 'paid'))]}" placeholder="Terms and Conditions..."/>
+                        </form>
+                    </page>
+                </xpath>
+                              
+                
+                <xpath expr="//button[@name='invoice_print']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                
+                <button name="action_invoice_sent" type="object" string="Send by Email" attrs="{'invisible':['|',('sent','=',True), ('state', '!=', 'open')]}" class="oe_highlight"  position='attributes'>
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </button>
+                
+                <button name="action_invoice_sent" type="object" string="Send by Email" attrs="{'invisible':['|',('sent','=',False), ('state', '!=', 'open')]}" position='attributes'>
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </button>
+                
+                <button name="%(account.action_account_invoice_refund)d" type='action' string='Refund Invoice' states='open,proforma2,paid' position='attributes'>
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </button>
+                <xpath expr="//button[@string='Validate']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>
+                
+                
+                <xpath expr="//notebook/page[@string='Other Info']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>
+
+                
+            </field>
+        </record>
+        
+        <record id="m_view_invoice_customer" model="ir.ui.view">
+            <field name="name">m.account.invoice.customer.pay</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account_voucher.view_invoice_customer"/>
+            <field name="arch" type="xml">
+                
+                <button name="invoice_pay_customer" type="object" string="Register Payment" attrs="{'invisible': ['|', ('state','!=','open'), ('sent','=',True)]}"  position='attributes'>
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </button>
+                
+                <button name="invoice_pay_customer" type="object" string="Register Payment" attrs="{'invisible': ['|', ('state','!=','open'), ('sent','=',False)]}"  class="oe_highlight" position='attributes'>
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </button>
+            </field>
+        </record>
+        
+        
+        <record id="m_view_invoice_line_form" model="ir.ui.view">
+            <field name="name">m.account.invoice.line.form</field>
+            <field name="model">account.invoice.line</field>
+            <field name="inherit_id" ref="account.view_invoice_line_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='product_id']" position="after">
+                    <button name="update_saleprice_button" type="object" String="Update Slaeprice"/>
+                </xpath>
+            </field>
+        </record>
+        
+        
+        <record id="m_view_tax_form" model="ir.ui.view">
+            <field name="name">m_account.tax.form</field>
+            <field name="model">account.tax</field>
+            <field name="inherit_id" ref="account.view_tax_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='description']" position="attributes">
+                    <attribute name="required">1</attribute>
+                </xpath>
+            </field>
+        </record>
+        
+        <record id="m_view_account_invoice_filter" model="ir.ui.view">
+            <field name="name">m.account.invoice.select</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+            <field name="arch" type="xml">
+                <field name="period_id" position="after">
+                    <field name="date_invoice"/>
+                    <field name="date_from" filter_domain="[('date_invoice','&gt;=',self)]"/>
+                    <field name="date_to" filter_domain="[('date_invoice','&lt;=',self)]"/>
+                </field>
+                <filter string="Unpaid" position="after">
+                    <filter name="current_date" string="Today"
+                        domain="[('date_invoice','=',(context_today()).strftime('%%Y-%%m-%%d'))]"/>
+                </filter>
+                <xpath expr="field[@name='partner_id']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>
+                
+                <xpath expr="field[@name='user_id']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                </xpath>
+                
+            </field>
+        </record>
+        
+<!--    Moving Tax Lines to Other Info Tab in Suplier Invoice    -->
+        <record id="m_invoice_supplier_form" model="ir.ui.view">
+            <field name="name">m.account.invoice.supplier.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_supplier_form"/>
+            <field name="arch" type="xml">
+                <xpath  expr="//notebook/page[@string='Invoice']/div/field[@name='tax_line']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath> 
+                <xpath  expr="//notebook/page[@string='Other Info']/group" position="after">
+                    <div style="width: 100%%">
+                        <field name="tax_line">
+                            <tree editable="bottom" string="Taxes">
+                                <field name="name"/>
+                                <field name="account_id" groups="account.group_account_invoice"/>
+                                <field name="account_analytic_id" domain="[('type','&lt;&gt;','view'), ('company_id', '=', parent.company_id)]" groups="analytic.group_analytic_accounting"/>
+                                <field name="base" on_change="base_change(base,parent.currency_id,parent.company_id,parent.date_invoice)" readonly="1" sum="Base Total"/>
+                                <field name="amount" on_change="amount_change(amount,parent.currency_id,parent.company_id,parent.date_invoice)" sum="Base Total"/>
+                                
+                                <field invisible="True" name="base_amount"/>
+                                <field invisible="True" name="tax_amount"/>
+                                <field name="factor_base" invisible="True"/>
+                                <field name="factor_tax" invisible="True"/>
+                            </tree>
+                        </field>
+                    </div>
+                </xpath>
+                <xpath expr="//page[@string='Payments']" position="after">
+                    <page string="Terms and Conditions">
+                        <form string="Terms and Conditions">
+                            <field name="terms" attrs="{'readonly':[('state', 'in',('open','paid'))]}" placeholder="Terms and Conditions..."/>
+                        </form>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+        
+        
+<!--   Customer Invoice Action  -->
+        
+        <record id="account.action_invoice_tree1" model="ir.actions.act_window">
+            <field name="name">Customer Invoices</field>
+            <field name="res_model">account.invoice</field>
+            <field name="context">{'default_type':'out_invoice', 'type':'out_invoice', 'journal_type': 'sale','search_default_current_date':1}</field>
+            <field name="help" type="html">
+            </field>
+        </record>
+        
+        <!--   Supplier Invoice Action  -->
+        
+        <record id="account.action_invoice_tree2" model="ir.actions.act_window">
+            <field name="name">Supplier Invoices</field>
+            <field name="res_model">account.invoice</field>
+            <field name="context">{'default_type': 'in_invoice', 'type': 'in_invoice', 'journal_type': 'purchase', 'search_default_current_date':1}</field>
+        </record>
+        
+        <!--   Customer Refunds Action  -->
+        
+        <record id="account.action_invoice_tree3" model="ir.actions.act_window">
+            <field name="name">Customer Refunds</field>
+            <field name="res_model">account.invoice</field>
+            <field name="context">{'default_type':'out_refund', 'type':'out_refund', 'journal_type': 'sale_refund', 'search_default_current_date':1}</field>
+        </record>
+        <!--   Supplier Refunds Action  -->
+        <record id="account.action_invoice_tree4" model="ir.actions.act_window">
+            <field name="name">Supplier Refunds</field>
+            <field name="res_model">account.invoice</field>
+            <field name="context">{'default_type': 'in_refund', 'type': 'in_refund', 'journal_type': 'purchase_refund', 'search_default_current_date':1}</field>
+        </record>
+        
+        
+        <!--    To Remove std Report    -->
+        
+        <delete model="ir.actions.report.xml" search="[('name','=','Invoices'),('model','=','account.invoice')]"/>
+        
+<!--	
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       				Customer Portal  Invoices 
+  		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^	
+-->
+        
+        <record model="ir.actions.act_window" id="action_portal_invoices">
+            <field name="name">Invoices</field>
+            <field name="res_model">account.invoice</field>
+            <field name="view_mode">tree,form,calendar,graph</field>
+            <field name="view_id" eval="False"/>
+            <field name="context">{'type':'out_invoice'}</field>
+            <field name="domain">[('state','in',('open','paid'))]</field>
+            <field name="search_view_id" ref="account.view_account_invoice_filter"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to see all invoices made by a particular customer.
+                </p>
+            </field>
+        </record>
+        
+        <record id="action_portal_invoices_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="account.invoice_tree"/>
+            <field name="act_window_id" ref="action_portal_invoices"/>
+        </record>
+        
+        <record id="action_portal_invoices_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="account.invoice_form"/>
+            <field name="act_window_id" ref="action_portal_invoices"/>
+        </record>
+        <menuitem name="Invoices" id="menu_portal_customer_invoices"   parent="menu_portal_customer_admin" action="action_portal_invoices" sequence="2"  groups="magicemart.magicemart_portal_manager"/>
+        
+        
+<!--	
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       				Supplier Portal  Invoices 
+  		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^	
+-->
+        
+        <record model="ir.actions.act_window" id="action_supplier_portal_invoices">
+            <field name="name">Invoices</field>
+            <field name="res_model">account.invoice</field>
+            <field name="view_mode">tree,form,calendar,graph</field>
+            <field name="view_id" eval="False"/>
+            <field name="context">{'type':'in_invoice'}</field>
+            <field name="domain">[('state','in',('open','paid'))]</field>
+            <field name="search_view_id" ref="account.view_account_invoice_filter"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to see all invoices made by a particular customer.
+                </p>
+            </field>
+        </record>
+        
+        <record id="action_supplier_portal_invoices_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="account.invoice_tree"/>
+            <field name="act_window_id" ref="action_supplier_portal_invoices"/>
+        </record>
+        
+        <record id="action_supplier_portal_invoices_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="account.invoice_form"/>
+            <field name="act_window_id" ref="action_supplier_portal_invoices"/>
+        </record>
+        
+        <menuitem name="Invoices" id="menu_supplier_portal_invoice"  parent="menu_supplier_portal" 
+            action="action_supplier_portal_invoices"  sequence="3" groups="magicemart.magicemart_supplier_portal" />
+        
+<!--    Bank Statements    -->
+        <record id="m_view_bank_statement_form" model="ir.ui.view">
+            <field name="name">m.account.bank.statement.form1</field>
+            <field name="model">account.bank.statement</field>
+            <field name="priority">1</field>
+            <field name="inherit_id" ref="account.view_bank_statement_form"/>
+            <field name="arch" type="xml">
+                <page string='Transactions' position="after" >
+                    <page string="Receipts">
+                        <field name="receipt_ids"/>
+                    </page>
+                    <page string="Payments">
+                        <field name="payment_ids"/>
+                    </page>
+                   
+                    <page string="Cash Registers">
+                        <field name="cash_ids">
+                        <tree string="Cash Registers">
+                            <field name="date"/>
+                            <field name="name"/>
+                            <field name="ref"/>
+                            <field name="partner_id"/>
+                            <field name="type"/>
+                            <field name="account_id"/>
+                            <field name="analytic_account_id"/>
+                            <field name="amount"/>
+                            <field name="voucher_id"/>
+                        </tree>
+                        </field>
+                    </page>
+                </page>    
+                
+                <xpath expr="//notebook/page[@string='Transactions']/field[@name='line_ids']/tree[@string='Statement lines']/field[@name='name']" position="attributes">
+                    <attribute name="string">Beneficiary Information</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Transactions']/field[@name='line_ids']/tree[@string='Statement lines']/field[@name='type']" position="attributes">
+                    <attribute name="string">Partner Type</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Transactions']/field[@name='line_ids']/tree[@string='Statement lines']/field[@name='ref']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Transactions']/field[@name='line_ids']/tree[@string='Statement lines']/field[@name='analytic_account_id']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Transactions']/field[@name='line_ids']/tree[@string='Statement lines']/field[@name='amount']" position="before">
+                    <field name="t_type" required="1" on_change="onchange_trnstyp_amount(t_type, t_amount)"/>
+                </xpath>
+       
+                <xpath expr="//notebook/page[@string='Transactions']/field[@name='line_ids']/tree[@string='Statement lines']/field[@name='amount']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Transactions']/field[@name='line_ids']/tree[@string='Statement lines']/field[@name='t_type']" position="after">
+                    <field name="t_amount" on_change="onchange_trnstyp_amount(t_type, t_amount)"/>
+                </xpath>
+                
+            </field>
+        </record>
+        
+        <!--    Cash Registers    -->
+        <record id="m_view_bank_statement_form2" model="ir.ui.view">
+            <field name="name">m.account.bank.statement.form2</field>
+            <field name="model">account.bank.statement</field>
+            <field name="priority">2</field>
+            <field name="inherit_id" ref="account.view_bank_statement_form2"/>
+            <field name="arch" type="xml">
+                <page string='Cash Transactions' position="after" >
+                    <page string="Receipts">
+                        <field name="receipt_ids"/>
+                    </page>
+                    <page string="Payments">
+                        <field name="payment_ids"/>
+                    </page>
+                </page>
+                <xpath expr="//notebook/page[@string='Cash Transactions']/field[@name='line_ids']/tree[@string='Statement lines']/field[@name='name']" position="attributes">
+                    <attribute name="string">Beneficiary Information</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Cash Transactions']/field[@name='line_ids']/tree[@string='Statement lines']/field[@name='ref']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//notebook/page[@string='Cash Transactions']/field[@name='line_ids']/tree[@string='Statement lines']/field[@name='analytic_account_id']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Cash Transactions']/field[@name='line_ids']/tree[@string='Statement lines']/field[@name='amount']" position="before">
+                    <field name="t_type" required="1"/>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Cash Transactions']/field[@name='line_ids']/tree[@string='Statement lines']/field[@name='amount']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Cash Transactions']/field[@name='line_ids']/tree[@string='Statement lines']/field[@name='t_type']" position="after">
+                    <field name="t_amount" on_change="onchange_trnstyp_amount(t_type, t_amount)"/>
+                </xpath>
+                
+            </field>
+            
+        </record>
+        
+        <!-- Hiding Analytic Distribution in Cash Register Menu        -->
+        
+        <record model="ir.ui.view" id="m_view_move_line_tree_inherit">
+            <field name="name">m.account.move.line.tree.inherit</field>
+            <field name="model">account.move.line</field>
+            <field name="priority">2</field>
+            <field name="inherit_id" ref="account_analytic_plans.view_move_line_tree_inherit"/>
+            <field name="arch" type="xml">
+                <field name="analytics_id" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+            </field>
+        </record>
+        
+        <!-- Hiding Analytic Distribution in Bank Statements Menu        -->
+        
+        <record id="m_view_bank_statement_inherit_form" model="ir.ui.view">
+            <field name="name">m.account.bank.statement.form.inherit</field>
+            <field name="model">account.bank.statement</field>
+            <field name="inherit_id" ref="account_analytic_plans.view_bank_statement_inherit_form"/>
+            <field name="arch" type="xml">
+                <field name="analytics_id" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </field>
+            </field>
+        </record>
+
+<!--        <!-\- Hiding Import Invoices button in Bank Statements Menu        -\->
+        
+        <record id="m_view_bank_statement_form_invoice" model="ir.ui.view">
+            <field name="name">m.account.bank.statement.invoice.form.inherit</field>
+            <field name="model">account.bank.statement</field>
+            <field name="inherit_id" ref="account_voucher.view_bank_statement_form_invoice"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//div[@name='import_buttons']/button[@string='Import Invoices']" position="attributes">
+                    <attribute name="groups">base.group_system</attribute>
+                </xpath>
+            </field>
+        </record>
+        
+        <!-\- Hiding Import Payment Lines button in Bank Statements Menu        -\->
+        
+        <record id="m_view_bank_statement_form" model="ir.ui.view">
+            <field name="name">m.account.bank.statement.form.inherit</field>
+            <field name="model">account.bank.statement</field>
+            <field name="inherit_id" ref="account_payment.view_bank_statement_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='import_buttons']/button[@string='Import Payment Lines']" position="attributes">
+                    <attribute name="groups">base.group_system</attribute>
+                </xpath>
+            </field>
+        </record>-->
+        
+    </data>
+</openerp>
+
+
