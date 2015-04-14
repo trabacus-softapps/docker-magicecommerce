@@ -174,14 +174,14 @@ class stock_picking(osv.osv):
                 invoices[key] = invoice_id
 
             
-            if move.product_id.id in prod:
-                prod[move.product_id.id]['qty'] = move.product_uom_qty + prod[move.product_id.id]['qty']
-                prod[move.product_id.id]['move_id'] = move.id
+            if move.id in prod:
+                prod[move.id]['qty'] = move.product_uom_qty + prod[move.id]['qty']
+                prod[move.id]['product_id'] = move.product_id.id
             else:
-                prod.update({move.product_id.id : {'qty': move.product_uom_qty , 'move_id': move.id}})
-        for p in prod.values():
+                prod.update({move.id : {'qty': move.product_uom_qty , 'product_id_id': move.product_id.id}})
+        for p in prod.keys():
             
-            move1 =  move_obj.browse(cr, uid, p.get('move_id'))
+            move1 =  move_obj.browse(cr, uid, p)
             invoice_line_vals = move_obj._get_invoice_line_vals(cr, uid, move1, partner, inv_type, context=context)
             if invoice_line_vals:
                 invoice_line_vals['invoice_id'] = invoices[key]
@@ -566,7 +566,7 @@ class stock_move(osv.osv):
         partner = partner_obj.browse(cr, uid, partner_id)
         if partner_id:
             part_stock = partner.source_location_id.id
-            print "Partner Stock.....",part_stock
+#             print "Partner Stock.....",part_stock
             pick_type_id = vals.get("picking_type_id")
             # This proces should work only if they create through Sale or Delivery Order not Through Stock moves
             if pick_type_id and not vals.get("picking_id"):
@@ -794,6 +794,29 @@ class stock_warehouse_orderpoint(osv.osv):
 
 
 stock_warehouse_orderpoint()
+
+
+class procurement_order(osv.osv):
+    _inherit = "procurement.order"
+
+    def run(self, cr, uid, ids, autocommit=False, context=None):
+        new_ids = [x.id for x in self.browse(cr, uid, ids, context=context) if x.state not in ('running', 'done', 'cancel')]
+        new_ids.sort()
+        res = super(procurement_order, self).run(cr, uid, new_ids, autocommit=autocommit, context=context)
+
+        #after all the procurements are run, check if some created a draft stock move that needs to be confirmed
+        #(we do that in batch because it fasts the picking assignation and the picking state computation)
+        move_to_confirm_ids = []
+        for procurement in self.browse(cr, uid, new_ids, context=context):
+            if procurement.state == "running" and procurement.rule_id and procurement.rule_id.action == "move":
+                move_to_confirm_ids += [m.id for m in procurement.move_ids if m.state == 'draft']
+        if move_to_confirm_ids:
+            self.pool.get('stock.move').action_confirm(cr, uid, move_to_confirm_ids, context=context)
+        return res
+
+
+procurement_order()
+
 
 # TO be Comment After Going To Live
 # 

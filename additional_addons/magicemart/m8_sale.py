@@ -422,6 +422,8 @@ class sale_order(osv.osv):
         if not context:
             context={}
         pick_ids=[]
+        
+#         context.get('active_ids').sort()
         res=super(sale_order, self).action_ship_create(cr, uid, ids,context)
         pick=self.pool.get('stock.picking')
         

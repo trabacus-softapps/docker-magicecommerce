@@ -13,7 +13,7 @@
     Description text
     """,
 #     'website': 'http://www.softappsit.com',
-#     'qweb': ['static/src/xml/base.xml'],
+    'qweb': ['static/src/xml/base.xml'],
     # data files always loaded at installation
     'data': [
             'security/security_groups.xml',

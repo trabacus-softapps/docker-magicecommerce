@@ -2,7 +2,7 @@
     <!-- Templates modified at the web start, before loading of a database. -->
     
     <!-- Remove the Manage database link, but keep the Powered by OpenERP-->
-    <t t-extend="Login">
+<!--    <t t-extend="Login">
         <t t-jquery="div.oe_login_footer" t-operation="replace">
             <div class="oe_login_footer">
                 <a href="http://www.magicemart.com" target="_blank">Powered by <span>Magicemart</span></a>
@@ -10,10 +10,10 @@
         </t>
     </t>
     
-    <!-- Remove the 
+    <!-\- Remove the 
         My OpenERP.com account,
         About OpenERP,
-        Help link for user other than Admin-->
+        Help link for user other than Admin-\->
     <t t-name="UserMenu">
         <span class="oe_user_menu oe_topbar_item oe_dropdown_toggle oe_dropdown_arrow">
             <img class="oe_topbar_avatar" t-att-data-default-src="_s + '/web/static/src/img/user_menu_avatar.png'"/>
@@ -28,6 +28,12 @@
                 <li><a href="#" data-menu="logout">Log out</a></li>
             </ul>
         </span>
+    </t>-->
+    
+<!--    TO Remove the Top menu bar-->
+    <t t-extend="WebClient.announcement_bar">
+        <t t-jquery="div.openerp" t-operation="replace"/>
     </t>
     
 </templates>
+

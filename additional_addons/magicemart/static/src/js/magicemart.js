@@ -1,4 +1,4 @@
-openerp.magicemart1 = function(instance) {
+openerp.magicemart = function(instance) {
     /* Add a new mapping to the registry for image fields */
     instance.web.list.columns.add('field.image','instance.web.list.FieldBinaryImage');
 
