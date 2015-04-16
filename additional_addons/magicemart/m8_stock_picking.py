@@ -200,7 +200,7 @@ class stock_picking(osv.osv):
                 if mv_ids:
                     raise osv.except_osv(_('Warning!'), _("You are not supposed to group, because some products are returned back.!")) 
                 
-                cr.execute('update account_invoice_line set quantity = %s where id = %s',(p.get('qty'),invln_id))
+                cr.execute("update account_invoice_line set quantity = " +str(prod[p]['qty'])+" where id = "+str(invln_id))
             
         for move in moves:
             move_obj.write(cr, uid, move.id, {'invoice_state': 'invoiced'}, context=context)
