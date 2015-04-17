@@ -219,5 +219,18 @@
             <field name="domain_force">[('id','in',[x.id for x in user.company_ids])]</field>
         </record>
  
+        <!-- Record Rule For Partner -->
+        <record id="base.res_partner_rule" model="ir.rule">
+            <field eval="False" name="global"/>
+        </record>
+ 
+        <record id="im_livechat.session_rule_1" model="ir.rule">
+            <field eval="False" name="global"/>
+        </record>
+ 
+        <record id="im_livechat.message_rule_1" model="ir.rule">
+            <field eval="False" name="global"/>
+        </record>
+ 
     </data>
 </openerp>

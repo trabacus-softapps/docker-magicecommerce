@@ -4,6 +4,33 @@
         
         <!--	
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       			Supplier Invoice Tree View
+  		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^	
+        -->
+        
+        <record model="ir.ui.view" id="m_account_invoice_tree">
+            <field name="name">M Account Invoice</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="sale.account_invoice_tree"/>
+            <field name="arch" type="xml">    
+                <xpath expr="//field[@name='team_id'] " position="replace"/>
+            </field>
+        </record>        
+        
+        
+        <record id="m_invoice_tree" model="ir.ui.view">
+            <field name="name">m.account.invoice.tree</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='number']" position="after">
+                    <field name="supplier_invoice_number"/>
+                </xpath>
+            </field>
+        </record>
+        
+        <!--	
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
        				Invoice Form
   		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^	
         -->
@@ -21,6 +48,10 @@
                     <field name="contact_id" domain="[('parent_id','=',partner_id)]" attrs="{'readonly':[('state', 'not in',('draft'))]}"/>
                 </field>
                 
+                <xpath expr="//field[@name='partner_id']" position="attributes">
+                    <attribute name="options">{'no_create':True}</attribute>
+                </xpath>
+                
                 <field name="origin" position="attributes">
                     <attribute name="invisible">1</attribute>
                 </field>
@@ -34,6 +65,11 @@
                 <xpath expr="//notebook/page[@string='Invoice Lines']/field[@name='invoice_line']/tree[@string='Invoice Lines']/field[@name='product_id']" position="after">
                     <field name="reference"/>
                 </xpath>
+                
+                <xpath expr="//notebook/page[@string='Invoice Lines']/field[@name='invoice_line']/tree[@string='Invoice Lines']/field[@name='product_id']" position="attributes">
+                    <attribute name="options">{'no_create':True}</attribute>
+                </xpath>
+                
                 
                 <xpath expr="//notebook/page[@string='Other Info']/group/group/field[@name='company_id']" position="replace">
                     <field name="fiscal_position" widget="selection"/>
@@ -126,6 +162,10 @@
                 <xpath expr="//field[@name='product_id']" position="after">
                     <button name="update_saleprice_button" type="object" String="Update Slaeprice"/>
                 </xpath>
+                <xpath expr="//field[@name='product_id']" position="attributes">
+                    <attribute name="options">{'no_create':True}</attribute>
+                </xpath>
+                
             </field>
         </record>
         
@@ -163,6 +203,7 @@
                 </filter>
                 <xpath expr="field[@name='partner_id']" position="attributes">
                     <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
+                    <attribute name="options">{'no_create':True}</attribute>
                 </xpath>
                 
                 <xpath expr="field[@name='user_id']" position="attributes">
@@ -182,6 +223,17 @@
             <field name="model">account.invoice</field>
             <field name="inherit_id" ref="account.invoice_supplier_form"/>
             <field name="arch" type="xml">
+                
+                <xpath expr="//field[@name='partner_id']" position="attributes">
+                    <attribute name="options">{'no_create':True}</attribute>
+                </xpath>
+                
+                
+                <xpath expr="//button[@string='Validate']" position="after">
+                    <button name="%(action_customer_invoice)d" type="action" String="Print Invoice Format 1" class="oe_highlight" groups="base.group_user,magicemart.magicemart_portal_manager"/>
+                    <button name="%(action_customer_invoice1)d" type="action" String="Print Invoice Format 2" class="oe_highlight" groups="base.group_user,magicemart.magicemart_portal_manager"/>
+                </xpath>
+                
                 <xpath  expr="//notebook/page[@string='Invoice']/div/field[@name='tax_line']" position="attributes">
                     <attribute name="invisible">1</attribute>
                 </xpath> 
@@ -210,6 +262,11 @@
                         </form>
                     </page>
                 </xpath>
+                
+                <xpath expr="//notebook/page[@string='Invoice']/field[@name='invoice_line']/tree[@string='Invoice lines']/field[@name='product_id']" position="attributes">
+                    <attribute name="options">{'no_create':True}</attribute>
+                </xpath>
+                
             </field>
         </record>
         

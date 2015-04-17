@@ -24,7 +24,9 @@ class res_partner(osv.osv):
             'dest_location_id'      :   fields.many2one("stock.location",'Destination Location') ,              
             'product_ids'           :   fields.many2many('product.product', 'res_partner_prod_rel', 'partner_id', 'product_id', 'Products'),
             
-            'address'               :   fields.function(part_address, string ="Address", store=False, type = "char"),                
+            'address'               :   fields.function(part_address, string ="Address", store=False, type = "char"),
+            
+            'code'                  :   fields.char("Code", size=50),                
            }
     
     
@@ -47,7 +49,9 @@ class res_partner(osv.osv):
                     node.set('readonly','1')
                     setup_modifiers(node,res['fields']['property_product_pricelist'])
                     res['arch'] = etree.tostring(doc)
+                    
         return res
+    
     
     # On creation of Partner creating 2 locations
     def create(self, cr, uid, vals, context=None):
@@ -179,7 +183,14 @@ class res_partner(osv.osv):
                 name = name.replace('\n\n','\n')
             if context.get('show_email') and record.email:
                 name = "%s <%s>" % (name, record.email)
+#             res.append((record.id, name))
+            if record.code:
+                name = '[' + str(record.code) + ']' + str(record.name )
+            else:
+                name = record.name or ''
+                
             res.append((record.id, name))
+            
         return res
     
     

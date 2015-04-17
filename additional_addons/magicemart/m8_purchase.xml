@@ -41,6 +41,11 @@
                     <field name="in_name" attrs = "{'readonly':[('state', 'not in',('draft','sent'))]}"/>
                 </xpath>
                 -->
+                
+                <xpath expr="//field[@name='partner_id']" position="attributes">
+                    <attribute name="options">{'no_create':True}</attribute>
+                </xpath> 
+                
               <xpath expr="//form[@string='Purchase Order']/sheet/group/group/field[@name='partner_id']" position="after">
                     <field name='hide_field' invisible='1'/>
                  </xpath>
@@ -157,9 +162,9 @@
                                 <xpath expr="//notebook/page[@string='RFQ &amp; Bid']" position="attributes">
                     <attribute name="invisible">1</attribute>
                 </xpath>
-                
-                
                 -->
+                
+                
                 
                 <xpath expr="//form/header/field[@name='state']" position="replace">
                     <field name="state" widget="statusbar" statusbar_visible="draft,sent,approved,done" statusbar_colors='{"except_picking":"red","except_invoice":"red","confirmed":"blue"}' readonly="1"/>                    
@@ -216,6 +221,26 @@
             <field name="search_view_id" ref="purchase.view_purchase_order_filter"/>
             <field name="context">{'search_default_current_date':1}</field>
         </record>
+        
+        
+        <!--	
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       				Purchase Order Line Form View
+  		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        -->         
+        
+        <record id="m_purchase_order_line_form" model="ir.ui.view">
+            <field name="name">m.purchase.order.line.form</field>
+            <field name="model">purchase.order.line</field>
+            <field name="inherit_id" ref="purchase.purchase_order_line_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet/group/group/field[@name='product_id']" position="attributes">
+                    <attribute name="options">{'no_create':True}</attribute>
+                </xpath>
+                
+            </field>
+        </record>
+        
         
 <!--   To hide std Report in print dropdown    -->
         

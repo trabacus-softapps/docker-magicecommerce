@@ -112,7 +112,7 @@ class print_reportwiz(osv.osv_memory):
         return {
         'type': 'ir.actions.report.xml',
         'report_name': report_name,
-        'name' : invoice.number and 'sales invoice - ' + invoice.number  or 'sales invoice',
+        'name' : invoice.number and 'Invoice / Refund - ' + invoice.number  or 'Invoice / Refund',
         'datas': data,
             } 
         

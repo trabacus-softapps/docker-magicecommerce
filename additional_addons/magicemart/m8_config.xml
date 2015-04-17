@@ -84,7 +84,12 @@
                     <field name="discount" string="Discount(%%)" 
                         groups="base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager,magicemart.magicemart_portal_user,magicemart.magicemart_portal_manager"/>
                     <field name="discount_amt"
-                        groups="base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager,magicemart.magicemart_portal_user,magicemart.magicemart_portal_manager"/>
+                        groups="base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager,magicemart.magicemart_portal_user,magicemart.magicemart_portal_manager"
+                        invisible="1"/>
+                        
+                        
+                    <field name="standard_price" invisible="1" />
+                    
                 </xpath>
                 
                 <xpath expr="//field[@name='lst_price']" position="attributes">
@@ -145,7 +150,8 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='virtual_available']" position="after">
                     <field name="discount" string="Discount(%%)" />
-                    <field name="discount_amt"/>
+                    <field name="discount_amt" invisible="1"/>
+                    <field name="standard_price" invisible="1"/>
                     <field name="untax_amt"/>
                     <field name="tax_name"/>
                 </xpath>

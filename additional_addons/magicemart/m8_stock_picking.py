@@ -186,9 +186,7 @@ class stock_picking(osv.osv):
             if invoice_line_vals:
                 invoice_line_vals['invoice_id'] = invoices[key]
                 invoice_line_vals['origin'] = origin
-                print "Invoice Line vals-----------Before",invoice_line_vals 
                 invln_id = move_obj._create_invoice_line_from_vals(cr, uid, move1, invoice_line_vals, context=context)
-                print "Invoice Line Vals-----------After",invoice_line_vals
         wiz_id = context.get('wiz_id',False)
 #             if wiz_id:
 #                 wiz_id = wiz_id[0]
@@ -200,11 +198,10 @@ class stock_picking(osv.osv):
                 if mv_ids:
                     raise osv.except_osv(_('Warning!'), _("You are not supposed to group, because some products are returned back.!")) 
                 
-                cr.execute("update account_invoice_line set quantity = " +str(prod[p]['qty'])+" where id = "+str(invln_id))
+                cr.execute("update account_invoice_line set quantity ="+str(prod[p]['qty'])+" where id = "+ str(invln_id))
             
         for move in moves:
             move_obj.write(cr, uid, move.id, {'invoice_state': 'invoiced'}, context=context)
-        print "invoices.values()..........._invoice_create_line",invoices.values()
         invoice_obj.button_compute(cr, uid, invoices.values(), context=context, set_total=(inv_type in ('in_invoice', 'in_refund')))
         return invoices.values()
      

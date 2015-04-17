@@ -327,6 +327,10 @@
             <field name="inherit_id" ref="stock.view_picking_form"/>
             <field name="arch" type="xml">
                 
+                <xpath expr="//field[@name='partner_id']" position="attributes">
+                    <attribute name="options">{'no_create':True}</attribute>
+                </xpath>
+                
                 <!--             TO Show 2 button Deliver and Transfer     -->
                 <button string="Transfer" position="replace">
                     <button name="do_enter_transfer_details"  string="Deliver" groups="stock.group_stock_user" type="object" class="oe_highlight"
@@ -460,6 +464,10 @@
                 <xpath expr="//button[@name='action_cancel']" position="attributes">
                     <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
                 </xpath>
+                
+                <xpath expr="//field[@name='product_id']" position="attributes">
+                    <attribute name="options">{'no_create':True}</attribute>
+                </xpath> 
                 
             </field>
         </record>

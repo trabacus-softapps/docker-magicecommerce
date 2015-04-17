@@ -177,7 +177,6 @@ class purchase_order(osv.osv):
         return res
     
     
-# TO BE UNCOMMENT
     def onchange_company_id(self, cr, uid, ids, company_id, context=None):
         stockware_obj = self.pool.get("stock.warehouse")
         picking_type_obj = self.pool.get("stock.picking.type")
@@ -189,6 +188,20 @@ class purchase_order(osv.osv):
                 res['picking_type_id'] =spt_id[0]  
         return {'value': res}
       
+    # inherit updating Payment Term in Notes field  
+    def onchange_partner_id(self, cr, uid, ids, partner_id, context=None):
+        partner_obj = self.pool.get('res.partner')
+        res={}
+        res = super(purchase_order,self).onchange_partner_id(cr, uid, ids, partner_id, context)
+        if res:
+            part = partner_obj.browse(cr, uid, [partner_id])
+            if part:
+                res['value'].update({
+                                     'notes' : part.property_supplier_payment_term.name or ''
+                                     })
+        return res
+        
+    
     
     def print_quotation(self, cr, uid, ids, context=None):
         return True

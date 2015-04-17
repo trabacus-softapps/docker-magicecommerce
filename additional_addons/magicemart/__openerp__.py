@@ -36,7 +36,7 @@
 #             'report/standard/m_report.xml',  
             'security/ir.model.access.csv',
 
-            'views/m8_saleweb.xml',
+#             'views/m8_saleweb.xml',
             'views/treeview_image.xml',
     ],
     

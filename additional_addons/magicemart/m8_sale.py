@@ -72,15 +72,9 @@ class sale_order(osv.osv):
                     setup_modifiers(node, res['fields']['warehouse_id'])
                     res['arch'] = etree.tostring(doc)
                     
-#                 for node in doc1.xpath("//field[@name='price_unit']"):
-#                     print 'cameeee'
-#                     node.set('readonly','1')
-#                     setup_modifiers(node,res['fields']['order_line']['views']['form']['arch']['price_unit'])
-#                     res['fields']['order_line']['views']['form']['arch'] = etree.tostring(doc1)
-#                 print res['fields']
-#         if view_type == 'form' :print 'aaaaa', res['fields']['order_line']['views']['form']['fields']['price_unit']    
         return res
     
+   
     def _get_default_warehouse(self, cr, uid, context=None):
         if not context:
             context = {}

@@ -22,6 +22,45 @@ from openerp.osv import osv, fields, expression
 class product_template(osv.osv):
     _inherit = "product.template"
     
+    
+    def fields_view_get(self, cr, uid, view_id=None, view_type=False, context=None, toolbar=False, submenu=False):
+        if context is None:context = {}
+          
+        res = super(product_template, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=False)
+        cr.execute("""select uid from res_groups_users_rel where gid=
+                      (select id  from res_groups where category_id in 
+                      ( select id from ir_module_category where name = 'Customer Portal' ) and name = 'Manager') and uid = """+str(uid))
+        portal_user = cr.fetchone() 
+        portal_group = portal_user and portal_user[0]
+        doc = etree.XML(res['arch'])
+        
+        if uid == portal_group:
+                for node in doc.xpath("//form[@string='Product']"):
+                        node.set('create', _('false'))
+                        node.set('edit', _('false'))
+                for node in doc.xpath("//tree[@string='Products']"):
+                    node.set('create', _('false'))                
+                for node in doc.xpath("//kanban"):
+                        node.set('create', _('false'))        
+                res['arch'] = etree.tostring(doc)  
+                
+        if view_type == 'form':
+            if context.get('supplier'):
+                nodes = doc.xpath("//field[@name='discount_amt']")
+                for node in nodes:
+                    node.set('invisible', '1')
+                    setup_modifiers(node, res['fields']['discount_amt'])
+            res['arch'] = etree.tostring(doc) 
+            
+            if context.get('customer'):
+                nodes = doc.xpath("//field[@name='standard_price']")
+                for node in nodes:
+                    node.set('invisible', '1')
+                    setup_modifiers(node, res['fields']['standard_price'])
+            res['arch'] = etree.tostring(doc)       
+                  
+        return res
+    
     # TO show Untax amount , Tax Name in Product Tree view
     def _amount_calculation(self, cr, uid, ids, field_name, args, context=None):
         res = {}
@@ -243,7 +282,7 @@ class product_product(osv.osv):
             res.append(('id', 'in', ids))
         return res
 
-    # Overriden to get the products qty based on location id there means else getting all warehouse qty
+    # Overriden to get the products qty based on location id if there means else getting all warehouse qty
     def _product_available(self, cr, uid, ids, field_names=None, arg=False, context=None):
         if not context:
             context = {}
@@ -427,6 +466,21 @@ class product_product(osv.osv):
                 for node in doc.xpath("//kanban"):
                         node.set('create', _('false'))        
                 res['arch'] = etree.tostring(doc)  
+                
+        if view_type == 'tree':
+            if context.get('supplier'):
+                nodes = doc.xpath("//field[@name='standard_price']")
+                for node in nodes:
+                    node.set('invisible', '0')
+                    setup_modifiers(node, res['fields']['standard_price'])
+            res['arch'] = etree.tostring(doc) 
+            
+            if context.get('customer'):
+                nodes = doc.xpath("//field[@name='discount_amt']")
+                for node in nodes:
+                    node.set('invisible', '0')
+                    setup_modifiers(node, res['fields']['discount_amt'])
+            res['arch'] = etree.tostring(doc)       
                   
         return res
     

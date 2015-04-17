@@ -9,7 +9,8 @@
             <field name="inherit_id" ref = "base.view_partner_tree"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='display_name']" position="before">
-                    <field name="seq_num" string = 'Code'/>
+                    <field name="seq_num" string = 'Location Ref'/>
+                    <field name='code' required="True"/>
                 </xpath>
                 
                 <xpath expr="//field[@name='display_name']" position="after">
@@ -17,6 +18,8 @@
                     <field name="vat"/>
                     <field name='property_payment_term'/>
                 </xpath>
+                
+
                 
             </field>
         </record>
@@ -36,6 +39,7 @@
                 
                 <xpath expr="//group/group/field[@name='email']" position="after">
                     <field name="vat"/>
+                    <field name="code" required="True"/>
                 </xpath> 
                 <xpath expr="//group/group/div" position="attributes">
                     <attribute name="class">oe_left</attribute>
@@ -51,7 +55,7 @@
                 </xpath>
                 <xpath expr="//notebook/page[@string='Internal Notes']" position="after">
                     <page string="Products">
-                        <field name="product_ids"/>
+                        <field name="product_ids" context= "{'customer':context.get('customer',False),'supplier':context.get('supplier',False)}"/>
                     </page>
                 </xpath>
                 <xpath expr="//notebook/page[@string='Internal Notes']" position="attributes">
