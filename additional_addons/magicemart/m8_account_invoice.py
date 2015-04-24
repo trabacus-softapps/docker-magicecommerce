@@ -886,6 +886,9 @@ class account_bank_statement_line(osv.osv):
               't_type'    :   fields.selection([('receipt', 'Receipt'),('payment','Payment')], "Transaction Type"),
             't_amount'  :   fields.float("Amount", digits=(16,2)),
               }
+    _defaults = {
+                 'date': False,
+                 }
     
         
     def onchange_trnstyp_amount(self, cr, uid, ids, t_type, t_amount):

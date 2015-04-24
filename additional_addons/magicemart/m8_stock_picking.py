@@ -133,6 +133,74 @@ class stock_picking(osv.osv):
 #         return super(stock_picking, self).write(cr, uid, ids, vals, context=context)
 #          
     
+    
+        
+    """ Overriden, While Grouping more than 1 DO if product are same means sum up the quantity and create Invoice Lines""" 
+    def _invoice_create_line(self, cr, uid, moves, journal_id, inv_type='out_invoice', context=None):
+        invoice_obj = self.pool.get('account.invoice')
+        invoiceln_obj = self.pool.get('account.invoice.line')
+        move_obj = self.pool.get('stock.move')
+        stinvship_obj = self.pool.get("stock.invoice.onshipping")
+        
+        invoices = {}
+        prod = {}
+#         prod1 = {}
+        
+        for move in moves:
+            company = move.company_id
+            origin = move.picking_id.name
+            partner, user_id, currency_id = move_obj._get_master_data(cr, uid, move, company, context=context)
+
+            key = (partner, currency_id, company.id, False)
+
+            if key not in invoices:
+                # Get account and payment terms
+                invoice_vals = self._get_invoice_vals(cr, uid, key, inv_type, journal_id, move, context=context)
+                invoice_id = self._create_invoice_from_picking(cr, uid, move.picking_id, invoice_vals, context=context)
+                invoices[key] = invoice_id
+
+            
+            # IF same Product comes just adding qty
+            if move.product_id.id in prod:
+                prod[move.product_id.id]['qty'] = move.product_uom_qty + prod[move.product_id.id]['qty']
+            
+            # diff product_id means updating to dictionary
+            else:
+                prod.update({move.product_id.id : {'move_id': move.id,'qty': move.product_uom_qty}})
+        
+                
+        for p in sorted(prod.values()):
+            move1 =  move_obj.browse(cr, uid, p.get('move_id'))
+            invoice_line_vals = move_obj._get_invoice_line_vals(cr, uid, move1, partner, inv_type, context=context)
+            
+            if invoice_line_vals:
+                print "invoice_line_vals------",invoice_line_vals
+                invoice_line_vals['invoice_id'] = invoices[key]
+                invoice_line_vals['origin'] = origin
+#                 invoice_line_vals['discount'] = 0.00
+                invln_id = move_obj._create_invoice_line_from_vals(cr, uid, move1, invoice_line_vals, context=context)
+                cr.execute('update account_invoice_line set quantity = %s where id = %s',(p.get('qty'),invln_id))
+                
+                wiz_id = context.get('wiz_id',False)
+                wiz = stinvship_obj.browse(cr, uid, wiz_id)
+                 
+                if wiz.group:
+        #                 if move.origin_returned_move_id:
+                    for mv in moves:
+                        mv_ids = move_obj.search(cr, uid, [("origin_returned_move_id", '=' ,mv.id),('location_id', 'child_of', move.location_dest_id.id)],context=context)
+                        if mv_ids:
+                            raise osv.except_osv(_('Warning!'), _("You are not supposed to group, because some products are returned back.!")) 
+                         
+                        cr.execute('update account_invoice_line set quantity = %s where id = %s',(p.get('qty'),invln_id))
+#             
+        for move in moves:
+            move_obj.write(cr, uid, move.id, {'invoice_state': 'invoiced'}, context=context)
+        print "invoices.values()..........._invoice_create_line",invoices.values()
+        invoice_obj.button_compute(cr, uid, invoices.values(), context=context, set_total=(inv_type in ('in_invoice', 'in_refund')))
+        return invoices.values()
+     
+  
+    
     # Check Availability
     def action_assign(self, cr, uid, ids, *args):
         context = {}
@@ -149,63 +217,7 @@ class stock_picking(osv.osv):
                 if op.product_qty > quantity_available and pick.picking_type_id.code in ('outgoing'):
                    raise osv.except_osv(_('Warning'), _(str(op.product_id.name_template) + ' Quantity is greater than the Available Stock!!!'))
         return super(stock_picking, self).action_assign(cr, uid, ids, *args)
-     
-    
-    """ Overriden, While Grouping more than 1 DO if product are same means sum up the quantity and create Invoice Lines""" 
-    def _invoice_create_line(self, cr, uid, moves, journal_id, inv_type='out_invoice', context=None):
-        invoice_obj = self.pool.get('account.invoice')
-        invoiceln_obj = self.pool.get('account.invoice.line')
-        move_obj = self.pool.get('stock.move')
-        stinvship_obj = self.pool.get("stock.invoice.onshipping")
-        
-        invoices = {}
-        prod = {}
-        for move in moves:
-            company = move.company_id
-            origin = move.picking_id.name
-            partner, user_id, currency_id = move_obj._get_master_data(cr, uid, move, company, context=context)
 
-            key = (partner, currency_id, company.id, user_id)
-
-            if key not in invoices:
-                # Get account and payment terms
-                invoice_vals = self._get_invoice_vals(cr, uid, key, inv_type, journal_id, move, context=context)
-                invoice_id = self._create_invoice_from_picking(cr, uid, move.picking_id, invoice_vals, context=context)
-                invoices[key] = invoice_id
-
-            
-            if move.id in prod:
-                prod[move.id]['qty'] = move.product_uom_qty + prod[move.id]['qty']
-                prod[move.id]['product_id'] = move.product_id.id
-            else:
-                prod.update({move.id : {'qty': move.product_uom_qty , 'product_id_id': move.product_id.id}})
-        for p in prod.keys():
-            
-            move1 =  move_obj.browse(cr, uid, p)
-            invoice_line_vals = move_obj._get_invoice_line_vals(cr, uid, move1, partner, inv_type, context=context)
-            if invoice_line_vals:
-                invoice_line_vals['invoice_id'] = invoices[key]
-                invoice_line_vals['origin'] = origin
-                invln_id = move_obj._create_invoice_line_from_vals(cr, uid, move1, invoice_line_vals, context=context)
-        wiz_id = context.get('wiz_id',False)
-#             if wiz_id:
-#                 wiz_id = wiz_id[0]
-        wiz = stinvship_obj.browse(cr, uid, wiz_id)
-        if wiz.group:
-#                 if move.origin_returned_move_id:
-            for mv in moves:
-                mv_ids = move_obj.search(cr, uid, [("origin_returned_move_id", '=' ,mv.id),('location_id', 'child_of', move.location_dest_id.id)],context=context)
-                if mv_ids:
-                    raise osv.except_osv(_('Warning!'), _("You are not supposed to group, because some products are returned back.!")) 
-                
-                cr.execute("update account_invoice_line set quantity ="+str(prod[p]['qty'])+" where id = "+ str(invln_id))
-            
-        for move in moves:
-            move_obj.write(cr, uid, move.id, {'invoice_state': 'invoiced'}, context=context)
-        invoice_obj.button_compute(cr, uid, invoices.values(), context=context, set_total=(inv_type in ('in_invoice', 'in_refund')))
-        return invoices.values()
-     
-  
     
     """ TO BE UNCOMMENT"""
     
@@ -701,12 +713,12 @@ class stock_move(osv.osv):
                 sale = pick.sale_id
                 if sale:
                     for sol in  sale.order_line:
-                        if sol.id == move.procurement_id.sale_line_id.id and (sol.reference or sol.discount):
-                            inv_lines.update({
-                                                 'reference'    :   sol.reference or '',
-                                                 # Commented for Pricelist Concept
-                                                'discount'     :   0.00,
-                                                 })
+#                         if sol.id == move.procurement_id.sale_line_id.id and (sol.reference or sol.discount):
+                        inv_lines.update({
+                                             'reference'    :   sol.reference or '',
+                                             # Commented for Pricelist Concept
+                                            'discount'     :   0.00,
+                                             })
                             
                  
         if update_line:                
