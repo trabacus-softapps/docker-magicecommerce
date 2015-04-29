@@ -30,6 +30,25 @@
         </span>
     </t>-->
     
+    <t t-name="UserMenu">
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <img class="oe_topbar_avatar" t-att-data-default-src="_s + '/web/static/src/img/user_menu_avatar.png'"/>
+                <span class="oe_topbar_name"/> <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a href="#" data-menu="settings">Preferences</a></li>
+                <t t-if="widget.session.uid === 1">
+                    <li><a href="#" data-menu="account">My Odoo.com account</a></li>
+                    <li><a href="#" data-menu="about">About Odoo</a></li>
+                    <li><a href="#" data-menu="help">Help</a></li>
+                </t>
+                <li><a href="#" data-menu="logout">Log out</a></li>
+            </ul>
+        </li>
+    </t>
+
+    
 <!--    TO Remove the Top menu bar-->
     <t t-extend="WebClient.announcement_bar">
         <t t-jquery="div.openerp" t-operation="replace"/>
