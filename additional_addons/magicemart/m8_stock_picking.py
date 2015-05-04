@@ -162,17 +162,23 @@ class stock_picking(osv.osv):
             
             # IF same Product comes just adding qty
             if move.product_id.id in prod:
-                prod[move.product_id.id]['qty'] = move.product_uom_qty + prod[move.product_id.id]['qty']
-            
+                
+                returnmv_ids = move_obj.search_read(cr, uid, [("origin_returned_move_id", '=' ,move.id),('location_id', 'child_of', move.location_dest_id.id)],['product_uom_qty'] ,context=context)
+                rtprod_qty = sum(returnmv_ids['product_uom_qty'] for returnmv_ids in returnmv_ids)#and returnmv_ids[0] #and returnmv_ids[0]['product_uom_qty'] or 0.00
+                prod[move.product_id.id]['qty'] = (move.product_uom_qty - rtprod_qty) + prod[move.product_id.id]['qty']
+                
             # diff product_id means updating to dictionary
             else:
-                prod.update({move.product_id.id : {'move_id': move.id,'qty': move.product_uom_qty}})
+                returnmv_ids = move_obj.search_read(cr, uid, [("origin_returned_move_id", '=' ,move.id),('location_id', 'child_of', move.location_dest_id.id)],['product_uom_qty'] ,context=context)
+                rtprod_qty = sum(returnmv_ids['product_uom_qty'] for returnmv_ids in returnmv_ids)
+                prod.update({move.product_id.id : {'move_id': move.id,'qty': (move.product_uom_qty - rtprod_qty)}})
         
                 
         for p in sorted(prod.values()):
             move1 =  move_obj.browse(cr, uid, p.get('move_id'))
-            invoice_line_vals = move_obj._get_invoice_line_vals(cr, uid, move1, partner, inv_type, context=context)
             
+            invoice_line_vals = move_obj._get_invoice_line_vals(cr, uid, move1, partner, inv_type, context=context)
+        
             if invoice_line_vals:
                 print "invoice_line_vals------",invoice_line_vals
                 invoice_line_vals['invoice_id'] = invoices[key]
@@ -181,18 +187,6 @@ class stock_picking(osv.osv):
                 invln_id = move_obj._create_invoice_line_from_vals(cr, uid, move1, invoice_line_vals, context=context)
                 cr.execute('update account_invoice_line set quantity = %s where id = %s',(p.get('qty'),invln_id))
                 
-                wiz_id = context.get('wiz_id',False)
-                wiz = stinvship_obj.browse(cr, uid, wiz_id)
-                 
-                if wiz.group:
-        #                 if move.origin_returned_move_id:
-                    for mv in moves:
-                        mv_ids = move_obj.search(cr, uid, [("origin_returned_move_id", '=' ,mv.id),('location_id', 'child_of', move.location_dest_id.id)],context=context)
-                        if mv_ids:
-                            raise osv.except_osv(_('Warning!'), _("You are not supposed to group, because some products are returned back.!")) 
-                         
-                        cr.execute('update account_invoice_line set quantity = %s where id = %s',(p.get('qty'),invln_id))
-#             
         for move in moves:
             move_obj.write(cr, uid, move.id, {'invoice_state': 'invoiced'}, context=context)
         print "invoices.values()..........._invoice_create_line",invoices.values()
