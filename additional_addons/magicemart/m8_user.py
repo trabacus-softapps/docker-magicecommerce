@@ -131,6 +131,12 @@ class res_users(osv.osv):
                                    
                                    })
             
+        if not values.get("user_roles"):
+            values.update({
+                           'sel_groups_'+str(hrEmpid) : True
+                           })
+            
+            
         
         return super(res_users, self).create(cr, uid, values, context=context) 
 

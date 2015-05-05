@@ -112,7 +112,7 @@
             <field name="inherit_id" ref="product.view_partner_property_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='property_product_pricelist']" position="attributes">
-                    <attribute name="groups">base.group_system</attribute>
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
                 </xpath>
             </field>
         </record>

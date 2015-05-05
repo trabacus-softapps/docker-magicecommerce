@@ -354,6 +354,7 @@
                 <xpath expr="//field[@name='origin']" position="before">
                     <field name="cust_po_ref"  attrs="{'required':[('picking_type_code','in','outgoing')],'invisible':[('picking_type_code','in',('internal','incoming'))]}"/>
                     <field name="vehicle"   attrs="{'readonly':[('state','in','done')],'required':[('picking_type_code','in','outgoing')],'invisible':[('picking_type_code','in',('internal','incoming'))]}"/>
+                    <field name='supplier_inv_ref' attrs="{'readonly':[('state','in','done')],'required':[('picking_type_code','in','incoming')],'invisible':[('picking_type_code','in',('internal','outgoing'))]}"/>
                 </xpath>
                 
                 <xpath expr="//button[@name='action_assign']" position="after">

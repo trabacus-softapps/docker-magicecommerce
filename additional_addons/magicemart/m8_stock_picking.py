@@ -100,6 +100,8 @@ class stock_picking(osv.osv):
                 'cust_po_ref'      : fields.char("Customer PO Reference"), 
                 'sale_id'          : fields.many2one('sale.order','Sale Order'),
                 
+                'supplier_inv_ref' : fields.char("Supplier Invoice Reference", size=50),
+                
 #                 # Overriden for old records to update old numbers 
 #                 'name': fields.char('Reference', select=True, states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}, copy=False),
                 
@@ -134,7 +136,7 @@ class stock_picking(osv.osv):
 #          
     
     
-        
+       
     """ Overriden, While Grouping more than 1 DO if product are same means sum up the quantity and create Invoice Lines""" 
     def _invoice_create_line(self, cr, uid, moves, journal_id, inv_type='out_invoice', context=None):
         invoice_obj = self.pool.get('account.invoice')
@@ -192,7 +194,6 @@ class stock_picking(osv.osv):
         print "invoices.values()..........._invoice_create_line",invoices.values()
         invoice_obj.button_compute(cr, uid, invoices.values(), context=context, set_total=(inv_type in ('in_invoice', 'in_refund')))
         return invoices.values()
-     
   
     
     # Check Availability
@@ -239,12 +240,15 @@ class stock_picking(osv.osv):
 #                                      'contact_id'  : pick.contact_id and pick.contact_id.id or False,
                                      'company_id'  : pick.company_id.id,
                                      })
-  
               
             invoice_vals.update({
                 'dc_ref'         : do_name and do_name[0:-2] or None,
                   
                                 })
+            if pick.picking_type_id.code == "incoming":
+                invoice_vals.update({
+                                     'supplier_invoice_number' : pick.supplier_inv_ref or '',
+                                     })
 #         onchange_company = accinv_obj.onchange_company_id(cr, uid, pick.id, pick.company_id.id, partner, inv_type, [0,0,False],False)
         return invoice_vals
          

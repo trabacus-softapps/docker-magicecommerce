@@ -536,12 +536,13 @@ class account_invoice_line(osv.osv):
             cost =0.00
             avg_cost = 0.00
             pol_amt=[]
-            cr.execute("""select  sum(pl.price_subtotal1/pl.product_qty) 
-                        from purchase_order_line pl 
-                        inner join purchase_order po on po.id = pl.order_id 
-                        where product_id="""+str(case.product_id.id)+"""  and po.state in ('approved','done')
-                        and pl.price_unit >0 
-                        and  po.date_order <='"""+str(case.invoice_id.date_invoice)+"""' group by po.date_order,po.id order by po.date_order desc limit 3""")
+            if case.invoice_id.date_invoice:
+                cr.execute("""select  sum(pl.price_subtotal1/pl.product_qty) 
+                            from purchase_order_line pl 
+                            inner join purchase_order po on po.id = pl.order_id 
+                            where product_id="""+str(case.product_id.id)+"""  and po.state in ('approved','done')
+                            and pl.price_unit >0 
+                            and  po.date_order <='"""+str(case.invoice_id.date_invoice)+"""' group by po.date_order,po.id order by po.date_order desc limit 3""")
                          
             pol_txamt = [x[0] for x in cr.fetchall()]
             if not pol_txamt or 0 in pol_txamt:

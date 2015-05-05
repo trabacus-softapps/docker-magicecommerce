@@ -55,7 +55,7 @@
             </field>
         </record>     
 <!-- Invisible Warning Tab in Product master for Customers TO BE UNCOMMENT      -->
-<!--        <record id="m_product_warning_form_view" model="ir.ui.view">
+        <record id="m_product_warning_form_view" model="ir.ui.view">
             <field name="name">m.product.warning.form.inherit</field>
             <field name="model">product.product</field>
             <field name="inherit_id" ref="warning.product_warning_form_view"/>
@@ -64,7 +64,20 @@
                     <attribute name="groups">base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
                 </xpath>
             </field>
-        </record>-->
+        </record>
+    	
+        <record id="m_view_partner_warning_form" model="ir.ui.view">
+            <field name="name">m.res.partner.warning.form.inherit</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="inherit_id" ref="warning.view_partner_warning_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@string='Warnings']" position="attributes">
+                    <attribute name="groups">base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+            </field>
+        </record>
+                
     	
         <!--  Product master Tree-->
         
@@ -422,4 +435,24 @@
             </field>
         </record>
     </data>
-</openerp> 
+    
+    
+    <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						For Creating Inbound and Outbound category 
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->    
+    
+    <data noupdate="1">
+        <!--
+    Phonecall Categories
+    -->
+        <record model="crm.phonecall.category" id="crm.categ_phone1">
+            <field name="name">Inbound</field>
+            <!--            <field name="team_id" ref="sales_team.team_sales_department"/>-->
+        </record>
+        <record model="crm.phonecall.category" id="crm.categ_phone2">
+            <field name="name">Outbound</field>
+            <!--            <field name="team_id" ref="sales_team.team_sales_department"/>-->
+        </record>
+        
+    </data>
+</openerp>

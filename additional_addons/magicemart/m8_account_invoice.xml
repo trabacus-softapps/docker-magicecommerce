@@ -414,7 +414,7 @@
                 </xpath>
                 
                 <xpath expr="//notebook/page[@string='Transactions']/field[@name='line_ids']/tree[@string='Statement lines']/field[@name='partner_id']"  position="after">
-                    <field name="t_amount" on_change="onchange_trnstyp_amount(t_type, t_amount)" attrs="{'readonly' : [('journal_entry_id', '!=', False)] }"/>
+                    <field name="t_amount" on_change="onchange_trnstyp_amount(t_type, t_amount)"/>
                 </xpath>
                 
 

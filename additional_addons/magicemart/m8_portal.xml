@@ -276,6 +276,88 @@
             groups="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
         
 
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						Hiding Make Invoice in More button (Sale Order) for Customer Portal Users and Managers
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+
+        
+        <record id="sale.action_sale_order_make_invoice" model="ir.actions.act_window">
+            <field name="name">Make Invoices</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sale.make.invoice</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="sale.view_sale_order_make_invoice"/>
+            <field name="target">new</field>
+            <field name="multi">True</field>
+            <field name="groups_id" eval="[(4,ref('magicemart.magicemart_group_user')),(4,ref('magicemart.magicemart_group_manager')),(4,ref('base.group_system'))]"/>
+        </record>
+        
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						Hiding Create Draft Invoices in More button (Invoice) for Customer Portal Users and Managers
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        
+        <act_window name="Create Draft Invoices"
+            res_model="stock.invoice.onshipping"
+            src_model="stock.picking"
+            key2="client_action_multi"
+            multi="True"
+            view_mode="form"
+            view_type="form"
+            target="new"
+            id="stock_account.action_stock_invoice_onshipping"
+            groups = "base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						Hiding Confirm Draft Invoices in More button (Invoice) for Customer Portal Users and Managers
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        
+        <act_window id="account.action_account_invoice_confirm"
+            multi="True"
+            key2="client_action_multi" name="Confirm Draft Invoices"
+            res_model="account.invoice.confirm" src_model="account.invoice"
+            view_mode="form" target="new" view_type="form" 
+            groups = "base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						Hiding Add to Wave in More button (Warehouse) for Customer Portal Users and Managers
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        
+        <act_window id="stock_picking_wave.action_picking_to_wave"
+            multi="True"
+            key2="client_action_multi" name="Add to Wave"
+            res_model="stock.picking.to.wave" src_model="stock.picking"
+            view_mode="form" target="new" view_type="form"
+            groups = "base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" />
+        
+       
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						Hiding Moves in More button (Product Master) for Customer Portal Users and Managers
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+       
+        <record id="stock.act_product_stock_move_open" model="ir.actions.act_window">
+            <field name="context">{'search_default_done': 1,'search_default_product_id': active_id, 'default_product_id': active_id}</field>
+            <field name="name">Moves</field>
+            <field name="res_model">stock.move</field>
+            <field name="groups_id" eval="[(4,ref('magicemart.magicemart_group_user')),(4,ref('magicemart.magicemart_group_manager')),(4,ref('base.group_system'))]"/>
+        </record>
+        
+        
+        <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
+						Hiding Merge Purchase Order for Supplier Portal
+		*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
+        
+        <act_window name="Merge Purchase orders"
+            context="{'search_default_draft': 1, 'search_default_approved': False}"
+            res_model="purchase.order.group"
+            src_model="purchase.order"
+            view_mode="form"
+            target="new"
+            multi="True"
+            key2="client_action_multi"
+            id="purchase.action_view_purchase_order_group"
+            groups = "base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+        
         
         
         <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
