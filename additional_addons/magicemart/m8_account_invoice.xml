@@ -323,6 +323,27 @@
         
         <delete model="ir.actions.report.xml" search="[('name','=','Invoices'),('model','=','account.invoice')]"/>
         
+        
+        <!--	
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       	    Adding Company to Group By in Account.Account Search 
+  		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^	
+        -->
+        
+        <record id="m_view_account_search" model="ir.ui.view">
+            <field name="name">m account.account.search</field>
+            <field name="model">account.account</field>
+            <field name="inherit_id" ref="account.view_account_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@string='Group By']/filter[@string='Internal Type']" position="after">
+                    <filter string="Company" icon="terp-stock_symbol-selection" domain="" context="{'group_by':'company_id'}"/>
+                </xpath>
+                
+            </field>
+        </record>            
+        
+        
+        
 <!--	
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
        				Customer Portal  Invoices 

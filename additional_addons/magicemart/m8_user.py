@@ -131,11 +131,11 @@ class res_users(osv.osv):
                                    
                                    })
             
-        if not values.get("user_roles"):
-            values.update({
-                           'sel_groups_'+str(hrEmpid) : True
-                           })
-            
+#         if not values.get("user_roles"):
+#             values.update({
+#                            'sel_groups_'+str(hrEmpid) : True
+#                            })
+#             
             
         
         return super(res_users, self).create(cr, uid, values, context=context) 
@@ -221,7 +221,7 @@ class res_users(osv.osv):
                          'sel_groups_'+ str(stUser)+ '_'+str(stMgrid): False,
                          'sel_groups_'+ str(accinvid)+ '_'+str(accacnt)+ '_' +str(accMgrid): False,     
                          'sel_groups_'+str(soOwnid)+'_' + str(soAlledsid)+'_'+str(soMgrid) : False,
-                         'sel_groups_'+str(hrEmpid)+'_' + str(hrOfrid)+'_'+str(hrMgrid) : False,
+                         'sel_groups_'+ str(hrOfrid)+'_'+str(hrMgrid) : False,
                          'sel_groups_'+str(prgUsrid)+'_' +str(prgMgrid):False,
                          'sel_groups_'+str(knowUsrid):False,
                          'sel_groups_'+str(prchUsrid)+'_' +str(prchMgrid):False,
@@ -247,6 +247,8 @@ class res_users(osv.osv):
         dummy, mUsrid = data_obj.get_object_reference(cr, 1, 'magicemart', 'magicemart_group_user')
         dummy, mMgrid = data_obj.get_object_reference(cr, 1, 'magicemart', 'magicemart_group_manager')
         dummy, supMgr = data_obj.get_object_reference(cr, 1, 'magicemart', 'magicemart_supplier_portal')
+        
+        dummy, hrEmpid = data_obj.get_object_reference(cr, 1, 'base', 'group_user')
 
         if ids and isinstance(ids, int):
            ids = [ids] 
@@ -288,7 +290,12 @@ class res_users(osv.osv):
                     vals.update({
                                    'name':part.name or False,
                                    
-                                   })                
+                                   })       
+#             if not vals.get("user_roles", case.user_roles) and not vals.get("name",case.name) == "Administrator":
+#                 vals.update({
+#                              'sel_groups_'+str(hrEmpid) : True
+#                              
+#                              })
                         
         return super(res_users, self).write(cr, uid, ids, vals, context=context)
         

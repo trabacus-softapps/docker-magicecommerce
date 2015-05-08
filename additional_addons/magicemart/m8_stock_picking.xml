@@ -336,7 +336,7 @@
                     <button name="do_enter_transfer_details"  string="Deliver" groups="stock.group_stock_user" type="object" class="oe_highlight"
                         attrs="{'invisible':['|',('state','not in', ('assigned','partially','available')),('picking_type_code','not in',('internal','outgoing'))]}"/>
                     
-                    <button name="do_enter_transfer_details"  string="Recieve" groups="stock.group_stock_user" type="object" class="oe_highlight"
+                    <button name="do_enter_transfer_details"  string="Receive" groups="stock.group_stock_user" type="object" class="oe_highlight"
                         attrs="{'invisible':['|',('state','not in', ('assigned','partially','available')),('picking_type_code','in',('internal','outgoing'))]}"/>
                 </button>
                 

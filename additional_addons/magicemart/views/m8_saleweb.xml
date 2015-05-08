@@ -15,22 +15,24 @@
         
         
         <template id="m_product_price" inherit_id="website_sale.product_price">
-            <xpath expr="//span[@class='text-danger oe_default_price']" position="replace">
+            <xpath expr="//h4[@class='oe_price_h4 css_editable_mode_hidden']" position="replace">
                 <span class="text-danger oe_default_price" style="text-decoration: line-through; white-space: nowrap;"
-                    t-field="product.pricelist_amt"
+                    t-field="product.lst_price"
                     t-field-options='{
                     "widget": "monetary",
                     "from_currency": "website.currency_id",
                     "display_currency": "user_id.partner_id.property_product_pricelist.currency_id"
                     }'/>
                 <b class="oe_price" style="white-space: nowrap;"
-                    t-field="product.discount_amt"
-                    t-field-options='{
+                    t-esc="product.discount_amt"
+                    t-esc-options='{
                     "widget": "monetary",
                     "display_currency": "user_id.partner_id.property_product_pricelist.currency_id"
                     }'/>
             </xpath>
             
+            
+        </template>
 <!--            <xpath expr="//span[@itemprop='price']" position="replace">
                 <span itemprop="price" style="display:none;" t-esc="product.pricelist_amt"/>
             </xpath>
@@ -63,8 +65,6 @@
                         }'/>
                 </td>
             </xpath>-->
-        
-        </template>
         
         <template id="m_product" name="Product" inherit_id="website_sale.product">
             <xpath expr="//input[@name='product_id']" position="replace">

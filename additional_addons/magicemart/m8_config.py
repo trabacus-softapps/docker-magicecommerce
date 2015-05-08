@@ -114,28 +114,86 @@ class product_template(osv.osv):
                                res[prod.product_tmpl_id.id]['tax_name'] = tax.name   
         return res
                
-    def _pricelist_amount(self, cr, uid, ids, field_name, args, context=None):
-        res = {}
-        sale_obj = self.pool.get("sale.order")
-        user_obj = self.pool.get("res.users")
-        sale_line_obj = self.pool.get("sale.order.line")
+#     def _pricelist_amount(self, cr, uid, ids, field_name, args, context=None):
+#         res = {}
+#         sale_obj = self.pool.get("sale.order")
 #         user_obj = self.pool.get("res.users")
-#         u_id = context.get("uid",uid)
-        user = user_obj.browse(cr, uid, context.get("uid",uid))
-        part = user.partner_id
-        object_name = self._name + ',' + str(part.id)
-        pricelist = part.property_product_pricelist and part.property_product_pricelist.id or False
-         
-        for case in self.browse(cr, uid, ids):
-            amount = sale_line_obj.product_id_change(cr, uid, [], pricelist, case.id, qty=0,
-                    uom=False, qty_uos=0, uos=False, name='', partner_id=False,
-                    lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, context=context)
-            if 'value' in amount and  'price_unit' in amount['value']:
-                res[case.id] = amount['value']['price_unit']
-            else:
-                res[case.id] = case.list_price
+#         sale_line_obj = self.pool.get("sale.order.line")
+#         prod_obj = self.pool.get("product.product")
+# #         user_obj = self.pool.get("res.users")
+# #         u_id = context.get("uid",uid)
+#         user = user_obj.browse(cr, uid, context.get("uid",uid))
+#         part = user.partner_id
+#         object_name = self._name + ',' + str(part.id)
+#         pricelist = part.property_product_pricelist and part.property_product_pricelist.id or False
+#         
+#         for case in self.browse(cr, uid, ids):
+#             prod_ids = prod_obj.search(cr, uid, [('product_tmpl_id','=',case.id)])
+#             if prod_ids:
+#                 prod_id = prod_ids[0] 
+#             amount = sale_line_obj.product_id_change_with_wh(cr, uid, ids, pricelist, prod_id, qty=0,
+#                     uom=False, qty_uos=0, uos=False, name='', partner_id=False,
+#                     lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, warehouse_id=False, context=context)
+#             if 'value' in amount and  'price_unit' in amount['value']:
+#                 res[case.id] = amount['value']['price_unit']
+#             else:
+#                 res[case.id] = case.list_price
+#         return res
+# #     
+
+
+    def _set_product_template_price(self, cr, uid, id, name, value, args, context=None):
+        product_uom_obj = self.pool.get('product.uom')
+
+        product = self.browse(cr, uid, id, context=context)
+        if 'uom' in context:
+            uom = product.uos_id or product.uom_id
+            value = product_uom_obj._compute_price(cr, uid,
+                    context['uom'], value, uom.id)
+
+        return product.write({'list_price': value})
+
+#    Overriden to Display Pricelist Price or Price After Discount or Sales Price in Front end Shop Menu
+    def _product_template_price(self, cr, uid, ids, name, arg, context=None):
+        plobj = self.pool.get('product.pricelist')
+        res = {}
+        quantity = context.get('quantity') or 1.0
+        pricelist = context.get('pricelist', False)
+        partner = context.get('partner', False)
+        if pricelist:
+            # Support context pricelists specified as display_name or ID for compatibility
+            if isinstance(pricelist, basestring):
+                pricelist_ids = plobj.name_search(
+                    cr, uid, pricelist, operator='=', context=context, limit=1)
+                pricelist = pricelist_ids[0][0] if pricelist_ids else pricelist
+   
+            if isinstance(pricelist, (int, long)):
+                products = self.browse(cr, uid, ids, context=context)
+                qtys = map(lambda x: (x, quantity, partner), products)
+                pl = plobj.browse(cr, uid, pricelist, context=context)
+                price = plobj._price_get_multi(cr,uid, pl, qtys, context=context)
+                for id in ids:
+                    prod_temp = self.browse(cr, uid, [id])
+                    
+                    if price and prod_temp.list_price == price.get(id):
+                        if prod_temp.discount:
+                            res[id] = prod_temp.discount_amt
+                    
+                    if not price.get(id):
+                        res[id] = prod_temp.discount_amt or prod_temp.list_price
+                    
+#                     if price.get(id):       
+                    if price.get(id) and not prod_temp.list_price == price.get(id):
+                        res[id] = price.get(id, prod_temp.discount_amt or prod_temp.list_price)
+                    print "Before RES-----",res
+        for id in ids:
+            prod_temp = self.browse(cr, uid, [id])
+            res.setdefault(id, prod_temp.list_price)
+        print "RES-----",res
         return res
-#     
+
+
+
     _columns = {
                 'discount'       :   fields.float("Discount", digits=(16,2)),
                 'discount_amt'   :   fields.float("Price After Discount", digits=(16,2)),
@@ -143,7 +201,9 @@ class product_template(osv.osv):
                 'tax_name'       :   fields.function(_amount_calculation, string='Tax Percentage',store=False, type ='char',size=100, multi='all'),
                 
                 # Pricelist Amount
-                'pricelist_amt'   :   fields.function(_pricelist_amount, string ="Amount", store=False, type = "float" )
+#                 'pricelist_amt'   :   fields.function(_pricelist_amount, string ="Amount", store=False, type = "float" )
+
+                'price': fields.function(_product_template_price, fnct_inv=_set_product_template_price, type='float', string='Price', digits_compute=dp.get_precision('Product Price')),
                 }
     def onchange_discper(self,cr, uid, ids, discount, list_price):
         res = {}
@@ -575,129 +635,135 @@ class ir_rule(osv.osv):
         # involve objects on which the real uid has no acces rights.
         # This means also there is no implicit restriction (e.g. an object
         # references another object the user can't see).
-        " This function is to set the rule domain for product_product object based on the user permissions"
-        if not context:
-            context = {}
-        newdom = []
-         
-        dom = self._compute_domain(cr, uid, model_name, mode) or []
-        cr.execute("""select uid from res_groups_users_rel where gid in (select id  from res_groups where name in ('User', 'Manager') and  
-                      category_id in (select id from ir_module_category where name = 'Customer Portal'))""")
-        custgrp_ids = [x[0] for x in cr.fetchall()]
-                 
-        if uid in custgrp_ids or context.get("uid") in custgrp_ids:
-#             if dom:
-            if model_name == 'product.product':
-                cr.execute("""select source_location_id from res_partner where id = (select partner_id from res_users where id = """+str(context.get("uid",uid))+""")""")
-                loc_ids = cr.fetchone()
-                
-                if loc_ids and loc_ids[0]:
-                    cr.execute("""
+        if uid and uid !=63:
+            
+            " This function is to set the rule domain for product_product object based on the user permissions"
+            if not context:
+                context = {}
+            newdom = []
+#             if not uid:
+#                 uid = SUPERUSER_ID
+            dom = self._compute_domain(cr, uid, model_name, mode) or []
+            custgrp_ids = []
+            if uid:
+                cr.execute("""select uid from res_groups_users_rel where gid in (select id  from res_groups where name in ('User', 'Manager') and  
+                              category_id in (select id from ir_module_category where name = 'Customer Portal'))""")
+                custgrp_ids = [x[0] for x in cr.fetchall()]
+                     
+            if uid and uid in custgrp_ids or context.get("uid") in custgrp_ids:
+    #             if dom:
+                if model_name == 'product.product':
+                    cr.execute("""select source_location_id from res_partner where id = (select partner_id from res_users where id = """+str(context.get("uid",uid))+""")""")
+                    loc_ids = cr.fetchone()
                     
-                        select p.id 
-                        from 
-                        (    select distinct(a.product) as product_id
-                            from(
-                                select sl.product_id as product from  sale_order_line sl 
-                                inner join sale_order s on s.id = sl.order_id 
-                                inner join res_partner p on p.id = s.partner_id 
-                                inner join res_users u on u.partner_id = p.id
-                                where u.id = """ + str(context.get("uid",uid)) + """
+                    if loc_ids and loc_ids[0]:
+                        cr.execute("""
                         
-                                union all 
-                                
-                                (   select pr.product_id as product from res_partner_prod_rel pr inner join res_partner p on p.id=pr.partner_id
-                                    where p.id = (select partner_id from res_users where id = """ + str(context.get("uid",uid)) + """)
-                                )
-                        
-                            )a
-                        
-                        ) b
-                        inner join product_product p on b.product_id = p.id
-                        inner join product_template pt on pt.id = p.product_tmpl_id
-                        where pt.company_id is null or pt.company_id = (select u.company_id from res_users u where u.id = """ + str(context.get("uid",uid)) + """)
-                        
-                    """)
-                    prod_ids = cr.fetchall()
-                    
-                    
-                    if prod_ids:
-                        newdom = [('id', 'in', [x[0] for x in prod_ids])]
-                        
-                    else:   
-                        newdom = [('id', '=',1)]
-                        
-                    if len(dom):
-                        domain = list((['&'] + dom + newdom))
-                        
-                    else:
-                        domain = list(newdom)
-                    
-                    query = self.pool[model_name]._where_calc(cr, SUPERUSER_ID, domain, active_test=False)
-                    return query.where_clause, query.where_clause_params, query.tables
-#             return [], [], ['"' + self.pool[model_name]._table + '"']
-           
-        cr.execute("""select distinct(uid) from res_groups_users_rel 
-                        where gid in (select id  from res_groups where name in ('Supplier Manager') and  
-                        category_id in (select id from ir_module_category where name = 'Supplier Portal'))""")
-        supgrp_ids = [z[0] for z in cr.fetchall()]
-        
-        if uid in supgrp_ids:
-#             if dom:
-           if model_name == 'product.product':
-               cr.execute("""
-                    select p.id 
-                        from 
-                        (    select distinct(a.product) as product_id
-                            from(
-                               select m.product_id as product
-                               from stock_move m
-                               inner join stock_picking sp on sp.id = m.picking_id
-                               inner join res_partner rp on rp.id = sp.partner_id
-                               inner join res_users u on u.partner_id = rp.id
-                               left outer join stock_picking_type spt on spt.id = sp.picking_type_id
-                               where m.state='done' and spt.code='incoming' and u.id = """ + str(context.get("uid",uid)) + """
-                        
-                                union all 
-                                
-                                    (    select pr.product_id as product from res_partner_prod_rel pr inner join res_partner p on p.id=pr.partner_id
-                                         where p.id = (select partner_id from res_users where id = """ + str(context.get("uid",uid)) + """
+                            select p.id 
+                            from 
+                            (    select distinct(a.product) as product_id
+                                from(
+                                    select sl.product_id as product from  sale_order_line sl 
+                                    inner join sale_order s on s.id = sl.order_id 
+                                    inner join res_partner p on p.id = s.partner_id 
+                                    inner join res_users u on u.partner_id = p.id
+                                    where u.id = """ + str(context.get("uid",uid)) + """
+                            
+                                    union all 
+                                    
+                                    (   select pr.product_id as product from res_partner_prod_rel pr inner join res_partner p on p.id=pr.partner_id
+                                        where p.id = (select partner_id from res_users where id = """ + str(context.get("uid",uid)) + """)
                                     )
-                                )
-                        )a
+                            
+                                )a
+                            
+                            ) b
+                            inner join product_product p on b.product_id = p.id
+                            inner join product_template pt on pt.id = p.product_tmpl_id
+                            where pt.company_id is null or pt.company_id = (select u.company_id from res_users u where u.id = """ + str(context.get("uid",uid)) + """)
+                            
+                        """)
+                        prod_ids = cr.fetchall()
                         
-                        ) b
-                        inner join product_product p on b.product_id = p.id
-                        inner join product_template pt on pt.id = p.product_tmpl_id
-                        where pt.company_id is null or pt.company_id = (select u.company_id from res_users u where u.id = """ + str(context.get("uid",uid)) + """)
-
-
-                             """)
-               prod_ids = cr.fetchall()
-               
-               if prod_ids:
-                   newdom = [('id', 'in', [x[0] for x in prod_ids])]
-               else:   
-                   newdom = [('id', '=',1)]
+                        
+                        if prod_ids:
+                            newdom = [('id', 'in', [x[0] for x in prod_ids])]
+                            
+                        else:   
+                            newdom = [('id', '=',1)]
+                            
+                        if len(dom):
+                            domain = list((['&'] + dom + newdom))
+                            
+                        else:
+                            domain = list(newdom)
+                        
+                        query = self.pool[model_name]._where_calc(cr, SUPERUSER_ID, domain, active_test=False)
+                        return query.where_clause, query.where_clause_params, query.tables
+    #             return [], [], ['"' + self.pool[model_name]._table + '"']
+            supgrp_ids = []
+            if uid:   
+                cr.execute("""select distinct(uid) from res_groups_users_rel 
+                                where gid in (select id  from res_groups where name in ('Supplier Manager') and  
+                                category_id in (select id from ir_module_category where name = 'Supplier Portal'))""")
+                supgrp_ids = [z[0] for z in cr.fetchall()]
+            
+            if uid and uid in supgrp_ids:
+    #             if dom:
+               if model_name == 'product.product':
+                   cr.execute("""
+                        select p.id 
+                            from 
+                            (    select distinct(a.product) as product_id
+                                from(
+                                   select m.product_id as product
+                                   from stock_move m
+                                   inner join stock_picking sp on sp.id = m.picking_id
+                                   inner join res_partner rp on rp.id = sp.partner_id
+                                   inner join res_users u on u.partner_id = rp.id
+                                   left outer join stock_picking_type spt on spt.id = sp.picking_type_id
+                                   where m.state='done' and spt.code='incoming' and u.id = """ + str(context.get("uid",uid)) + """
+                            
+                                    union all 
+                                    
+                                        (    select pr.product_id as product from res_partner_prod_rel pr inner join res_partner p on p.id=pr.partner_id
+                                             where p.id = (select partner_id from res_users where id = """ + str(context.get("uid",uid)) + """
+                                        )
+                                    )
+                            )a
+                            
+                            ) b
+                            inner join product_product p on b.product_id = p.id
+                            inner join product_template pt on pt.id = p.product_tmpl_id
+                            where pt.company_id is null or pt.company_id = (select u.company_id from res_users u where u.id = """ + str(context.get("uid",uid)) + """)
+    
+    
+                                 """)
+                   prod_ids = cr.fetchall()
+                   
+                   if prod_ids:
+                       newdom = [('id', 'in', [x[0] for x in prod_ids])]
+                   else:   
+                       newdom = [('id', '=',1)]
+                        
+                   if len(dom):
+                       domain = list((['&'] + dom + newdom))
+                   else:
+                       domain = list(newdom)
+                   query = self.pool[model_name]._where_calc(cr, SUPERUSER_ID, domain, active_test=False)
+                   return query.where_clause, query.where_clause_params, query.tables
                     
-               if len(dom):
-                   domain = list((['&'] + dom + newdom))
-               else:
-                   domain = list(newdom)
-               query = self.pool[model_name]._where_calc(cr, SUPERUSER_ID, domain, active_test=False)
-               return query.where_clause, query.where_clause_params, query.tables
-                
-# If above both conditions not satisfies means, standard should work
-        if model_name == 'product.product':
-            if uid not in custgrp_ids and uid not in  supgrp_ids: 
+    # If above both conditions not satisfies means, standard should work
+            if model_name == 'product.product':
+                if uid not in custgrp_ids and uid not in  supgrp_ids: 
+                    if dom:
+                        query = self.pool[model_name]._where_calc(cr, SUPERUSER_ID, dom, active_test=False)
+                        return query.where_clause, query.where_clause_params, query.tables
+            else:
                 if dom:
                     query = self.pool[model_name]._where_calc(cr, SUPERUSER_ID, dom, active_test=False)
                     return query.where_clause, query.where_clause_params, query.tables
-        else:
-            if dom:
-                query = self.pool[model_name]._where_calc(cr, SUPERUSER_ID, dom, active_test=False)
-                return query.where_clause, query.where_clause_params, query.tables
-            
+                
         return [], [], ['"' + self.pool[model_name]._table + '"']
 ir_rule()     
 

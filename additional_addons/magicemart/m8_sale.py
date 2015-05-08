@@ -4,6 +4,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
+from openerp import SUPERUSER_ID
 from openerp.osv import fields, osv
 from datetime import datetime, timedelta
 import time
@@ -725,6 +726,7 @@ class sale_order_line(osv.osv):
         order_id = vals.get('order_id')
         case = sale_obj.browse(cr, uid,order_id )
         company_id = case.warehouse_id.company_id.id
+        print "Vals Create Before------",vals
         
         res = self.product_id_change_with_wh(cr, uid, [], case.pricelist_id.id,vals.get('product_id',False),vals.get('qty',0), vals.get('uom',False), vals.get('qty_uos',0),
                                       vals.get('uos',False), vals.get('name',''), case.partner_id.id, vals.get('lang',False), vals.get('update_tax',True), vals.get('date_order',False), 
@@ -758,7 +760,7 @@ class sale_order_line(osv.osv):
                                  'tax_id' : [(6, 0, [t.id])],
                                  
                                  })
-        
+        print "Vals Create After------",vals
         if location_ids:
             location_ids = location_ids[0]
         product = vals.get('product_id', False)
@@ -777,51 +779,86 @@ class sale_order_line(osv.osv):
         
         if context and uid != context.get("uid",False):
             uid = context.get("uid")
+        if not uid:
+            uid = SUPERUSER_ID
         context = dict(context)
+        prodtemp_obj = self.pool.get("product.template")
         loc_obj = self.pool.get("stock.location")
         move_obj = self.pool.get("stock.move")
         prod_obj = self.pool.get("product.product")
         tax_obj = self.pool.get("account.tax")
+        user_obj = self.pool.get("res.users")
         
         for case in self.browse(cr, uid, ids):
-            if vals.get('price_unit',case.price_unit)<= 0.0:
+            price_unit = vals.get('price_unit')
+            print "Vals Write------",vals
+            prod_id = vals.get("product_id", case.product_id.id)
+            prod = prod_obj.browse(cr, uid, [prod_id])
+#             prodtemp_id = prod_obj.browse(cr, uid,[prod.product_tmpl_id.id] )
+            
+            pricelist_id = case.order_id.pricelist_id.id
+             
+            context.update({'quantity':case.product_uom_qty or 1.0 })
+            context.update({'pricelist': pricelist_id or False})
+            context.update({'partner': case.order_id.partner_id.id or False})
+             
+            # Calling This method update price_unit as Pricelist Price or Price After Discount or Sales Price 
+            prodtemp = prodtemp_obj._product_template_price(cr, uid, [prod.product_tmpl_id.id], 'price', False, context=context)
+            price_unit = prodtemp[prod.product_tmpl_id.id]
+            if price_unit <=0.00:
                 raise osv.except_osv(_('Warning'), _('Please Enter The Unit Price For \'%s\'.') % (case.name))
-            location_ids = loc_obj.search(cr, uid,[('company_id','=', case.company_id.id),('name','=','Stock')])
-            
-            if location_ids:
-                location_ids = location_ids[0]
+            if not price_unit:
+                price_unit = case.price_unit
+                if price_unit <= 0.00:
+                    raise osv.except_osv(_('Warning'), _('Please Enter The Unit Price For \'%s\'.') % (case.name))
+             
+            if price_unit:
+                vals.update({
+                             'price_unit':price_unit
+                             })    
                 
-            if vals.get('warehouse_id',case.order_id.warehouse_id.id):  # shop is nothing but company_id
-                context.update({'warehouse':vals.get('warehouse_id',case.order_id.warehouse_id.id)})
-            product = vals.get('product_id', case.product_id.id)
-            available_qty = prod_obj._product_available(cr, uid, [product], None, False, context)
-            available_qty = available_qty[product].get('qty_available',0)
-            prod = prod_obj.browse(cr, uid,[product])
-            
-            vals.update({
-                         'available_qty' : available_qty,
-                         'product_image':prod.image_medium
-                         })
-               
-            res = self.product_id_change_with_wh(cr, uid, [], case.order_id.pricelist_id.id,vals.get('product_id',case.product_id.id),vals.get('qty',0), vals.get('uom',False), vals.get('qty_uos',0),
-                                          vals.get('uos',False), vals.get('name',''), case.order_id.partner_id.id, vals.get('lang',False), vals.get('update_tax',True), vals.get('date_order',False), 
-                                          vals.get('packaging',False), vals.get('fiscal_position',False), vals.get('flag',False),warehouse_id=case.order_id.warehouse_id.id,context=context)['value']
-            vals.update({
-                         'available_qty' : available_qty,
-                         # Commented for Pricelist Concept
-                        'discount' : res.get('discount') and res.get('discount')  or 0,
-                        'price_unit': res.get("price_unit") and res.get("price_unit") or 1
-                          
-                         })
-            if res.get("tax_id"):
-                comp_id = vals.get("company_id",case.company_id)
-                tax = tax_obj.browse(cr, uid, res.get("tax_id"))
-                for t in tax:
-                    if t.company_id.id == comp_id.id:
-                        vals.update({
-                                     'tax_id' : [(6, 0, [t.id])],
-                                     
-                                     })
+#             location_ids = loc_obj.search(cr, uid,[('company_id','=', case.company_id.id or False),('name','=','Stock')])
+#             
+#             if location_ids:
+#                 location_ids = location_ids[0]
+#           
+#             user_ids = user_obj.search(cr, uid, [('login','=', 'public')])
+            cr.execute("select id from res_users where login = '" +str('public')+"'")
+            user_id = cr.fetchone()
+            print "USERS",user_id 
+            if user_id != uid:
+                
+                if vals.get('warehouse_id',case.order_id.warehouse_id.id):  # shop is nothing but company_id
+                    context.update({'warehouse':vals.get('warehouse_id',case.order_id.warehouse_id.id)})
+                product = vals.get('product_id', case.product_id.id)
+                available_qty = prod_obj._product_available(cr, uid, [product], None, False, context)
+                available_qty = available_qty[product].get('qty_available',0)
+                prod = prod_obj.browse(cr, uid,[product])
+                
+                vals.update({
+                             'available_qty' : available_qty,
+                             'product_image':prod.image_medium
+                             })
+                   
+                res = self.product_id_change_with_wh(cr, uid, [], case.order_id.pricelist_id.id,vals.get('product_id',case.product_id.id),vals.get('qty',0), vals.get('uom',False), vals.get('qty_uos',0),
+                                              vals.get('uos',False), vals.get('name',''), case.order_id.partner_id.id, vals.get('lang',False), vals.get('update_tax',True), vals.get('date_order',False), 
+                                              vals.get('packaging',False), vals.get('fiscal_position',False), vals.get('flag',False),warehouse_id=case.order_id.warehouse_id.id,context=context)['value']
+                vals.update({
+                             'available_qty' : available_qty,
+                             # Commented for Pricelist Concept
+                            'discount' : res.get('discount') and res.get('discount')  or 0,
+                            'price_unit': res.get("price_unit") and res.get("price_unit") or 1
+                              
+                             })
+                if res.get("tax_id"):
+                    comp_id = vals.get("company_id",case.company_id)
+                    tax = tax_obj.browse(cr, uid, res.get("tax_id"))
+                    for t in tax:
+                        if t.company_id.id == comp_id.id:
+                            vals.update({
+                                         'tax_id' : [(6, 0, [t.id])],
+                                         
+                                         })
             return super(sale_order_line, self).write(cr, uid, [case.id], vals, context=context)
      
     

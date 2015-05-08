@@ -20,15 +20,15 @@ class website_sale(openerp.addons.website_sale.controllers.main.website_sale):
     @http.route(['/shop/product/<model("product.template"):product>'], type='http', auth="public", website=True)
     def product(self, product, category='', search='', **kwargs):
         cr, uid, context  = request.cr, request.uid, request.context
-         
+          
         res = super(website_sale,self).product(product, category, search, **kwargs)
-
-        
+ 
+         
         if res:
             if not product.product_variant_ids:
                 cr.execute("select id from product_product where product_tmpl_id = "+str(product.id)+" order by id limit 1")
                 variant_ids = cr.fetchone()
-                
+                 
                 print "variant_ids.......",variant_ids,variant_ids[0]
                 if variant_ids:
                     variant_ids =variant_ids[0]
