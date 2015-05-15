@@ -363,7 +363,10 @@ class sale_order(osv.osv):
              
             #to select sub company shop
             if not warehouse.company_id.parent_id:
-                raise osv.except_osv(_('User Error'), _('You must select sub company sale warehouse !'))
+                vals.update({
+                             'warehouse_id':2.
+                             })
+#                 raise osv.except_osv(_('User Error'), _('You must select sub company sale warehouse !'))
             partner_id = vals.get('partner_id',False)
             partner = partner_obj.browse(cr, uid, partner_id)
             vals.update({
@@ -385,19 +388,22 @@ class sale_order(osv.osv):
             return []
         
         case = self.browse(cr, uid, ids[0])
-         
-        if vals.get('warehouse_id',case.warehouse_id.id):
-            warehouse = warehouse_obj.browse(cr, uid, vals.get('warehouse_id',case.warehouse_id.id))
-            if not warehouse.company_id.parent_id:
-                raise osv.except_osv(_('User Error'), _('You must select sub company sale Warehouse !'))
-             
-        if vals.get('partner_id', case.partner_id):
-            partner_id = vals.get('partner_id', case.partner_id.id)
-            partner = partner_obj.browse(cr, uid, partner_id)
-            vals.update({
-#                          'pricelist_id':partner.property_product_pricelist.id,
-                         'company_id':warehouse.company_id.id,
-                         })
+        if uid != 1: 
+            if vals.get('warehouse_id',case.warehouse_id.id):
+                warehouse = warehouse_obj.browse(cr, uid, vals.get('warehouse_id',case.warehouse_id.id))
+                if not warehouse.company_id.parent_id:
+                    vals.update({
+                                 'warehouse_id' : 2,
+                                 })
+#                     raise osv.except_osv(_('User Error'), _('You must select sub company sale Warehouse !'))
+                 
+            if vals.get('partner_id', case.partner_id):
+                partner_id = vals.get('partner_id', case.partner_id.id)
+                partner = partner_obj.browse(cr, uid, partner_id)
+                vals.update({
+    #                          'pricelist_id':partner.property_product_pricelist.id,
+                             'company_id':warehouse.company_id.id,
+                             })
  
         return super(sale_order, self).write(cr, uid, ids, vals, context = context)
      
@@ -726,7 +732,6 @@ class sale_order_line(osv.osv):
         order_id = vals.get('order_id')
         case = sale_obj.browse(cr, uid,order_id )
         company_id = case.warehouse_id.company_id.id
-        print "Vals Create Before------",vals
         
         res = self.product_id_change_with_wh(cr, uid, [], case.pricelist_id.id,vals.get('product_id',False),vals.get('qty',0), vals.get('uom',False), vals.get('qty_uos',0),
                                       vals.get('uos',False), vals.get('name',''), case.partner_id.id, vals.get('lang',False), vals.get('update_tax',True), vals.get('date_order',False), 
