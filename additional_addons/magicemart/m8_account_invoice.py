@@ -673,15 +673,15 @@ class account_bank_statement(osv.osv):
                 prev_id = cr.fetchone() 
                 if prev_id:
                     prev_rec = self.browse(cr, uid, prev_id[0])
-                    rcpt_ids = voucher_obj.search(cr, uid, [('date','>',prev_rec.closing_date),('date','<=',case.closing_date),('journal_id','in',jour_ids),('type','=','receipt'),('state','=','posted')])
-                    pay_ids = voucher_obj.search(cr, uid, [('date','>',prev_rec.closing_date),('date','<=',case.closing_date),('journal_id','in',jour_ids),('type','=','payment'),('state','=','posted')])
+                    rcpt_ids = voucher_obj.search(cr, uid, [('date','>',prev_rec.closing_date),('date','<=',case.date),('journal_id','in',jour_ids),('type','=','receipt'),('state','=','posted')])
+                    pay_ids = voucher_obj.search(cr, uid, [('date','>',prev_rec.closing_date),('date','<=',case.date),('journal_id','in',jour_ids),('type','=','payment'),('state','=','posted')])
                
             else:
                 prev_id = self.search(cr, uid, [('journal_id','=',case.journal_id.id), ('state','=','confirm')], order='closing_date desc', limit=1)
                 if prev_id:
                     prev_rec = self.browse(cr, uid, prev_id[0])
-                    rcpt_ids = voucher_obj.search(cr, uid, [('date','>',prev_rec.closing_date),('journal_id','in',jour_ids),('type','=','receipt'),('state','=','posted')])
-                    pay_ids  = voucher_obj.search(cr, uid, [('date','>',prev_rec.closing_date),('journal_id','in',jour_ids),('type','=','payment'),('state','=','posted')])
+                    rcpt_ids = voucher_obj.search(cr, uid, [('date','>',prev_rec.closing_date),('date','<=',case.date),('journal_id','in',jour_ids),('type','=','receipt'),('state','=','posted')])
+                    pay_ids  = voucher_obj.search(cr, uid, [('date','>',prev_rec.closing_date),('date','<=',case.date),('journal_id','in',jour_ids),('type','=','payment'),('state','=','posted')])
                     
             res[case.id]['receipt_ids'] = rcpt_ids
             res[case.id]['payment_ids'] = pay_ids 
@@ -707,7 +707,7 @@ class account_bank_statement(osv.osv):
                                     from account_bank_statement b
                                     inner join account_bank_statement_line bl on bl.statement_id = b.id
                                     where bl.account_id  = """ + str(case.journal_id.default_debit_account_id.id) + """
-                                    and bl.date > '""" + str(prev_cash_st.closing_date)+ """' and bl.date <= '""" + str (case.closing_date)+ """'
+                                    and bl.date > '""" + str(prev_cash_st.closing_date)+ """' and bl.date <= '""" + str (case.date)+ """'
                                     and b.state = 'confirm'
                                 """)
                     cash = cr.fetchall()
@@ -724,6 +724,7 @@ class account_bank_statement(osv.osv):
                                     inner join account_bank_statement_line bl on bl.statement_id = b.id
                                     where bl.account_id  = """ + str(case.journal_id.default_debit_account_id.id) + """
                                     and bl.date > '""" + str(prev_cash_st.closing_date)+ """' 
+                                    and bl.date <= '""" + str(case.date)+ """' 
                                     and b.state = 'confirm'
                                 """)
                     cash = cr.fetchall()
