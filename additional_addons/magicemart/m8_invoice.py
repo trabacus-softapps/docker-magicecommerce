@@ -96,7 +96,3 @@ class account_invoice_line(models.Model):
         price_subtotal = Fields.Float(string='Amount', digits= dp.get_precision('Account'),
                                           store=True, readonly=True, compute='_compute_price')
         
-        # creating this field  coz created in new version of saas-6
-        price_subtotal_signed = Fields.Float(string='Amount Signed', digits=0,
-                                             store=True, readonly=True, compute='_compute_price'),
-        

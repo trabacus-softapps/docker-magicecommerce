@@ -336,7 +336,7 @@
                     <button name="do_enter_transfer_details"  string="Deliver" groups="stock.group_stock_user" type="object" class="oe_highlight"
                         attrs="{'invisible':['|',('state','not in', ('assigned','partially','available')),('picking_type_code','not in',('internal','outgoing'))]}"/>
                     
-                    <button name="do_enter_transfer_details"  string="Receive" groups="stock.group_stock_user" type="object" class="oe_highlight"
+                    <button name="do_enter_transfer_details"  string="Recieve" groups="stock.group_stock_user" type="object" class="oe_highlight"
                         attrs="{'invisible':['|',('state','not in', ('assigned','partially','available')),('picking_type_code','in',('internal','outgoing'))]}"/>
                 </button>
                 
@@ -354,7 +354,6 @@
                 <xpath expr="//field[@name='origin']" position="before">
                     <field name="cust_po_ref"  attrs="{'required':[('picking_type_code','in','outgoing')],'invisible':[('picking_type_code','in',('internal','incoming'))]}"/>
                     <field name="vehicle"   attrs="{'readonly':[('state','in','done')],'required':[('picking_type_code','in','outgoing')],'invisible':[('picking_type_code','in',('internal','incoming'))]}"/>
-                    <field name='supplier_inv_ref' attrs="{'readonly':[('state','in','done')],'required':[('picking_type_code','in','incoming')],'invisible':[('picking_type_code','in',('internal','outgoing'))]}"/>
                 </xpath>
                 
                 <xpath expr="//button[@name='action_assign']" position="after">

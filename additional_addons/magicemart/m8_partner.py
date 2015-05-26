@@ -64,9 +64,8 @@ class res_partner(osv.osv):
         comp_ids = comp_obj.search(cr, uid,[('parent_id','=', False)])     
         if comp_ids:
             comp_ids=comp_ids[0]
-         
         partner_id = vals.get('id') 
-        cr.execute("""select id from stock_location where name = 'Customers' and location_id = (select id from stock_location where name = 'Partner Locations')""")
+        cr.execute("""select id from stock_location where complete_name = 'Partner Locations / Customers / Stock'""")
         cust_loc = cr.fetchone()
         partner_loc = cust_loc and cust_loc[0] or 0
        

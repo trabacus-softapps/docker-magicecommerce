@@ -154,3 +154,67 @@ class website_sale(openerp.addons.website_sale.controllers.main.website_sale):
             'attrib_encode': lambda attribs: werkzeug.url_encode([('attrib',i) for i in attribs]),
         }
         return request.website.render("website_sale.products", values)
+    
+    # Overriden Pass pricelist_id
+    @http.route(['/shop/get_unit_price'], type='json', auth="public", methods=['POST'], website=True)
+    def get_unit_price(self, product_ids, add_qty, **kw):
+        cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
+        products = pool['product.product'].browse(cr, uid, product_ids, context=context)
+        partner = pool['res.users'].browse(cr, uid, uid, context=context).partner_id
+        pricelist_id = request.session.get('sale_order_code_pricelist_id') or partner.property_product_pricelist.id
+        prices = pool['product.pricelist'].price_rule_get_multi(cr, uid, pricelist_id, [(product, add_qty, partner) for product in products], context=context)
+        return {product_id: prices[product_id][pricelist_id][0] for product_id in product_ids}
+    
+#   
+#     # Overriden to pass Warehouse
+#     @http.route(['/shop/product/<model("product.template"):product>'], type='http', auth="public", website=True)
+#     def product(self, product, category='', search='', **kwargs):
+#         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
+#         category_obj = pool['product.public.category']
+#         template_obj = pool['product.template']
+#         warehouse_obj = pool['stock.warehouse']
+#         
+#         warehouse_ids = warehouse_obj.search(cr, uid, [('code','!=', 'MAIN')])
+#         warehouse = warehouse_obj.browse(cr, uid, warehouse_ids, context=context)
+#               
+#          
+#         context.update(active_id=product.id)
+#         
+#         if category:
+#             category = category_obj.browse(cr, uid, int(category), context=context)
+# 
+#         attrib_list = request.httprequest.args.getlist('attrib')
+#         attrib_values = [map(int,v.split("-")) for v in attrib_list if v]
+#         attrib_set = set([v[1] for v in attrib_values])
+# 
+#         keep = WSmain.QueryURL('/shop', category=category and category.id, search=search, attrib=attrib_list)
+# 
+#         category_ids = category_obj.search(cr, uid, [('parent_id', '=', False)], context=context)
+#         categs = category_obj.browse(cr, uid, category_ids, context=context)
+# 
+#         pricelist = self.get_pricelist()
+# 
+#         from_currency = pool.get('product.price.type')._get_field_currency(cr, uid, 'list_price', context)
+#         to_currency = pricelist.currency_id
+#         compute_currency = lambda price: pool['res.currency']._compute(cr, uid, from_currency, to_currency, price, context=context)
+# 
+#         if not context.get('pricelist'):
+#             context['pricelist'] = int(self.get_pricelist())
+#             product = template_obj.browse(cr, uid, int(product), context=context)
+# 
+#         values = {
+#             'search': search,
+#             'category': category,
+#             'pricelist': pricelist,
+#             'attrib_values': attrib_values,
+#             'compute_currency': compute_currency,
+#             'attrib_set': attrib_set,
+#             'keep': keep,
+#             'categories': categs,
+#             'main_object': product,
+#             'warehouse': warehouse,
+#             'product': product,
+#             'get_attribute_value_ids': self.get_attribute_value_ids
+#         }
+#         return request.website.render("website_sale.product", values)
+#   

@@ -69,7 +69,22 @@
         <template id="m_product" name="Product" inherit_id="website_sale.product">
             <xpath expr="//input[@name='product_id']" position="replace">
                 <input type="hidden" class="product_id" name="product_id" t-att-value="int(product.product_variant_ids[0]) if len(product.product_variant_ids) == 1 else variants"/>
-            </xpath>        
+                
+            </xpath>      
+            
+        <!-- Adding Field City or Warehouse in /shop/product  form    -->
+            
+<!--            <xpath expr="//form[@class='js_add_cart_variants']/div[@class='js_product']/a[@id='add_to_cart']" position="before">
+<!-\-                <h4>Select City : </h4>-\->
+                <select class="form-control" style="width: 50%;">
+                    <option selected="selected">Select City </option> 
+                    <t t-foreach="warehouse" t-as="wh">
+                        <option><t t-esc="wh.name"/></option>
+                    </t>
+                </select>
+                <p></p>
+            </xpath> -->
+            
         </template>
         
         <template id="m_product_variants" inherit_id="website_sale.product_variants" >
@@ -77,5 +92,10 @@
                 <input type="hidden" t-if="len(product.product_variant_ids) == 1" name="product_id" t-att-value="product.product_variant_ids[0].id if len(product.product_variant_ids) == 1 else variants" />
             </xpath>
         </template>        
+        
+        
+        
+        
+       
     </data>
 </openerp>

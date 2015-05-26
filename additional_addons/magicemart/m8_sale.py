@@ -49,6 +49,7 @@ class sale_order(osv.osv):
                      
                 for node in doc.xpath("//field[@name='partner_id']"):
                     node.set('options', "{'no_open' : true}")
+                    node.set('options', "{'no_create' : true}")
                     setup_modifiers(node, res['fields']['partner_id'])
                     res['arch'] = etree.tostring(doc)
                     
@@ -765,7 +766,6 @@ class sale_order_line(osv.osv):
                                  'tax_id' : [(6, 0, [t.id])],
                                  
                                  })
-        print "Vals Create After------",vals
         if location_ids:
             location_ids = location_ids[0]
         product = vals.get('product_id', False)
@@ -796,7 +796,6 @@ class sale_order_line(osv.osv):
         
         for case in self.browse(cr, uid, ids):
             price_unit = vals.get('price_unit')
-            print "Vals Write------",vals
             prod_id = vals.get("product_id", case.product_id.id)
             prod = prod_obj.browse(cr, uid, [prod_id])
 #             prodtemp_id = prod_obj.browse(cr, uid,[prod.product_tmpl_id.id] )
@@ -830,7 +829,6 @@ class sale_order_line(osv.osv):
 #             user_ids = user_obj.search(cr, uid, [('login','=', 'public')])
             cr.execute("select id from res_users where login = '" +str('public')+"'")
             user_id = cr.fetchone()
-            print "USERS",user_id 
             if user_id != uid:
                 
                 if vals.get('warehouse_id',case.order_id.warehouse_id.id):  # shop is nothing but company_id
