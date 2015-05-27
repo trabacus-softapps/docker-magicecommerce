@@ -74,16 +74,25 @@
             
         <!-- Adding Field City or Warehouse in /shop/product  form    -->
             
-<!--            <xpath expr="//form[@class='js_add_cart_variants']/div[@class='js_product']/a[@id='add_to_cart']" position="before">
-<!-\-                <h4>Select City : </h4>-\->
-                <select class="form-control" style="width: 50%;">
-                    <option selected="selected">Select City </option> 
+            <xpath expr="//form[@class='js_add_cart_variants']/div[@class='js_product']" position="before">
+                <h3>Select City</h3>
+                <select name = "Warehouse" id="warehouse_select" class="form-control" required="required" style="width: 50%;">
+                    
+<!--                    <option selected="selected"></option> -->
                     <t t-foreach="warehouse" t-as="wh">
-                        <option><t t-esc="wh.name"/></option>
+                        <option t-att-value = 'wh.id'><t t-esc="wh.name"/></option>
                     </t>
                 </select>
                 <p></p>
-            </xpath> -->
+            </xpath> 
+            
+<!--            <xpath expr="//form[@class='js_add_cart_variants']/div[@class='js_product']/a[@id='add_to_cart']" position="replace">
+                <button id="replaced_add_to_cart" type="submit" class="btn btn-primary btn-lg mt8 js_check_product">Add to Cart</button>
+            </xpath>-->
+<!--            
+            <xpath expr="//form[@class='js_add_cart_variants']/div[@class='js_product']/a[@id='add_to_cart']" position="after">
+                <button id="add_to_cart" type="submit" class="btn btn-primary btn-lg mt8 js_check_product">Add to Cart</button>
+            </xpath>-->
             
         </template>
         

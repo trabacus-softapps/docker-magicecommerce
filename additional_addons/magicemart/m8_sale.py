@@ -353,33 +353,34 @@ class sale_order(osv.osv):
         
     def create(self, cr, uid, vals, context = None):
         print "sale",uid, context.get("uid") 
+        print "Sale COntext",context
         if not context:
             context = {}
+        print "Create Wbsite Sale Order......",vals
         partner_obj = self.pool.get("res.partner")
         warehouse_obj = self.pool.get('stock.warehouse')
         uid = context.get("uid",uid)
-         
-        if vals.get('warehouse_id',False):
-            warehouse = warehouse_obj.browse(cr, uid, vals.get('warehouse_id'))
-             
-            #to select sub company shop
-            if not warehouse.company_id.parent_id:
+        team_id = vals.get('team_id',False)
+        if team_id !=3: 
+            if vals.get('warehouse_id',False):
+                warehouse = warehouse_obj.browse(cr, uid, vals.get('warehouse_id'))
+                 
+                #to select sub company shop
+                if not warehouse.company_id.parent_id:
+                    raise osv.except_osv(_('User Error'), _('You must select sub company sale warehouse !'))
+                partner_id = vals.get('partner_id',False)
+                partner = partner_obj.browse(cr, uid, partner_id)
                 vals.update({
-                             'warehouse_id':2.
-                             })
-#                 raise osv.except_osv(_('User Error'), _('You must select sub company sale warehouse !'))
-            partner_id = vals.get('partner_id',False)
-            partner = partner_obj.browse(cr, uid, partner_id)
-            vals.update({
-#                          'pricelist_id':partner.property_product_pricelist.id,
-                         'company_id':warehouse.company_id.id,
-                        })
+    #                          'pricelist_id':partner.property_product_pricelist.id,
+                             'company_id':warehouse.company_id.id,
+                            })
          
         return super(sale_order, self).create(cr, uid, vals, context = context)
       
     def write(self, cr, uid, ids, vals, context = None):
         if not context:
             context = {}
+        print "Create Wbsite Sale Order Line......",vals
         partner_obj = self.pool.get("res.partner")
         warehouse_obj = self.pool.get('stock.warehouse')
         
@@ -393,10 +394,7 @@ class sale_order(osv.osv):
             if vals.get('warehouse_id',case.warehouse_id.id):
                 warehouse = warehouse_obj.browse(cr, uid, vals.get('warehouse_id',case.warehouse_id.id))
                 if not warehouse.company_id.parent_id:
-                    vals.update({
-                                 'warehouse_id' : 2,
-                                 })
-#                     raise osv.except_osv(_('User Error'), _('You must select sub company sale Warehouse !'))
+                    raise osv.except_osv(_('User Error'), _('You must select sub company sale Warehouse !'))
                  
             if vals.get('partner_id', case.partner_id):
                 partner_id = vals.get('partner_id', case.partner_id.id)

@@ -165,56 +165,95 @@ class website_sale(openerp.addons.website_sale.controllers.main.website_sale):
         prices = pool['product.pricelist'].price_rule_get_multi(cr, uid, pricelist_id, [(product, add_qty, partner) for product in products], context=context)
         return {product_id: prices[product_id][pricelist_id][0] for product_id in product_ids}
     
-#   
-#     # Overriden to pass Warehouse
-#     @http.route(['/shop/product/<model("product.template"):product>'], type='http', auth="public", website=True)
-#     def product(self, product, category='', search='', **kwargs):
-#         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
-#         category_obj = pool['product.public.category']
-#         template_obj = pool['product.template']
-#         warehouse_obj = pool['stock.warehouse']
-#         
-#         warehouse_ids = warehouse_obj.search(cr, uid, [('code','!=', 'MAIN')])
-#         warehouse = warehouse_obj.browse(cr, uid, warehouse_ids, context=context)
-#               
-#          
-#         context.update(active_id=product.id)
-#         
-#         if category:
-#             category = category_obj.browse(cr, uid, int(category), context=context)
-# 
-#         attrib_list = request.httprequest.args.getlist('attrib')
-#         attrib_values = [map(int,v.split("-")) for v in attrib_list if v]
-#         attrib_set = set([v[1] for v in attrib_values])
-# 
-#         keep = WSmain.QueryURL('/shop', category=category and category.id, search=search, attrib=attrib_list)
-# 
-#         category_ids = category_obj.search(cr, uid, [('parent_id', '=', False)], context=context)
-#         categs = category_obj.browse(cr, uid, category_ids, context=context)
-# 
-#         pricelist = self.get_pricelist()
-# 
-#         from_currency = pool.get('product.price.type')._get_field_currency(cr, uid, 'list_price', context)
-#         to_currency = pricelist.currency_id
-#         compute_currency = lambda price: pool['res.currency']._compute(cr, uid, from_currency, to_currency, price, context=context)
-# 
-#         if not context.get('pricelist'):
-#             context['pricelist'] = int(self.get_pricelist())
-#             product = template_obj.browse(cr, uid, int(product), context=context)
-# 
-#         values = {
-#             'search': search,
-#             'category': category,
-#             'pricelist': pricelist,
-#             'attrib_values': attrib_values,
-#             'compute_currency': compute_currency,
-#             'attrib_set': attrib_set,
-#             'keep': keep,
-#             'categories': categs,
-#             'main_object': product,
-#             'warehouse': warehouse,
-#             'product': product,
-#             'get_attribute_value_ids': self.get_attribute_value_ids
-#         }
-#         return request.website.render("website_sale.product", values)
-#   
+   
+    # Overriden to pass Warehouse
+    @http.route(['/shop/product/<model("product.template"):product>'], type='http', auth="public", website=True)
+    def product(self, product, category='', search='', **kwargs):
+        cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
+        category_obj = pool['product.public.category']
+        template_obj = pool['product.template']
+        warehouse_obj = pool['stock.warehouse']
+         
+        warehouse_ids = warehouse_obj.search(cr, uid, [('code','!=', 'MAIN')])
+        warehouse = warehouse_obj.browse(cr, uid, warehouse_ids, context=context)
+               
+          
+        context.update(active_id=product.id)
+         
+        if category:
+            category = category_obj.browse(cr, uid, int(category), context=context)
+ 
+        attrib_list = request.httprequest.args.getlist('attrib')
+        attrib_values = [map(int,v.split("-")) for v in attrib_list if v]
+        attrib_set = set([v[1] for v in attrib_values])
+ 
+        keep = WSmain.QueryURL('/shop', category=category and category.id, search=search, attrib=attrib_list)
+ 
+        category_ids = category_obj.search(cr, uid, [('parent_id', '=', False)], context=context)
+        categs = category_obj.browse(cr, uid, category_ids, context=context)
+ 
+        pricelist = self.get_pricelist()
+ 
+        from_currency = pool.get('product.price.type')._get_field_currency(cr, uid, 'list_price', context)
+        to_currency = pricelist.currency_id
+        compute_currency = lambda price: pool['res.currency']._compute(cr, uid, from_currency, to_currency, price, context=context)
+ 
+        if not context.get('pricelist'):
+            context['pricelist'] = int(self.get_pricelist())
+            product = template_obj.browse(cr, uid, int(product), context=context)
+ 
+        values = {
+            'search': search,
+            'category': category,
+            'pricelist': pricelist,
+            'attrib_values': attrib_values,
+            'compute_currency': compute_currency,
+            'attrib_set': attrib_set,
+            'keep': keep,
+            'categories': categs,
+            'main_object': product,
+            'warehouse': warehouse,
+            'product': product,
+            'get_attribute_value_ids': self.get_attribute_value_ids
+        }
+        return request.website.render("website_sale.product", values)
+   
+    @http.route(['/shop/cart/update'], type='http', auth="public", methods=['POST'], website=True)
+    def cart_update(self, product_id, add_qty=1, set_qty=0, **kw):
+        print "KW",kw
+        cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
+        sline_obj = pool['sale.order.line']
+        warehouse_obj = pool['stock.warehouse']
+        sale_obj = pool['sale.order']
+        
+        sale_order_id = request.session.get('sale_order_id')
+        
+        if not sale_order_id:
+#             if kw.get('Warehouse') == 'Select City':
+#                     raise Warning(" Please Select The City")
+            
+            warehouse_id = int(kw.get('Warehouse', False))
+            context.update({"Warehouse":warehouse_id})
+            warehouse = warehouse_obj.browse(cr, uid, warehouse_id) 
+             
+#             if not warehouse_id:
+#                 raise osv.except_osv(_('Warning'),_('Please Select The City!'))
+              
+            # Creating Sale order
+            sale = request.website.sale_get_order(force_create=1, context=context)
+            request.session['sale_order_id'] = sale.id
+             
+            # Creating Sale order Line
+            sale._cart_update(product_id=int(product_id), add_qty=float(add_qty), set_qty=float(set_qty))
+            if sale.id:
+                cr.execute("update sale_order set warehouse_id="+str(warehouse_id)+"where id="+str(sale.id))
+                cr.execute("update sale_order set company_id="+str(warehouse.company_id.id)+"where id ="+str(sale.id))
+                
+        else:
+            request.website.sale_get_order(force_create=0)._cart_update(product_id=int(product_id), add_qty=float(add_qty), set_qty=float(set_qty))
+            
+        return request.redirect("/shop/cart")
+     
+     
+    
+    
