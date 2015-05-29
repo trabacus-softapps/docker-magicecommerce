@@ -55,7 +55,6 @@ class res_partner(osv.osv):
     
     # On creation of Partner creating 2 locations
     def create(self, cr, uid, vals, context=None):
-        print "Vals......",vals
         m_ac_obj = self.pool.get("account.account")
         comp_obj = self.pool.get("res.company")
         c_parent_id=False

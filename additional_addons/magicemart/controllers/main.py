@@ -5,6 +5,7 @@ from openerp import SUPERUSER_ID
 from openerp import http
 from openerp.http import request
 import openerp
+from openerp import tools
 from openerp.tools.translate import _
 from openerp.addons.website.models.website import slug
 import openerp.addons.website_sale.controllers.main as WSmain
@@ -165,95 +166,123 @@ class website_sale(openerp.addons.website_sale.controllers.main.website_sale):
         prices = pool['product.pricelist'].price_rule_get_multi(cr, uid, pricelist_id, [(product, add_qty, partner) for product in products], context=context)
         return {product_id: prices[product_id][pricelist_id][0] for product_id in product_ids}
     
-   
-    # Overriden to pass Warehouse
-    @http.route(['/shop/product/<model("product.template"):product>'], type='http', auth="public", website=True)
-    def product(self, product, category='', search='', **kwargs):
+    
+    # Passing Warehouse On click of Process Checkout
+    @http.route(['/shop/checkout'], type='http', auth="public", website=True)
+    def checkout(self, **post):
         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
-        category_obj = pool['product.public.category']
-        template_obj = pool['product.template']
-        warehouse_obj = pool['stock.warehouse']
-         
-        warehouse_ids = warehouse_obj.search(cr, uid, [('code','!=', 'MAIN')])
-        warehouse = warehouse_obj.browse(cr, uid, warehouse_ids, context=context)
-               
-          
-        context.update(active_id=product.id)
-         
-        if category:
-            category = category_obj.browse(cr, uid, int(category), context=context)
- 
-        attrib_list = request.httprequest.args.getlist('attrib')
-        attrib_values = [map(int,v.split("-")) for v in attrib_list if v]
-        attrib_set = set([v[1] for v in attrib_values])
- 
-        keep = WSmain.QueryURL('/shop', category=category and category.id, search=search, attrib=attrib_list)
- 
-        category_ids = category_obj.search(cr, uid, [('parent_id', '=', False)], context=context)
-        categs = category_obj.browse(cr, uid, category_ids, context=context)
- 
-        pricelist = self.get_pricelist()
- 
-        from_currency = pool.get('product.price.type')._get_field_currency(cr, uid, 'list_price', context)
-        to_currency = pricelist.currency_id
-        compute_currency = lambda price: pool['res.currency']._compute(cr, uid, from_currency, to_currency, price, context=context)
- 
-        if not context.get('pricelist'):
-            context['pricelist'] = int(self.get_pricelist())
-            product = template_obj.browse(cr, uid, int(product), context=context)
- 
-        values = {
-            'search': search,
-            'category': category,
-            'pricelist': pricelist,
-            'attrib_values': attrib_values,
-            'compute_currency': compute_currency,
-            'attrib_set': attrib_set,
-            'keep': keep,
-            'categories': categs,
-            'main_object': product,
-            'warehouse': warehouse,
-            'product': product,
-            'get_attribute_value_ids': self.get_attribute_value_ids
-        }
-        return request.website.render("website_sale.product", values)
-   
-    @http.route(['/shop/cart/update'], type='http', auth="public", methods=['POST'], website=True)
-    def cart_update(self, product_id, add_qty=1, set_qty=0, **kw):
-        print "KW",kw
+        warehouse_obj = pool["stock.warehouse"]
+        user_obj = pool["res.users"]
+        
+        print "Checout Post.....",post
+        order = request.website.sale_get_order(force_create=1, context=context)
+
+        redirection = self.checkout_redirection(order)
+        if redirection:
+            return redirection
+
+        values = self.checkout_values()
+        
+        user = user_obj.browse(cr, uid, uid)
+        if user.login == 'public':  
+            warehouse_ids = warehouse_obj.search(cr, uid, [('code','!=', 'MAIN')])
+            warehouse = warehouse_obj.browse(cr, uid, warehouse_ids, context=context)
+            values.update({
+                           'warehouse':warehouse,
+                           })
+        print "Checkout....",values
+        return request.website.render("website_sale.checkout", values)
+    
+    
+    
+    # While Confirming the Order Updating Warehouse and Company with respect to sale order
+    @http.route(['/shop/confirm_order'], type='http', auth="public", website=True)
+    def confirm_order(self, **post):
         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
-        sline_obj = pool['sale.order.line']
-        warehouse_obj = pool['stock.warehouse']
-        sale_obj = pool['sale.order']
+        warehouse_obj = pool["stock.warehouse"]
+        print "ConfirmPost.....",post
         
-        sale_order_id = request.session.get('sale_order_id')
+        warehouse_id = post.get("Warehouse")
+        if warehouse_id:
+            warehouse = warehouse_obj.browse(cr, uid, int(warehouse_id))
+#             warehouse = int(warehouse)
+        order = request.website.sale_get_order(context=context)
+        if not order:
+            return request.redirect("/shop")
+
+        redirection = self.checkout_redirection(order)
+        if redirection:
+            return redirection
+
+        values = self.checkout_values(post)
+
+        values["error"], values["error_message"] = self.checkout_form_validate(values["checkout"])
+        if values["error"]:
+            return request.website.render("website_sale.checkout", values)
+
+        self.checkout_form_save(values["checkout"])
+
+        request.session['sale_last_order_id'] = order.id
         
-        if not sale_order_id:
-#             if kw.get('Warehouse') == 'Select City':
-#                     raise Warning(" Please Select The City")
-            
-            warehouse_id = int(kw.get('Warehouse', False))
-            context.update({"Warehouse":warehouse_id})
-            warehouse = warehouse_obj.browse(cr, uid, warehouse_id) 
-             
-#             if not warehouse_id:
-#                 raise osv.except_osv(_('Warning'),_('Please Select The City!'))
-              
-            # Creating Sale order
-            sale = request.website.sale_get_order(force_create=1, context=context)
-            request.session['sale_order_id'] = sale.id
-             
-            # Creating Sale order Line
-            sale._cart_update(product_id=int(product_id), add_qty=float(add_qty), set_qty=float(set_qty))
-            if sale.id:
-                cr.execute("update sale_order set warehouse_id="+str(warehouse_id)+"where id="+str(sale.id))
-                cr.execute("update sale_order set company_id="+str(warehouse.company_id.id)+"where id ="+str(sale.id))
+        
                 
-        else:
-            request.website.sale_get_order(force_create=0)._cart_update(product_id=int(product_id), add_qty=float(add_qty), set_qty=float(set_qty))
-            
-        return request.redirect("/shop/cart")
-     
-     
+        if warehouse_id and order:
+            cr.execute("update sale_order set warehouse_id="+str(warehouse_id)+"where id="+str(order.id))
+            cr.execute("update sale_order set company_id="+str(warehouse.company_id.id)+"where id ="+str(order.id))
+        
+
+        request.website.sale_get_order(update_pricelist=True, context=context)
+        
+        
+        return request.redirect("/shop/payment")
+   
+
+#     # To Display Error If Required fields are not set 
+#     def checkout_form_validate(self, data):
+#         cr, uid, context, registry = request.cr, request.uid, request.context, request.registry
+# 
+#         error = dict()
+#         error_message = []
+#         
+#         print "Data.....",data
+# 
+#         # Validation
+#         for field_name in self.mandatory_billing_fields:
+#             print "FIELD NAME",data.get(field_name)
+#             if not data.get(field_name):
+#                 error[field_name] = 'missing'
+#             
+#             if "Warehouse" not in data:
+#                 error[field_name] = 'missing'
+#             
+#         # email validation
+#         if data.get('email') and not tools.single_email_re.match(data.get('email')):
+#             error["email"] = 'error'
+#             error_message.append(_('Invalid Email! Please enter a valid email address.'))
+# 
+#         # vat validation
+#         if data.get("vat") and hasattr(registry["res.partner"], "check_vat"):
+#             if request.website.company_id.vat_check_vies:
+#                 # force full VIES online check
+#                 check_func = registry["res.partner"].vies_vat_check
+#             else:
+#                 # quick and partial off-line checksum validation
+#                 check_func = registry["res.partner"].simple_vat_check
+#             vat_country, vat_number = registry["res.partner"]._split_vat(data.get("vat"))
+#             if not check_func(cr, uid, vat_country, vat_number, context=None): # simple_vat_check
+#                 error["vat"] = 'error'
+# 
+#         if data.get("shipping_id") == -1:
+#             for field_name in self.mandatory_shipping_fields:
+#                 field_name = 'shipping_' + field_name
+#                 if not data.get(field_name):
+#                     error[field_name] = 'missing'
+# 
+#         # error message for empty required fields
+#         if [err for err in error.values() if err == 'missing']:
+#             error_message.append(_('Some required fields are empty.'))
+# 
+#         return error, error_message
+
     
-    
+     

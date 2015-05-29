@@ -336,7 +336,7 @@
                     <button name="do_enter_transfer_details"  string="Deliver" groups="stock.group_stock_user" type="object" class="oe_highlight"
                         attrs="{'invisible':['|',('state','not in', ('assigned','partially','available')),('picking_type_code','not in',('internal','outgoing'))]}"/>
                     
-                    <button name="do_enter_transfer_details"  string="Recieve" groups="stock.group_stock_user" type="object" class="oe_highlight"
+                    <button name="do_enter_transfer_details"  string="Receive" groups="stock.group_stock_user" type="object" class="oe_highlight"
                         attrs="{'invisible':['|',('state','not in', ('assigned','partially','available')),('picking_type_code','in',('internal','outgoing'))]}"/>
                 </button>
                 
@@ -354,6 +354,7 @@
                 <xpath expr="//field[@name='origin']" position="before">
                     <field name="cust_po_ref"  attrs="{'required':[('picking_type_code','in','outgoing')],'invisible':[('picking_type_code','in',('internal','incoming'))]}"/>
                     <field name="vehicle"   attrs="{'readonly':[('state','in','done')],'required':[('picking_type_code','in','outgoing')],'invisible':[('picking_type_code','in',('internal','incoming'))]}"/>
+                    <field name='supplier_inv_ref' attrs="{'readonly':[('state','in','done')],'required':[('picking_type_code','in','incoming')],'invisible':[('picking_type_code','in',('internal','outgoing'))]}"/>
                 </xpath>
                 
                 <xpath expr="//button[@name='action_assign']" position="after">
@@ -560,6 +561,21 @@
         
         <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. -->
         
+        
+<!-- Quantity Update Button should visible for Magic Manager Only       -->
+        
+<!--        <record id="m_view_template_property_form" model="ir.ui.view">
+            <field name="name">m.product.template.stock.property.form.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="stock.view_template_property_form"/>
+            <field name="arch" type="xml">
+                
+                <xpath expr="//group[@name='status']/group[@string='Stock and Expected Variations']/label[@for='qty_available']/div/button[@string='⇒ Update']" position="attributes">
+                    
+                    <attribute name="groups">magicemart.magicemart_group_manager</attribute>
+                </xpath>
+            </field>
+        </record>-->
         
     </data>
 </openerp>

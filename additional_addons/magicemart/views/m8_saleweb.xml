@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <openerp>
     <data>
-
-        <!-- Product item used by /shop and /shop/cart -->
+<!--
+        <!-\- Product item used by /shop and /shop/cart -\->
         <template id="m_products_item" inherit_id="website_sale.products_item"  name="Product item">
             <xpath expr="//div[@itemscope='itemscope']/section/div[@itemprop='offers']/b/span[@t-field='product.price']" position="replace">
                 <span t-field="product.discount_amt" style="white-space: nowrap;"  t-field-options='{
@@ -32,7 +32,12 @@
             </xpath>
             
             
-        </template>
+        </template>-->
+        
+        
+        
+        
+        
 <!--            <xpath expr="//span[@itemprop='price']" position="replace">
                 <span itemprop="price" style="display:none;" t-esc="product.pricelist_amt"/>
             </xpath>
@@ -73,18 +78,18 @@
             </xpath>      
             
         <!-- Adding Field City or Warehouse in /shop/product  form    -->
-            
+<!--            
             <xpath expr="//form[@class='js_add_cart_variants']/div[@class='js_product']" position="before">
                 <h3>Select City</h3>
-                <select name = "Warehouse" id="warehouse_select" class="form-control" required="required" style="width: 50%;">
+                <select name = "Warehouse" id="warehouse_select" class="form-control" style="width: 50%;">
                     
-<!--                    <option selected="selected"></option> -->
+<!-\-                    <option selected="selected"></option> -\->
                     <t t-foreach="warehouse" t-as="wh">
                         <option t-att-value = 'wh.id'><t t-esc="wh.name"/></option>
                     </t>
                 </select>
                 <p></p>
-            </xpath> 
+            </xpath> -->
             
 <!--            <xpath expr="//form[@class='js_add_cart_variants']/div[@class='js_product']/a[@id='add_to_cart']" position="replace">
                 <button id="replaced_add_to_cart" type="submit" class="btn btn-primary btn-lg mt8 js_check_product">Add to Cart</button>
@@ -94,8 +99,15 @@
                 <button id="add_to_cart" type="submit" class="btn btn-primary btn-lg mt8 js_check_product">Add to Cart</button>
             </xpath>-->
             
+            
+<!--            <xpath expr="//div[@class='row']/div[@class='col-sm-5 col-md-5 col-lg-4 col-lg-offset-1']/form[@class='js_add_cart_variants']" position="inside">
+                <div class="hidden">
+                    <t t-call="magicemart.m_products_item"/>
+                </div>
+            </xpath>-->
+            
         </template>
-        
+<!--        
         <template id="m_product_variants" inherit_id="website_sale.product_variants" >
             <xpath expr="//input[@name='product_id']" position="replace">
                 <input type="hidden" t-if="len(product.product_variant_ids) == 1" name="product_id" t-att-value="product.product_variant_ids[0].id if len(product.product_variant_ids) == 1 else variants" />
@@ -104,7 +116,56 @@
         
         
         
+        <template id="m_products" name="Products" inherit_id="website_sale.products">
+            <xpath expr="//div[@class='container oe_website_sale']/div[@class='products_pager']/div[@class='row']" position="after">
+                <select name = "Warehouse" id="warehouse_select" class="form-control" style="width: 20%; display:inline-block;">
+                    <option disabled="selected">Select City</option> 
+                    <t t-foreach="warehouse" t-as="wh">
+                        <option t-att-value = 'wh.id'><t t-esc="wh.name"/></option>
+                    </t>
+                </select>
+                
+            </xpath>
+        </template>
         
+        -->
+        
+        <template id="m_checkout" inherit_id="website_sale.checkout">
+            <xpath expr="//form[@action='/shop/confirm_order']/div[@class='row']/div[@class='col-md-8 oe_cart']/h3[@class='page-header mt16']" position="after">
+                <t t-if="warehouse">
+                    <label>Select City</label>
+                    <select name = "Warehouse" id="warehouse_select" required="required" class="form-control" style="width: 50%;">
+                        <option selected="selected" value=""></option>
+                        <t t-foreach="warehouse" t-as="wh">
+                            <option t-att-value = 'wh.id'><t t-esc="wh.name"/></option>
+                        </t>
+                    </select>
+                </t>
+            </xpath>
+            
+        </template>
        
     </data>
 </openerp>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

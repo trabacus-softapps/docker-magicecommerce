@@ -19,6 +19,8 @@ from openerp.osv.orm import setup_modifiers
 import time
 import openerp.addons.decimal_precision as dp
 from openerp.osv import osv, fields, expression
+from openerp.exceptions import UserError
+
 
 class product_template(osv.osv):
     _inherit = "product.template"
