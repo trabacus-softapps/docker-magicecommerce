@@ -227,7 +227,8 @@ class website_sale(openerp.addons.website_sale.controllers.main.website_sale):
             cr.execute("update sale_order set company_id="+str(warehouse.company_id.id)+"where id ="+str(order.id))
             
 #             sale_obj.web_comp_tax(cr, uid, order.id, int(warehouse_id), warehouse.company_id.id, {})
-            sale_obj.write(cr, uid, [order.id], {'company_id':warehouse.company_id.id})
+            print "Company Confirm.......", warehouse.company_id.id
+#             sale_obj.write(cr, uid, [order.id], {'company_id':warehouse.company_id.id})
             
             
         values = self.checkout_values(post)
