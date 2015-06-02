@@ -220,11 +220,14 @@ class website_sale(openerp.addons.website_sale.controllers.main.website_sale):
         
                 
         if warehouse_id and order:
+            
+            print "Wraehouse...............",int(warehouse_id)
+            
             cr.execute("update sale_order set warehouse_id="+str(warehouse_id)+"where id="+str(order.id))
             cr.execute("update sale_order set company_id="+str(warehouse.company_id.id)+"where id ="+str(order.id))
             
-            sale_obj.web_comp_tax(cr, uid, order.id, int(warehouse_id), warehouse.company_id.id, {})
-            
+#             sale_obj.web_comp_tax(cr, uid, order.id, int(warehouse_id), warehouse.company_id.id, {})
+            sale_obj.write(cr, uid, [order.id], {'company_id':warehouse.company_id.id})
             
             
         values = self.checkout_values(post)
@@ -310,9 +313,9 @@ class AuthSignupHome(openerp.addons.auth_signup.controllers.main.AuthSignupHome)
         
         qcontext.update({'company_id':company})
         
-#         print "ARGS",kw
-        if 'db_id' in kw:
-            company_id = int(kw.get('db_id'))
+        print "kw",kw
+        if 'company' in kw:
+            company_id = int(kw.get('company'))
             if company_id:
 #                 company_id = (company_id)
 #                 eval(field['selection'])

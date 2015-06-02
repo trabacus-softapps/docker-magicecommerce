@@ -2,6 +2,32 @@
 from openerp.osv import fields, osv 
 from openerp.tools.translate import _
 from ast import literal_eval
+from datetime import datetime, timedelta
+import random
+from urlparse import urljoin
+import werkzeug
+
+from openerp.addons.base.ir.ir_mail_server import MailDeliveryException
+from openerp.osv import osv, fields
+from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT, ustr
+from ast import literal_eval
+from openerp.tools.translate import _
+from openerp.exceptions import UserError
+
+
+
+class SignupError(Exception):
+    pass
+
+# def random_token():
+#     # the token has an entropy of about 120 bits (6 bits/char * 20 chars)
+#     chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+#     return ''.join(random.choice(chars) for i in xrange(20))
+# 
+# def now(**kwargs):
+#     dt = datetime.now() + timedelta(**kwargs)
+#     return dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+
 
 ROLES = [('magicemart_group_user','Magic User')
        , ('magicemart_group_manager','Magic Manager')
@@ -107,6 +133,7 @@ class res_users(osv.osv):
         part_obj = self.pool.get("res.partner")
         data_obj = self.pool.get('ir.model.data')
         
+        print "Create Vals",values
         if not 'lang' in context:
             context.update({'lang': 'en_US','search_default_no_share' : 1, 'tz':'Asia/Kolkata', 'uid':1 })
 #         Users Create context {'lang': 'en_US', 'params': {'action': 78}, 'search_default_no_share': 1, 'tz': 'Asia/Kolkata', 'uid': 1}

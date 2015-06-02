@@ -436,16 +436,15 @@ class sale_order(osv.osv):
         return res
      
      
-     
-    def web_comp_tax(self,cr, uid, ids, warehouse_id, company_id, context=None):
-        context = dict(context or {})
-        
-        case =  self.browse(cr, uid, ids)
-        if case:
-            self.write(cr, uid, case.id, {"warehouse_id":warehouse_id,
-                        'company_id':company_id,
-                        })
-        return True
+#      
+#     def web_comp_tax(self,cr, uid, ids, warehouse_id, company_id, context=None):
+#         context = dict(context or {})
+#         print "Wrehouse Sale.........",warehouse_id
+#         if warehouse_id:
+#             self.write(cr, uid, ids, {"warehouse_id":warehouse_id,
+#                                       'company_id':company_id,
+#                                       })
+#         return True
 
 sale_order()
 
@@ -867,13 +866,13 @@ class sale_order_line(osv.osv):
                 comp_id = vals.get("company_id",case.company_id.id)
                 if res.get("company_id"):
                     comp_id = res.get("company_id", case.company_id)
-                    
+                     
                 tax = tax_obj.browse(cr, uid, res.get("tax_id"))
                 for t in tax:
                     if t.company_id.id == comp_id:
                         vals.update({
                                      'tax_id' : [(6, 0, [t.id])],
-                                     
+                                      
                                      })
             return super(sale_order_line, self).write(cr, uid, [case.id], vals, context=context)
      
