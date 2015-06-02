@@ -1,6 +1,7 @@
 
 from openerp.osv import fields, osv 
 from openerp.tools.translate import _
+from ast import literal_eval
 
 ROLES = [('magicemart_group_user','Magic User')
        , ('magicemart_group_manager','Magic Manager')
@@ -26,7 +27,34 @@ class res_users(osv.osv):
     _description = "MagicEMart Users"
     
 
-
+    # Overridden:
+    def _signup_create_user(self, cr, uid, values, context=None):
+        """ create a new user from the template user """
+        print "its me"
+        ctx = dict(context or {})
+        ctx.update({'portal_user': True})
+        ir_config_parameter = self.pool.get('ir.config_parameter')
+        template_user_id = literal_eval(ir_config_parameter.get_param(cr, uid, 'auth_signup.template_user_id', 'False'))
+        assert template_user_id and self.exists(cr, uid, template_user_id, context=context), 'Signup: invalid template user'
+ 
+        # check that uninvited users may sign up
+        if 'partner_id' not in values:
+            if not literal_eval(ir_config_parameter.get_param(cr, uid, 'auth_signup.allow_uninvited', 'False')):
+                raise SignupError('Signup is not allowed for uninvited users')
+ 
+        assert values.get('login'), "Signup: no login given for new user"
+        assert values.get('partner_id') or values.get('name'), "Signup: no name or partner given for new user"
+ 
+        # create a copy of the template user (attached to a specific partner_id if given)
+        values['active'] = True
+        context = dict(context or {}, no_reset_password=True)
+        try:
+            with cr.savepoint():
+                return self.copy(cr, uid, template_user_id, values, context=ctx)
+        except Exception, e:
+            # copy may failed if asked login is not available.
+            raise SignupError(ustr(e))
+        
     def _get_belongingGroups(self, cr, uid, belongto, context=None):
         data_obj = self.pool.get('ir.model.data') 
         result = super(res_users, self)._get_group(cr, uid, context)
@@ -76,9 +104,13 @@ class res_users(osv.osv):
         return result
 
     def create(self, cr, uid, values, context=None):
-#         print "Val", values['partnerr_id']
         part_obj = self.pool.get("res.partner")
         data_obj = self.pool.get('ir.model.data')
+        
+        if not 'lang' in context:
+            context.update({'lang': 'en_US','search_default_no_share' : 1, 'tz':'Asia/Kolkata', 'uid':1 })
+#         Users Create context {'lang': 'en_US', 'params': {'action': 78}, 'search_default_no_share': 1, 'tz': 'Asia/Kolkata', 'uid': 1}
+        
         dummy, ptUsrid = data_obj.get_object_reference(cr, 1, 'magicemart', 'magicemart_portal_user')
         dummy, ptMgr = data_obj.get_object_reference(cr, 1, 'magicemart', 'magicemart_portal_manager')
         dummy, mUsrid = data_obj.get_object_reference(cr, 1, 'magicemart', 'magicemart_group_user')
@@ -91,18 +123,28 @@ class res_users(osv.osv):
         dummy, hrEmpid = data_obj.get_object_reference(cr, 1, 'base', 'group_user')
         dummy, supMgr = data_obj.get_object_reference(cr, 1, 'magicemart', 'magicemart_supplier_portal')
         values.update({'active'  : True,})
-        if 'user_roles' in values and values['user_roles']:
         
-            if 'user_roles' in values and values['user_roles']:  # Here we are checking the field 'usr_roels' adn value for 'usr_Roles' present 
+        
+        # Portal: Deletinf Standard Groups
+        if context.get('portal_user', False):
+            del values['groups_id']
+            
+        user_roles = values.get('user_roles', False)
+                                
+        if user_roles:
+        
+            if user_roles:  # Here we are checking the field 'usr_roels' adn value for 'usr_Roles' present 
                 groupids = self._get_belongingGroups(cr, uid, values['user_roles'], context)
                 for fl in groupids:
                     values['in_group_' + str(fl)] = True
-            if values.get("user_roles") == 'magicemart_portal_manager':
+                    
+            if user_roles == 'magicemart_portal_manager':
                 if not values.get("location_id"):
                     raise osv.except_osv(_('Warning'),_('Please select the Customer Stock Location '))
+
                         
             # To Make Magic User & Manager as False for Potal Group    
-            if values.get("user_roles") in( 'magicemart_group_user','magicemart_group_manager'):
+            if user_roles in( 'magicemart_group_user','magicemart_group_manager'):
                 values.update(
                             {'sel_groups_'+ str(ptUsrid)+'_' + str(ptMgr) : False,
                              'sel_groups_'+str(supMgr):False,
@@ -110,18 +152,18 @@ class res_users(osv.osv):
                               }
                             )
             # To Make portal User & Manager as False for Magic Group
-            if values.get("user_roles") == 'magicemart_portal_user' or 'magicemart_portal_manager':
+            if user_roles == 'magicemart_portal_user' or 'magicemart_portal_manager':
                 values.update({
                             'sel_groups_'+ str(mUsrid)+'_' + str(mMgrid) : False,
                             'sel_groups_'+str(supMgr):False, 
                             })    
-            if values.get("user_roles") == 'magicemart_supplier_portal':
+            if user_roles == 'magicemart_supplier_portal':
                 values.update({
                             'sel_groups_'+ str(mUsrid)+'_' + str(mMgrid) : False,
                             'sel_groups_'+str(ptUsrid)+'_'+str(ptMgr):False,
                               })
                                 
-            if values.get("user_roles") in('magicemart_portal_user','magicemart_portal_manager','magicemart_supplier_portal'):
+            if user_roles in ('magicemart_portal_user','magicemart_portal_manager','magicemart_supplier_portal'):
                 part = values.get('partner_id')
                 if part:
                     partner_id = part_obj.browse(cr, uid,part)
@@ -131,13 +173,8 @@ class res_users(osv.osv):
                                    
                                    })
             
-#         if not values.get("user_roles"):
-#             values.update({
-#                            'sel_groups_'+str(hrEmpid) : True
-#                            })
-#             
-            
-        
+                
+        print "Create Last ___________________________", values.get('login', False), values.get('groups_id', False)
         return super(res_users, self).create(cr, uid, values, context=context) 
 
     def clear_allgroups(self, cr, uid, ids, context=None):
@@ -239,8 +276,10 @@ class res_users(osv.osv):
         return clear
 
     def write(self, cr, uid, ids, vals, context=None):
+        
         data_obj = self.pool.get('ir.model.data')
         part_obj = self.pool.get("res.partner")
+        
         dummy, ptUsrid = data_obj.get_object_reference(cr, 1, 'magicemart', 'magicemart_portal_user')
         dummy, ptMgr = data_obj.get_object_reference(cr, 1, 'magicemart', 'magicemart_portal_manager')
         
@@ -252,51 +291,45 @@ class res_users(osv.osv):
 
         if ids and isinstance(ids, int):
            ids = [ids] 
-        if hasattr(ids, '__iter__'):
-            case = self.browse(cr, uid, ids, context=context)
-            if case:
-                case = case[0]
-            if vals.get("user_roles",case.user_roles):
-                if vals.get("user_roles",case.user_roles) not in ('magicemart_group_user','magicemart_group_manager'):
+        
+        for case in self.browse(cr, uid, ids, context=context):
+            user_roles =  vals.get("user_roles", case.user_roles)
+            
+            if user_roles:
+                if user_roles not in ('magicemart_group_user','magicemart_group_manager'):
                     clear = self.clear_allgroups(cr, uid, ids, context=context)
                     vals.update(clear)
                     groupids = self._get_belongingGroups(cr, uid, vals.get('user_roles', case.user_roles), context)
                     for fl in groupids:
-                        vals['in_group_' + str(fl)] = True  
+                        vals['in_group_' + str(fl)] = True
                 
-                for case in self.browse(cr, uid, ids, context=context):
-                    if vals.get('user_roles'):
-                        clear = self.clear_allgroups(cr, uid, ids, context=context)
-                        vals.update(clear)
-                        groupids = self._get_belongingGroups(cr, uid, vals.get('user_roles'), context)
-                        for fl in groupids:
-                            vals['in_group_' + str(fl)] = True
-                            
-                    if vals.get("user_roles",case.user_roles) == 'magicemart_portal_manager':
-                        if not vals.get("location_id",case.location_id):
-                            raise osv.except_osv(_('Warning'),_('Please select the Customer Stock Location '))
-                        
-                    # To Make Magic User & Manager as False for Potal Group    
-                    if vals.get("user_roles",case.user_roles) in ('magicemart_group_user','magicemart_group_manager'):
-                        vals.update(
-                                    {'sel_groups_'+ str(ptUsrid)+'_' + str(ptMgr) : False, 
-                                     'sel_groups_'+str(supMgr):False,
-                                     'location_id':False, }
+                
+            if vals.get('user_roles'):
+                clear = self.clear_allgroups(cr, uid, ids, context=context)
+                vals.update(clear)
+                groupids = self._get_belongingGroups(cr, uid, vals.get('user_roles'), context)
+                for fl in groupids:
+                    vals['in_group_' + str(fl)] = True
+                    
+                    
+            if user_roles == 'magicemart_portal_manager':
+                if not vals.get("location_id",case.location_id):
+                    raise osv.except_osv(_('Warning'),_('Please select the Customer Stock Location '))
+                
+                
+            # To Make Magic User & Manager as False for Potal Group    
+            elif user_roles in ('magicemart_group_user','magicemart_group_manager'):
+                vals.update(
+                            {'sel_groups_'+ str(ptUsrid)+'_' + str(ptMgr) : False, 
+                             'sel_groups_'+str(supMgr):False,
+                             'location_id':False, }
                                     )
                     
-            if vals.get("user_roles",case.user_roles) in('magicemart_portal_user','magicemart_portal_manager','magicemart_supplier_portal'):
+            elif user_roles in ('magicemart_portal_user','magicemart_portal_manager','magicemart_supplier_portal'):
                 part = part_obj.browse(cr,uid,vals.get('partner_id',case.partner_id.id))
                 if part:
-                    vals.update({
-                                   'name':part.name or False,
-                                   
-                                   })       
-#             if not vals.get("user_roles", case.user_roles) and not vals.get("name",case.name) == "Administrator":
-#                 vals.update({
-#                              'sel_groups_'+str(hrEmpid) : True
-#                              
-#                              })
-                        
+                    vals.update({'name':part.name or False,})       
+
         return super(res_users, self).write(cr, uid, ids, vals, context=context)
         
 res_users()

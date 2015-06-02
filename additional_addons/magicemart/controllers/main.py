@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import werkzeug
 
+
 from openerp import SUPERUSER_ID
 from openerp import http
 from openerp.http import request
@@ -10,6 +11,8 @@ from openerp.tools.translate import _
 from openerp.addons.website.models.website import slug
 import openerp.addons.website_sale.controllers.main as WSmain
 
+
+from openerp.addons.auth_signup.res_users import SignupError
 
 
 PPG = 20 # Products Per Page
@@ -200,6 +203,7 @@ class website_sale(openerp.addons.website_sale.controllers.main.website_sale):
     def confirm_order(self, **post):
         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
         warehouse_obj = pool["stock.warehouse"]
+        sale_obj = pool["sale.order"]
         print "ConfirmPost.....",post
         
         warehouse_id = post.get("Warehouse")
@@ -213,7 +217,16 @@ class website_sale(openerp.addons.website_sale.controllers.main.website_sale):
         redirection = self.checkout_redirection(order)
         if redirection:
             return redirection
-
+        
+                
+        if warehouse_id and order:
+            cr.execute("update sale_order set warehouse_id="+str(warehouse_id)+"where id="+str(order.id))
+            cr.execute("update sale_order set company_id="+str(warehouse.company_id.id)+"where id ="+str(order.id))
+            
+            sale_obj.web_comp_tax(cr, uid, order.id, int(warehouse_id), warehouse.company_id.id, {})
+            
+            
+            
         values = self.checkout_values(post)
 
         values["error"], values["error_message"] = self.checkout_form_validate(values["checkout"])
@@ -223,12 +236,6 @@ class website_sale(openerp.addons.website_sale.controllers.main.website_sale):
         self.checkout_form_save(values["checkout"])
 
         request.session['sale_last_order_id'] = order.id
-        
-        
-                
-        if warehouse_id and order:
-            cr.execute("update sale_order set warehouse_id="+str(warehouse_id)+"where id="+str(order.id))
-            cr.execute("update sale_order set company_id="+str(warehouse.company_id.id)+"where id ="+str(order.id))
         
 
         request.website.sale_get_order(update_pricelist=True, context=context)
@@ -285,4 +292,65 @@ class website_sale(openerp.addons.website_sale.controllers.main.website_sale):
 #         return error, error_message
 
     
-     
+    
+class AuthSignupHome(openerp.addons.auth_signup.controllers.main.AuthSignupHome):    
+    
+    
+    
+    # Overriden to Create Company Field in Sign Up Page
+    @http.route('/web/signup', type='http', auth='public', website=True)
+    def web_auth_signup(self, *args, **kw):
+        qcontext = self.get_auth_signup_qcontext()
+        cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
+        comp_obj = pool["res.company"]
+         
+        comp_ids = comp_obj.search(cr, uid, [('parent_id','!=',False)])
+        
+        company = comp_obj.browse(cr, uid, comp_ids)
+        
+        qcontext.update({'company_id':company})
+        
+#         print "ARGS",kw
+        if 'db_id' in kw:
+            company_id = int(kw.get('db_id'))
+            if company_id:
+#                 company_id = (company_id)
+#                 eval(field['selection'])
+                qcontext.update({'company_id':company_id, 'company_ids': [(6, 0, [company_id])],})
+            
+        if not qcontext.get('token') and not qcontext.get('signup_enabled'):
+            raise werkzeug.exceptions.NotFound()
+
+        if 'error' not in qcontext and request.httprequest.method == 'POST':
+            try:
+                self.do_signup(qcontext)
+                return super(AuthSignupHome, self).web_login(*args, **kw)
+            except (SignupError, AssertionError), e:
+                qcontext['error'] = _(e.message)
+
+        return request.render('auth_signup.signup', qcontext)
+    
+    # Overriden to pass only 1 company in company and allowed companies in Users
+    def do_signup(self, qcontext):
+        """ Shared helper that creates a res.partner out of a token """
+        cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
+        loc_obj = pool["stock.location"]
+        prod_obj = pool["product.product"]
+        values = dict((key, qcontext.get(key)) for key in ('login', 'name', 'password','company_id','company_ids'))
+        
+        loc_ids = loc_obj.search(cr, uid, [('complete_name','=','Partner Locations / Customers / Stock')])
+        prod_ids = prod_obj.search(cr, uid, []) 
+        if loc_ids:
+            loc_ids = loc_ids[0]
+            values.update({
+                           
+                           'user_roles':'magicemart_portal_manager',
+                           'location_id' : loc_ids,
+                           'product_ids': [(6, 0, prod_ids)],
+                           })
+        
+        assert any([k for k in values.values()]), "The form was not properly filled in."
+        assert values.get('password') == qcontext.get('confirm_password'), "Passwords do not match; please retype them."
+        self._signup_with_values(qcontext.get('token'), values)
+        request.cr.commit()
+    

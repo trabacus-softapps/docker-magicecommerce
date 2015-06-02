@@ -436,6 +436,16 @@ class sale_order(osv.osv):
         return res
      
      
+     
+    def web_comp_tax(self,cr, uid, ids, warehouse_id, company_id, context=None):
+        context = dict(context or {})
+        
+        case =  self.browse(cr, uid, ids)
+        if case:
+            self.write(cr, uid, case.id, {"warehouse_id":warehouse_id,
+                        'company_id':company_id,
+                        })
+        return True
 
 sale_order()
 
@@ -673,10 +683,13 @@ class sale_order_line(osv.osv):
         prod_obj =self.pool.get("product.product")
         prod =  prod_obj.browse(cr, uid,product)
         pricelist_obj = self.pool.get("product.pricelist")
+        warehouse_obj = self.pool.get("stock.warehouse")
         pricelist_id  = pricelist_obj.browse(cr, uid, pricelist)
         
         if warehouse_id:  # shop is nothing but company_id
             context.update({'warehouse':warehouse_id})
+            warehouse = warehouse_obj.browse(cr, uid, warehouse_id)
+            res['value']['company_id'] = warehouse.company_id.id
 #             warehouse_id = context.get('warehouse_id')
 #             warehouse = self.pool.get("stock.warehouse").browse(cr, uid, warehouse_id)
 #             comp_id = warehouse.company_id.id
@@ -851,10 +864,13 @@ class sale_order_line(osv.osv):
                           
                          })
             if res.get("tax_id"):
-                comp_id = vals.get("company_id",case.company_id)
+                comp_id = vals.get("company_id",case.company_id.id)
+                if res.get("company_id"):
+                    comp_id = res.get("company_id", case.company_id)
+                    
                 tax = tax_obj.browse(cr, uid, res.get("tax_id"))
                 for t in tax:
-                    if t.company_id.id == comp_id.id:
+                    if t.company_id.id == comp_id:
                         vals.update({
                                      'tax_id' : [(6, 0, [t.id])],
                                      

@@ -145,6 +145,42 @@
             
         </template>
        
+       
+       
+<!--       Sign UP-->
+        
+        <template id="m_auth_signup_fields" inherit_id = "auth_signup.fields" >
+            <xpath expr="//div[@class='form-group field-confirm_password']" position="after">
+                <label>Select City</label>
+                <select name="company" id="company_select" class="form-control">
+                    <option selected="selected" value=""></option>
+                    <t t-foreach="company_id" t-as="company">
+                        <option t-att-value = 'company.id'><t t-esc="company.name"/></option>
+                        </t>
+                </select>
+                <br/>
+            </xpath>
+            
+        </template>
+       
+       
+<!--       
+        
+        
+                    <xpath expr="//div[@class='form-group field-confirm_password']" position="after">
+                <label>Select City</label>
+                <select name="db_id" id="company_select" required="required" class="form-control">
+                    <option selected="selected" value=""/>
+                        <t t-foreach="company_id" t-as="company">
+                            <option t-att-value="company.id"><t t-esc="company.name"/></option>
+
+                        </t>
+                </select>
+<br/>
+            </xpath>
+        
+        -->
+       
     </data>
 </openerp>
 
