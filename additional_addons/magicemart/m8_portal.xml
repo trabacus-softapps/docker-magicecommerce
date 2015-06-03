@@ -6,13 +6,13 @@
         <menuitem icon="terp-project" name="Customer Portal Admin" id="menu_magicemart_customer" sequence="501"  groups="magicemart.magicemart_portal_manager,magicemart.magicemart_portal_user" />
         <menuitem name="Customer Portal" id="menu_portal_customer" parent="menu_magicemart_customer" sequence="1" groups="magicemart.magicemart_portal_manager,magicemart.magicemart_portal_user" />
         
-        <menuitem name="Customer Portal Admin" id="menu_portal_customer_admin" parent="menu_magicemart_customer" sequence="2" groups="magicemart.magicemart_portal_manager" />
+        <menuitem name="Your Account Menu" id="menu_portal_customer_admin" parent="menu_magicemart_customer" sequence="0" groups="magicemart.magicemart_portal_manager" />
         
         
-        <menuitem name="Customer Portal Employee" id="portal_customer_employee" parent="menu_magicemart_customer" sequence="1" groups="magicemart.magicemart_portal_manager,magicemart.magicemart_portal_user" />
+        <menuitem name="Distribution (Optional)" id="portal_customer_employee" parent="menu_magicemart_customer" sequence="2" groups="magicemart.magicemart_portal_manager,magicemart.magicemart_portal_user" />
         
         
-        <menuitem name="Reports" id="portal_customer_reports" parent="menu_magicemart_customer" sequence="3" groups="magicemart.magicemart_portal_manager" />
+        <menuitem name="Reports" id="portal_customer_reports" parent="menu_magicemart_customer" sequence="1" groups="magicemart.magicemart_portal_manager" />
         
         <menuitem name="Supplier" id="menu_magicemart_supplier"   sequence="502"  groups="magicemart.magicemart_supplier_portal" />
         <menuitem name="Supplier" id="menu_supplier_portal" parent="menu_magicemart_supplier" sequence="1"  groups="magicemart.magicemart_supplier_portal" />
@@ -429,7 +429,7 @@
         </record>
         
                 
-        <menuitem name="Delivery Orders" id="menu_portal_customer_delivery_order"  action="m_action_picking_type_custportal"
+        <menuitem name="Delivery Challans" id="menu_portal_customer_delivery_order"  action="m_action_picking_type_custportal"
             parent="menu_portal_customer_admin"  sequence="2" groups="magicemart.magicemart_portal_manager" />
 
         
@@ -489,8 +489,8 @@
             <field name="act_window_id" ref="action_portal_product"/>
         </record>
         
-        <menuitem name="Products" id="menu_portal_customer_products" parent="portal_customer_employee" 
-            action="magicemart.action_portal_product" sequence="3" groups="magicemart.magicemart_portal_manager,magicemart.magicemart_portal_user" />
+        <menuitem name="Products" id="menu_portal_customer_products" parent="menu_portal_customer_admin" 
+            action="magicemart.action_portal_product" sequence="0" groups="magicemart.magicemart_portal_manager,magicemart.magicemart_portal_user" />
         
         
         <!--	*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. *.*.*.*.*.*.*.*.*.*.*.*.*.*.* .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.

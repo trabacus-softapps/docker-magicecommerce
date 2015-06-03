@@ -29,3 +29,15 @@ openerp.magicemart = function(instance) {
     }
     });
 }
+
+$(document).ready(function()
+{
+	if($('.my_cart_quantity').text() >= 1)
+	{
+		$('#warehouse_select').hide();
+	} 
+	// $('#add_to_cart').click(function(){
+    	// alert($('#warehouse_select option:first').val());
+	// });
+
+});

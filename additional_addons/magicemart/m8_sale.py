@@ -41,6 +41,7 @@ class sale_order(osv.osv):
          
         if portal_user:
             if view_type == 'form':
+                domain  = "[('id','=',"+str(user.partner_id.id)+")]"
                 for node in doc.xpath("//field[@name='pricelist_id']"):
                     node.set('options', '{"no_open":True}')
                     node.set('readonly','1')
@@ -50,6 +51,7 @@ class sale_order(osv.osv):
                 for node in doc.xpath("//field[@name='partner_id']"):
                     node.set('options', "{'no_open' : true}")
                     node.set('options', "{'no_create' : true}")
+                    node.set('domain', domain )
                     setup_modifiers(node, res['fields']['partner_id'])
                     res['arch'] = etree.tostring(doc)
                     
@@ -61,11 +63,13 @@ class sale_order(osv.osv):
                      
                 for node in doc.xpath("//field[@name='partner_invoice_id']"):
                     node.set('options', "{'no_open' : true}")
+                    node.set('domain', domain )
                     setup_modifiers(node, res['fields']['partner_invoice_id'])
                     res['arch'] = etree.tostring(doc)
                      
                 for node in doc.xpath("//field[@name='partner_shipping_id']"):
                     node.set('options', "{'no_open' : true}")
+                    node.set('domain', domain )
                     setup_modifiers(node, res['fields']['partner_shipping_id'])
                     res['arch'] = etree.tostring(doc)
                  
@@ -73,6 +77,17 @@ class sale_order(osv.osv):
                     node.set('options', "{'no_open' : true}")
                     setup_modifiers(node, res['fields']['warehouse_id'])
                     res['arch'] = etree.tostring(doc)
+                    
+                for node in doc.xpath("//field[@name='payment_term']"):
+                    node.set('options', "{'no_open' : true}")
+                    setup_modifiers(node, res['fields']['payment_term'])
+                    res['arch'] = etree.tostring(doc)
+                
+                for node in doc.xpath("//field[@name='date_order']"):
+                    node.set('readonly', "1")
+                    setup_modifiers(node, res['fields']['date_order'])
+                    res['arch'] = etree.tostring(doc)
+                
                     
         return res
     

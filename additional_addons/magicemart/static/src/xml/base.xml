@@ -30,10 +30,54 @@
         </span>
     </t>-->
     
+    <t t-name="UserMenu">
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <img class="oe_topbar_avatar" t-att-data-default-src="_s + '/web/static/src/img/user_menu_avatar.png'"/>
+                <span class="oe_topbar_name"/> <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a href="#" data-menu="settings">Preferences</a></li>
+                <t t-if="widget.session.uid === 1">
+                    <li><a href="#" data-menu="account">My Odoo.com account</a></li>
+                    <li><a href="#" data-menu="about">About Odoo</a></li>
+                    <li><a href="#" data-menu="help">Help</a></li>
+                </t>
+                <li><a href="#" data-menu="logout">Log out</a></li>
+            </ul>
+        </li>
+    </t>
+    
+    <t t-extend="Sidebar">
+        <t t-jquery="a.oe_sidebar_action_a" t-operation="replace">
+            <t t-if="widget.session.uid !== 1">
+                <a t-if="item.label !== 'Export'" class="oe_sidebar_action_a" t-att-title="item.title or ''" t-att-data-section="section.name" t-att-data-index="item_index" t-att-href="item.url" target="_blank">
+                    <t t-raw="item.label"/>
+                </a>
+            </t>
+            <t t-if="widget.session.uid === 1">
+                <a class="oe_sidebar_action_a" t-att-title="item.title or ''" t-att-data-section="section.name" t-att-data-index="item_index" t-att-href="item.url" target="_blank">
+                    <t t-raw="item.label"/>
+                </a>
+            </t>
+        </t>
+    </t>
+    
+    <t t-name="ExportView">
+        <a id="exportview" href="javascript: void(0)" style="text-decoration: none;color: #dsdsdsdsdsD3D3D;">Export</a>
+    </t>
+    
+  
+    
+    
 <!--    TO Remove the Top menu bar-->
     <t t-extend="WebClient.announcement_bar">
         <t t-jquery="div.openerp" t-operation="replace"/>
     </t>
     
+ 
+    
+    
 </templates>
+
 
