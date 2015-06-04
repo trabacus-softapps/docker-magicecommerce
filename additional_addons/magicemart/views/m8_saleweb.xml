@@ -164,12 +164,12 @@
         </template>
        
        
-<!--<!-\-       Favicon Image-\->
+<!--       Favicon Image-->
         <template id="magicecommerce_layout" name="Magicecommerce Layout" inherit_id="web.layout">
             <xpath expr="//head//link[@href='/web/static/src/img/favicon.ico']" position="replace">
                 <link href="/magicemart/static/src/img/favicon.png" type="image/x-icon" rel="shortcut icon"/>
             </xpath>
-        </template>       -->
+        </template>       
        
     </data>
 </openerp>
