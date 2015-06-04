@@ -76,15 +76,23 @@ class product_template(osv.osv):
 #         for p in product_obj.browse(cr, uid, ids):
         user = user_obj.browse(cr, uid, uid)
         comp_id = []
-        prod_ids =  product_obj.search(cr, uid, [('product_tmpl_id', 'in', ids)])
-        for prod in product_obj.browse(cr, uid, prod_ids):
-            res[prod.product_tmpl_id.id] = {
+#         prod_ids =  product_obj.search(cr, uid, [('product_tmpl_id', 'in', ids)])
+        for case in self.browse(cr, uid, ids):
+            res[case.id] = {
                         'untax_amt' : 0.0,
                         'tax_name'   : '',
                       }
+#             for prod in product_obj.browse(cr, uid, prod_ids):
+                
+                   
+            if case.taxes_id:
+#                cr.execute("select tax_id from product_taxes_rel where prod_id =%s"%(prod.id))
                
-            if prod.taxes_id:
-               cr.execute("select tax_id from product_taxes_rel where prod_id =%s"%(prod.id))
+               cr.execute("""select tax_id from product_taxes_rel 
+                            inner join product_product pp on pp.id = prod_id
+                            inner join product_template pt on pp.product_tmpl_id = pt.id
+                            where pt.id = %s"""%(case.id))
+                    
                tax_id = [x[0] for x in cr.fetchall()]
                
                """ through cr.execute fetches all the records irrespective of company so need 
@@ -102,19 +110,19 @@ class product_template(osv.osv):
                        if user.company_id.id == tax.company_id.id or comp_id == tax.company_id.id:
                        
                            if tax.price_include == True:
-                               if prod.discount:
-                                   tax_amt = acc_tx_obj.compute_all(cr, uid, [tax], prod.discount_amt, 1, prod.id, None, None)
-                                   res[prod.product_tmpl_id.id]['untax_amt'] = prod.discount_amt - tax_amt["taxes"][0]["amount"]
+                               if case.discount:
+                                   tax_amt = acc_tx_obj.compute_all(cr, uid, [tax], case.discount_amt, 1, case.id, None, None)
+                                   res[case.id]['untax_amt'] = case.discount_amt - tax_amt["taxes"][0]["amount"]
                                    
                                else :
                                    
-                                   tax_amt = acc_tx_obj.compute_all(cr, uid, [tax], prod.product_tmpl_id.list_price, 1, prod.id, None, None)
-                                   res[prod.product_tmpl_id.id]['untax_amt'] = prod.product_tmpl_id.list_price - tax_amt["taxes"][0]["amount"]
-                               res[prod.product_tmpl_id.id]['tax_name'] = tax.name
+                                   tax_amt = acc_tx_obj.compute_all(cr, uid, [tax], case.list_price, 1, case.id, None, None)
+                                   res[case.id]['untax_amt'] = case.list_price - tax_amt["taxes"][0]["amount"]
+                               res[case.id]['tax_name'] = tax.name
                                
                            else:
-                               res[prod.product_tmpl_id.id]['untax_amt'] = prod.discount_amt or prod.product_tmpl_id.list_price
-                               res[prod.product_tmpl_id.id]['tax_name'] = tax.name   
+                               res[case.id]['untax_amt'] = case.discount_amt or case.list_price
+                               res[case.id]['tax_name'] = tax.name   
         return res
                
 #     def _pricelist_amount(self, cr, uid, ids, field_name, args, context=None):

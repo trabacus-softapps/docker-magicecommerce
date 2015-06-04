@@ -265,7 +265,7 @@
             <field name="act_window_id" ref="action_portal_cust_itemwise"/>
         </record>
         
-        <menuitem action="action_portal_cust_itemwise" id="m_itemwise_portal_cust" name="Itemwise Sales Analysis" 
+        <menuitem action="action_portal_cust_itemwise" id="m_itemwise_portal_cust" name="Your Purchase Analysis" 
             parent="portal_customer_reports" sequence="1" groups="magicemart.magicemart_group_manager,magicemart.magicemart_group_user,magicemart.magicemart_portal_manager"/>
 
 

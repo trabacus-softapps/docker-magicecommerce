@@ -478,6 +478,7 @@ class account_invoice_line(osv.osv):
         inv_obj = self.pool.get("account.invoice")
         for line in self.browse(cr, uid, ids):
             amount = 0.0
+            price = 0.00
             res[line.id] = {'price_total':0.0,'price_subtotal':0.0}
             if line:
                 if line.invoice_id.type in( "out_invoice","out_refund","in_refund"):
@@ -535,6 +536,7 @@ class account_invoice_line(osv.osv):
         for case in self.browse(cr, uid, ids):
             cost =0.00
             avg_cost = 0.00
+            pol_txamt = 0.00
             pol_amt=[]
             if case.invoice_id.date_invoice:
                 cr.execute("""select  sum(pl.price_subtotal1/pl.product_qty) 
@@ -570,7 +572,7 @@ class account_invoice_line(osv.osv):
             cr.execute("""select  sum(sl.price_unit) 
                             from sale_order_line sl 
                             inner join sale_order s on s.id = sl.order_id 
-                            where sl.product_id="""+str(case.product_id.id)+""" and s.state='done'
+                            where sl.product_id="""+str(case.product_id and case.product_id.id or 0 )+""" and s.state='done'
                             and sl.price_unit >0 
                             and  s.date_order <='"""+str(case.invoice_id.date_invoice)+"""'
                             group by s.date_order,s.id
