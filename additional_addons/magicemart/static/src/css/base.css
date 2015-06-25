@@ -35,3 +35,11 @@
 .announcement_bar {
     display:none !important;
 }
+
+.magic_class [data-id="product_id"]{width: 400px;}
+.magic_class [data-id="product_uom_qty"]{width: 100px;}
+.magic_class [data-id="price_unit"]{width: 150px;}
+.magic_class [data-id="purchase_price"]{width: 150px;}
+.magic_class [data-id="tax_id"]{width: 150px;}
+.magic_class [data-id="price_subtotal"]{width: 200px;}
+.magic_class [data-id="product_image"]{width: 100px;}

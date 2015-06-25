@@ -28,18 +28,33 @@ class sale_order(osv.osv):
             context = {}
         res = super(sale_order, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar,submenu=False)
         doc = etree.XML(res['arch'])
-# #         print 'res[',res['arch']
-#         if view_type == 'form' :
-#             print res['fields']['warehouse_id']
-#             res['fields']['order_line']['views']['form']['fields']['price_unit'].update({'readonly' : False, 'states' : {}})
-#             doc1 = etree.XML(res['fields']['order_line']['views']['form']['arch'])
-         
         cr.execute("""select uid from res_groups_users_rel where gid in
                       (select id  from res_groups where category_id in 
                       ( select id from ir_module_category where name = 'Customer Portal' ) and name in ('User','Manager')) and uid = """+str(uid))
-        portal_user = cr.fetchone() 
-         
-        if portal_user:
+        portal_user = cr.fetchone()
+        if portal_user: 
+        
+            if ('fields' in res) and (res['fields'].get('order_line'))\
+                    and (res['fields']['order_line'].get('views'))\
+                    and (res['fields']['order_line']['views'].get('tree'))\
+                    and (res['fields']['order_line']['views']['tree'].get('arch')):
+    #             doc = etree.XML(res['fields']['order_line']['views']['tree']['arch']) 
+    #             print 'doc',res['fields']['order_line']['views']['tree']['arch']
+                
+    
+                    doc1 = etree.XML(res['fields']['order_line']['views']['tree']['arch'])
+                    for node in doc1.xpath("//field[@name='price_unit']"):
+                        node.set('readonly', '1')
+                        setup_modifiers(node, res['fields']['order_line'])
+                        res['fields']['order_line']['views']['tree']['arch'] = etree.tostring(doc1)
+                    
+                    for node in doc1.xpath("//field[@name='tax_id']"):
+                        node.set('readonly', '1')
+                        setup_modifiers(node, res['fields']['order_line'])
+                        res['fields']['order_line']['views']['tree']['arch'] = etree.tostring(doc1)
+                    
+    #                 
+    #         if portal_user:
             if view_type == 'form':
                 domain  = "[('id','=',"+str(user.partner_id.id)+")]"
                 for node in doc.xpath("//field[@name='pricelist_id']"):
@@ -47,48 +62,47 @@ class sale_order(osv.osv):
                     node.set('readonly','1')
                     setup_modifiers(node,res['fields']['pricelist_id'])
                     res['arch'] = etree.tostring(doc)
-                     
+                      
                 for node in doc.xpath("//field[@name='partner_id']"):
                     node.set('options', "{'no_open' : true}")
                     node.set('options', "{'no_create' : true}")
                     node.set('domain', domain )
                     setup_modifiers(node, res['fields']['partner_id'])
                     res['arch'] = etree.tostring(doc)
-                    
+                      
                 for node in doc.xpath("//field[@name='contact_id']"):
                     node.set('options', "{'no_open' : true}")
                     setup_modifiers(node, res['fields']['contact_id'])
                     res['arch'] = etree.tostring(doc)
-                                        
-                     
+                                          
+                       
                 for node in doc.xpath("//field[@name='partner_invoice_id']"):
                     node.set('options', "{'no_open' : true}")
                     node.set('domain', domain )
                     setup_modifiers(node, res['fields']['partner_invoice_id'])
                     res['arch'] = etree.tostring(doc)
-                     
+                       
                 for node in doc.xpath("//field[@name='partner_shipping_id']"):
                     node.set('options', "{'no_open' : true}")
                     node.set('domain', domain )
                     setup_modifiers(node, res['fields']['partner_shipping_id'])
                     res['arch'] = etree.tostring(doc)
-                 
+                   
                 for node in doc.xpath("//field[@name='warehouse_id']"):
                     node.set('options', "{'no_open' : true}")
                     setup_modifiers(node, res['fields']['warehouse_id'])
                     res['arch'] = etree.tostring(doc)
-                    
+                      
                 for node in doc.xpath("//field[@name='payment_term']"):
                     node.set('options', "{'no_open' : true}")
                     setup_modifiers(node, res['fields']['payment_term'])
                     res['arch'] = etree.tostring(doc)
-                
+                  
                 for node in doc.xpath("//field[@name='date_order']"):
                     node.set('readonly', "1")
                     setup_modifiers(node, res['fields']['date_order'])
                     res['arch'] = etree.tostring(doc)
-                
-                    
+                        
         return res
     
    
@@ -471,7 +485,6 @@ class sale_order_line(osv.osv):
     _description = 'Sales Order Line'
     
     
-    
     def _get_order(self, cr, uid, ids, context=None):
         result = {}
         for line in self.pool.get('sale.order.line').browse(cr, uid, ids, context=context):
@@ -535,7 +548,7 @@ class sale_order_line(osv.osv):
                 'reference'     : fields.char("Reference(BOP)", size=20),  
 #                 'mrp'           : fields.related('product_id','list_price', type="float", string="MRP", store=True),
 #                 'available_qty' : fields.related('product_id','qty_available', type="float", string="Available Quantity", store=True ),
-                'product_image' : fields.binary('Product Image'),
+                'product_image' : fields.binary('Image'),
                 'sale_mrp'      : fields.float('MRP', digits=(16,2)),
                 'available_qty' : fields.integer("Available Quantity"),
                 

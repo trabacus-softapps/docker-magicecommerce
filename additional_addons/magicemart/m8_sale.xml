@@ -132,6 +132,7 @@
             </field>
         </record>
         
+       
         <!--	
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
        				Sale Order Form View
@@ -180,14 +181,22 @@
                     <attribute name="invisible">1</attribute>   
                 </xpath>
                 
-                <xpath expr="//notebook/page/field[@name='order_line']/tree/field[@name='sequence']" position="before">
+                <xpath expr="//notebook/page/field[@name='order_line']/tree/field[@name='price_subtotal']" position="after">
                     <field name="product_image" widget="image"/>
                 </xpath>
                 
-                
-                <xpath expr="//notebook/page/field[@name='order_line']/tree/field[@name='name']" position="after">
-                    <field name="reference"/>
+                <xpath expr="//notebook/page/field[@name='order_line']/tree/field[@name='product_uom_qty']" position="attributes">
+                    <attribute name="string">Qty</attribute>
                 </xpath>
+
+                <xpath expr="//notebook/page/field[@name='order_line']/tree/field[@name='product_uom']" position="attributes">
+                    <attribute name="string">UOM</attribute>
+                </xpath>
+
+                
+<!--                <xpath expr="//notebook/page/field[@name='order_line']/tree/field[@name='name']" position="after">
+                    <field name="reference"/>
+                </xpath>-->
                 
                 <xpath expr="//field[@name='partner_id']" position="attributes">
                     <attribute name="attrs">{'readonly':[('lock_it','=',True)]}</attribute>
@@ -231,13 +240,13 @@
                     <attribute name="attrs">{'readonly':[('lock_it','=',True)]}</attribute>   
                 </xpath>
                 
+              
+                
                 <xpath expr="//form[@string='Sales Order']/sheet/notebook/page[@string='Other Information']" position="attributes">
                     <attribute name="groups">base.group_erp_manager,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
                   </xpath>
                 
-                <field name="product_id" position="after">
-                    <field name="reference"/>
-                </field>  
+                
                 <xpath expr="//notebook/page/field[@name='order_line']/form//field[@name='product_id']" position="replace">
                     <field name="product_id"  context="{'partner_id':False, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'warehouse':parent.warehouse_id, 'uom':product_uom}"
                         groups="base.group_user,magicemart.magicemart_portal_manager"
@@ -314,6 +323,8 @@
             </field>
         </record>
         
+<!--        Sale Order Line Tree View Inherited-->
+        
         <record id="m_view_order_form_inherit" model="ir.ui.view">
             <field name="name">sale.order.form.sale.stock</field>
             <field name="model">sale.order</field>
@@ -334,7 +345,7 @@
                 </xpath>
                
                 <xpath expr="//field[@name='order_line']/tree//field[@name='product_id']" position="replace">
-                    <field name="product_id"
+                    <field name="product_id" string ="Product Name ____________"
                         context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom, 'warehouse':parent.warehouse_id}"
                         on_change="product_id_change_with_wh(parent.pricelist_id,product_id,product_uom_qty,False,product_uos_qty,False,name,parent.partner_id, False, True, parent.date_order, product_packaging, parent.fiscal_position, False, parent.warehouse_id, context)"
                         options="{'no_create':True}"/>
