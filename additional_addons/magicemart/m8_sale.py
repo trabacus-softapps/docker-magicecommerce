@@ -691,8 +691,6 @@ class sale_order_line(osv.osv):
         return {'value': result, 'domain': domain, 'warning': warning}
     
     #inherited
-    """  TO BE UNCOMENT  """
-    
     def product_id_change_with_wh(self, cr, uid, ids, pricelist, product, qty=0,
             uom=False, qty_uos=0, uos=False, name='', partner_id=False,
             lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, warehouse_id=False, context=None):
@@ -700,13 +698,15 @@ class sale_order_line(osv.osv):
         if not context:
             context= {}
         context = dict(context)
+        case = self.browse(cr, uid, ids)
+        uom = case.product_uom and case.product_uom.id or False
         res = super(sale_order_line,self).product_id_change_with_wh(cr, uid, ids, pricelist, product, qty, uom, qty_uos, uos, name, partner_id, lang, update_tax, date_order, packaging, fiscal_position, flag, warehouse_id,context)
         #if the product changes and product not in price_list then it will take the sale price
         location_ids =[]
         unit_amt = 0.00
         move_obj = self.pool.get("stock.move")
         loc_obj = self.pool.get("stock.location")
-        case = self.browse(cr, uid, ids)
+       
         prod_obj =self.pool.get("product.product")
         prod =  prod_obj.browse(cr, uid,product)
         pricelist_obj = self.pool.get("product.pricelist")
@@ -756,12 +756,13 @@ class sale_order_line(osv.osv):
     def create(self, cr, uid, vals, context=None):
         if not context:
             context = {}
-            
+        
         if context.get("uid"):    
             if uid != context.get("uid",False):
                 uid = context.get("uid")
         
         context = dict(context)
+        uom_obj = self.pool.get("product.uom")
         loc_obj = self.pool.get("stock.location")
         move_obj = self.pool.get("stock.move")
         sale_obj = self.pool.get("sale.order")
@@ -770,11 +771,21 @@ class sale_order_line(osv.osv):
         order_id = vals.get('order_id')
         case = sale_obj.browse(cr, uid,order_id )
         company_id = case.warehouse_id.company_id.id
-        
         res = self.product_id_change_with_wh(cr, uid, [], case.pricelist_id.id,vals.get('product_id',False),vals.get('qty',0), vals.get('uom',False), vals.get('qty_uos',0),
                                       vals.get('uos',False), vals.get('name',''), case.partner_id.id, vals.get('lang',False), vals.get('update_tax',True), vals.get('date_order',False), 
                                       vals.get('packaging',False), vals.get('fiscal_position',False), vals.get('flag',False),warehouse_id=case.warehouse_id.id,context=context)['value']
-                                      
+        
+        prod_uom = case.product_id.uom_id.id
+        line_uom = vals.get('product_uom')
+        
+        # For Case of UOM        
+        if prod_uom != line_uom:
+            uom = uom_obj.browse(cr, uid, vals.get('product_uom'))
+            if uom.factor:
+                vals.update({
+                             'price_unit' : float(res.get('price_unit')) / float(uom.factor)
+                            })
+                            
         if case.warehouse_id:  # shop is nothing but company_id
             context.update({'warehouse':case.warehouse_id.id})
         # Commented for Pricelist Concept   
@@ -783,11 +794,11 @@ class sale_order_line(osv.osv):
                     'discount' : res.get('discount') and res.get('discount') or 0.00, 
                      })
              
-        if res.get('price_unit'):
+        if res.get('price_unit') and prod_uom == line_uom:
             vals.update({
                     'price_unit' : res.get('price_unit') and res.get('price_unit') or 0.00, 
                      })
-        if res.get("price_unit"):
+        if res.get("price_unit") and prod_uom == line_uom:
             vals.update({'price_unit':res.get("price_unit")})
             if not vals.get('price_unit')or not res.get('price_unit'):
                 raise osv.except_osv(_('Warning'), _('Please Enter The Unit Price For \'%s\'.') % (vals['name'],))
@@ -830,6 +841,7 @@ class sale_order_line(osv.osv):
         prod_obj = self.pool.get("product.product")
         tax_obj = self.pool.get("account.tax")
         user_obj = self.pool.get("res.users")
+        uom_obj = self.pool.get("product.uom")
         
         for case in self.browse(cr, uid, ids):
             price_unit = vals.get('price_unit')
@@ -858,15 +870,6 @@ class sale_order_line(osv.osv):
                              'price_unit':price_unit
                              })    
                 
-#             location_ids = loc_obj.search(cr, uid,[('company_id','=', case.company_id.id or False),('name','=','Stock')])
-#             
-#             if location_ids:
-#                 location_ids = location_ids[0]
-#           
-#             user_ids = user_obj.search(cr, uid, [('login','=', 'public')])
-#             cr.execute("select id from res_users where login = '" +str('public')+"'")
-#             user_id = cr.fetchone()
-#             if user_id != uid:
                 
             if vals.get('warehouse_id',case.order_id.warehouse_id.id):  # shop is nothing but company_id
                 context.update({'warehouse':vals.get('warehouse_id',case.order_id.warehouse_id.id)})
@@ -880,16 +883,32 @@ class sale_order_line(osv.osv):
                          'product_image':prod.image_medium
                          })
                
-            res = self.product_id_change_with_wh(cr, uid, [], case.order_id.pricelist_id.id,vals.get('product_id',case.product_id.id),vals.get('qty',0), vals.get('uom',False), vals.get('qty_uos',0),
+            res = self.product_id_change_with_wh(cr, uid, [], case.order_id.pricelist_id.id,vals.get('product_id',case.product_id.id),vals.get('qty',0), vals.get('uom',case.product_uom.id), vals.get('qty_uos',0),
                                           vals.get('uos',False), vals.get('name',''), case.order_id.partner_id.id, vals.get('lang',False), vals.get('update_tax',True), vals.get('date_order',False), 
                                           vals.get('packaging',False), vals.get('fiscal_position',False), vals.get('flag',False),warehouse_id=case.order_id.warehouse_id.id,context=context)['value']
-            vals.update({
-                         'available_qty' : available_qty,
-                         # Commented for Pricelist Concept
-                        'discount' : res.get('discount') and res.get('discount')  or 0,
-                        'price_unit': res.get("price_unit") and res.get("price_unit") or 1
-                          
-                         })
+                                          
+            # For Case of UOM
+            prod_uom = prod.uom_id.id
+            line_uom = vals.get('product_uom',case.product_uom.id)
+            if prod_uom != line_uom:
+                uom = uom_obj.browse(cr, uid, line_uom)
+                if uom.factor:
+                    vals.update({
+                                 'price_unit' : float(res.get('price_unit')) / float(uom.factor),
+                                 'available_qty' : available_qty,
+                                 # Commented for Pricelist Concept
+                                 'discount' : res.get('discount') and res.get('discount')  or 0,
+                                 
+                                })
+            
+            if prod_uom == line_uom:                   
+                vals.update({
+                             'available_qty' : available_qty,
+                             # Commented for Pricelist Concept
+                            'discount' : res.get('discount') and res.get('discount')  or 0,
+                            'price_unit': res.get("price_unit") and res.get("price_unit") or 1
+                              
+                             })
             if res.get("tax_id"):
                 comp_id = vals.get("company_id",case.company_id.id)
                 if res.get("company_id"):

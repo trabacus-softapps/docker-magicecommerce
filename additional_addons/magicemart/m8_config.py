@@ -1014,15 +1014,16 @@ class product_pricelist(osv.osv):
             prod_tmpl_ids = [product.product_tmpl_id.id for product in products]
 
         # Load all rules
-        cr.execute(
-            'SELECT i.id '
-            'FROM product_pricelist_item AS i '
-            'WHERE (product_tmpl_id IS NULL OR product_tmpl_id = any(%s)) '
-                'AND (product_id IS NULL OR (product_id = any(%s))) '
-                'AND ((categ_id IS NULL) OR (categ_id = any(%s))) '
-                'AND (price_version_id = %s) '
-            'ORDER BY sequence, min_quantity desc',
-            (prod_tmpl_ids, prod_ids, categ_ids, version.id))
+        if prod_tmpl_ids:
+            cr.execute(
+                'SELECT i.id '
+                'FROM product_pricelist_item AS i '
+                'WHERE (product_tmpl_id IS NULL OR product_tmpl_id = any(%s)) '
+                    'AND (product_id IS NULL OR (product_id = any(%s))) '
+                    'AND ((categ_id IS NULL) OR (categ_id = any(%s))) '
+                    'AND (price_version_id = %s) '
+                'ORDER BY sequence, min_quantity desc',
+                (prod_tmpl_ids, prod_ids, categ_ids, version.id))
         
         item_ids = [x[0] for x in cr.fetchall()]
         items = self.pool.get('product.pricelist.item').browse(cr, uid, item_ids, context=context)

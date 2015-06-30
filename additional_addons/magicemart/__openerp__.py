@@ -3,9 +3,9 @@
     'version': '1.0',
     'sequence': 1,
         'depends': [
-                    'base','sale','sale_margin','website_quote','purchase','purchase_requisition','project','stock','account','account_analytic_default',
+                    'base','sale','sale_margin','purchase','purchase_requisition','project','stock','account','account_analytic_default',
                     'delivery','account_accountant','website','hr','fleet','marketing','knowledge', 'hr_timesheet','hr_holidays',
-                    'website_sale'
+                    
                 ],
     'author': 'Softappsit solutions',
     'category': 'E-commerce',

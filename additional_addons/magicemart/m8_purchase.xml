@@ -174,8 +174,22 @@
                 </xpath>
                 -->
                 
-                
-                
+                <xpath expr="//notebook/page[@string='Products']/field[@name='order_line']/tree[@string='Purchase Order Lines']/field[@name='date_planned']" position="attributes" >
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+
+                <xpath expr="//notebook/page[@string='Products']/field[@name='order_line']/tree[@string='Purchase Order Lines']/field[@name='product_id']" position="replace" >
+                    <field name="product_id" string='Product_____________'
+                        on_change="onchange_product_id(parent.pricelist_id, product_id, 0, False,
+                        parent.partner_id, parent.date_order, parent.fiscal_position, date_planned,
+                        name, False, parent.state, True, context)"
+                        context="{'partner_id': parent.partner_id}"/>
+                </xpath>
+
+                <xpath expr="//notebook/page[@string='Products']/field[@name='order_line']/tree[@string='Purchase Order Lines']/field[@name='product_uom']" position="attributes" >
+                    <attribute name="string">UOM</attribute>
+                </xpath>
+
                 <xpath expr="//form/header/field[@name='state']" position="replace">
                     <field name="state" widget="statusbar" statusbar_visible="draft,sent,approved,done" statusbar_colors='{"except_picking":"red","except_invoice":"red","confirmed":"blue"}' readonly="1"/>                    
                 </xpath>

@@ -134,7 +134,7 @@
             <xpath expr="//form[@action='/shop/confirm_order']/div[@class='row']/div[@class='col-md-8 oe_cart']/h3[@class='page-header mt16']" position="after">
                 <t t-if="warehouse">
                     <label>Select City</label>
-                    <select name = "Warehouse" id="warehouse_select" required="required" class="form-control" style="width: 50%;">
+                    <select name = "Warehouse" required="required" class="form-control" style="width: 50%;">
                         <option selected="selected" value=""></option>
                         <t t-foreach="warehouse" t-as="wh">
                             <option t-att-value = 'wh.id'><t t-esc="wh.name"/></option>
