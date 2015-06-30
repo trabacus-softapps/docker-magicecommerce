@@ -328,7 +328,6 @@ class account_invoice(osv.osv):
             if inv_lin:
                 inv_lin = inv_lin[0]
             invln_accid = inv_lin.account_id.id 
-            print "befor append IML", iml 
             if inv.round_off != 0:
                  
                iml.append({
@@ -343,7 +342,6 @@ class account_invoice(osv.osv):
                         'account_id':invln_accid,
                         'quantity': 1.0
                       })
-            print "After append IML", iml 
             
             
             # check if taxes are all computed
@@ -503,20 +501,24 @@ class account_invoice_line(osv.osv):
     def _cost_prize(self, cr, uid, ids, field_name, args, context=None):
         res = {}
 #         ids = self.search(cr, uid, [])
+        
         for case in self.browse(cr, uid, ids):
             cost =0.00
             avg_cost = 0.00
+            res[case.id] = 0.00
             pol_amt=[]
-            cr.execute("""select  sum(pl.price_unit) 
-                        from purchase_order_line pl 
-                        inner join purchase_order po on po.id = pl.order_id 
-                        where product_id="""+str(case.product_id.id)+"""  and po.state in ('approved','done')
-                        and pl.price_unit >0 
-                        and  po.date_order <='"""+str(case.invoice_id.date_invoice)+"""' group by po.date_order,po.id order by po.date_order desc limit 3""")
+            today = time.strftime('%Y-%m-%d')
+            if case.product_id.id:
+                cr.execute("""select  sum(pl.price_unit) 
+                            from purchase_order_line pl 
+                            inner join purchase_order po on po.id = pl.order_id 
+                            where product_id="""+str(case.product_id.id)+"""  and po.state in ('approved','done')
+                            and pl.price_unit >0 
+                            and  po.date_order <='"""+str(case.invoice_id.date_invoice or today)+"""' group by po.date_order,po.id order by po.date_order desc limit 3""")
                          
-            pol_amt = [x[0] for x in cr.fetchall()]
+                pol_amt = [x[0] for x in cr.fetchall()]
             if not pol_amt or 0 in pol_amt:
-                avg_cost = (case.price_subtotal)/case.quantity
+                avg_cost = case.quantity and (case.price_total)/case.quantity or case.price_unit
             else:
                 for amount in pol_amt:
                     cost += amount
@@ -533,22 +535,24 @@ class account_invoice_line(osv.osv):
     def _cost_prize_tax(self, cr, uid, ids, field_name, args, context=None):
         res = {}
 #         ids = self.search(cr, uid, ids)
+        today = time.strftime('%Y-%m-%d')
         for case in self.browse(cr, uid, ids):
             cost =0.00
             avg_cost = 0.00
             pol_txamt = 0.00
+            res[case.id] = 0.00
             pol_amt=[]
-            if case.invoice_id.date_invoice:
+            if case.product_id.id:
                 cr.execute("""select  sum(pl.price_subtotal1/pl.product_qty) 
                             from purchase_order_line pl 
                             inner join purchase_order po on po.id = pl.order_id 
                             where product_id="""+str(case.product_id.id)+"""  and po.state in ('approved','done')
                             and pl.price_unit >0 
-                            and  po.date_order <='"""+str(case.invoice_id.date_invoice)+"""' group by po.date_order,po.id order by po.date_order desc limit 3""")
+                            and  po.date_order <='"""+str(case.invoice_id.date_invoice or today)+"""' group by po.date_order,po.id order by po.date_order desc limit 3""")
                          
-            pol_txamt = [x[0] for x in cr.fetchall()]
+                pol_txamt = [x[0] for x in cr.fetchall()]
             if not pol_txamt or 0 in pol_txamt:
-                avg_txcost = (case.price_total)/case.quantity
+                avg_txcost = case.quantity and (case.price_total)/case.quantity or case.price_unit
             else:
                 for amount in pol_txamt:
                     cost += amount
@@ -568,19 +572,22 @@ class account_invoice_line(osv.osv):
         for case in self.browse(cr, uid, ids):
             cost =0.00
             avg_cost = 0.00
+#             res[case.id] = 0.00
             sol_amt=[]
-            cr.execute("""select  sum(sl.price_unit) 
-                            from sale_order_line sl 
-                            inner join sale_order s on s.id = sl.order_id 
-                            where sl.product_id="""+str(case.product_id and case.product_id.id or 0 )+""" and s.state='done'
-                            and sl.price_unit >0 
-                            and  s.date_order <='"""+str(case.invoice_id.date_invoice)+"""'
-                            group by s.date_order,s.id
-                            order by s.date_order desc limit 3""")
-                         
-            sol_amt = [x[0] for x in cr.fetchall()]
+            today = time.strftime('%Y-%m-%d')
+            if case.product_id.id:
+                cr.execute("""select  sum(sl.price_unit) 
+                                from sale_order_line sl 
+                                inner join sale_order s on s.id = sl.order_id 
+                                where sl.product_id="""+str(case.product_id and case.product_id.id or 0 )+""" and s.state='done'
+                                and sl.price_unit >0 
+                                and  s.date_order <='"""+str(case.invoice_id.date_invoice or today)+"""'
+                                group by s.date_order,s.id
+                                order by s.date_order desc limit 3""")
+                             
+                sol_amt = [x[0] for x in cr.fetchall()]
             if not sol_amt or 0 in sol_amt:
-                avg_cost = (case.price_subtotal)/case.quantity
+                avg_cost = case.quantity and (case.price_total)/case.quantity or case.price_unit
             else:
                 for amount in sol_amt:
                     cost += amount

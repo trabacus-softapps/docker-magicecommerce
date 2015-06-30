@@ -182,7 +182,6 @@ class stock_picking(osv.osv):
             invoice_line_vals = move_obj._get_invoice_line_vals(cr, uid, move1, partner, inv_type, context=context)
         
             if invoice_line_vals:
-                print "invoice_line_vals------",invoice_line_vals
                 invoice_line_vals['invoice_id'] = invoices[key]
                 invoice_line_vals['origin'] = origin
 #                 invoice_line_vals['discount'] = 0.00
@@ -191,7 +190,6 @@ class stock_picking(osv.osv):
                 
         for move in moves:
             move_obj.write(cr, uid, move.id, {'invoice_state': 'invoiced'}, context=context)
-        print "invoices.values()..........._invoice_create_line",invoices.values()
         invoice_obj.button_compute(cr, uid, invoices.values(), context=context, set_total=(inv_type in ('in_invoice', 'in_refund')))
         return invoices.values()
   
@@ -665,7 +663,7 @@ class stock_move(osv.osv):
         if not context:
             context = {}
            
-           
+        ctx = {}   
         inv_lines = super(stock_move,self)._get_invoice_line_vals(cr, uid, move, partner, inv_type, context=context)
 
         # updating tax for old dc's (coz, for old records procurement_id will not be there) TO BE UNCOMENT AFTER PROCESSING ALL OLD DCS   
@@ -678,9 +676,13 @@ class stock_move(osv.osv):
                     sale_tax.append(tax.id)
                 if sale_tax:
                     inv_lines.update({'invoice_line_tax_id' : [(6, 0, sale_tax)]})
-
+                    
+        original_context = context.get('active_ids')
+        if move.id:
+            active_id = move.picking_id.id
+            ctx.update({'active_ids':[active_id],'active_id':active_id})
         
-        hstry = stkrtn_obj.default_get(cr, uid,  ['product_return_moves', 'move_dest_exists', 'invoice_state'], context=context)
+            hstry = stkrtn_obj.default_get(cr, uid,  ['product_return_moves', 'move_dest_exists', 'invoice_state'], ctx)
 
         pick_id = context.get('active_id',False)
         if pick_id:
