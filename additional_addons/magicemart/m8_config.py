@@ -211,8 +211,11 @@ class product_template(osv.osv):
                 
                 # Pricelist Amount
 #                 'pricelist_amt'   :   fields.function(_pricelist_amount, string ="Amount", store=False, type = "float" )
-
+    
                 'price': fields.function(_product_template_price, fnct_inv=_set_product_template_price, type='float', string='Price', digits_compute=dp.get_precision('Product Price')),
+                
+                'related_qty' : fields.related('qty_available', type="float", string="Quantity on Hand"),
+                
                 }
     def onchange_discper(self,cr, uid, ids, discount, list_price):
         res = {}
@@ -325,8 +328,26 @@ class product_product(osv.osv):
         result = self.name_get(cr, user, ids, context=context)
         
         return result
-
-
+    
+    
+    # Suppluier Will Create Product update the New Product to Respective Supplier 
+    def create(self, cr, uid, vals, context=None):
+        print "Context",context
+        user_obj = self.pool.get("res.users")
+        part_obj = self.pool.get("res.partner")
+        user_id = context.get('uid', uid)
+        user = user_obj.browse(cr, uid, user_id)
+        
+        if user.user_roles == "magicemart_supplier_portal":
+            context.update({'new_product':True})
+            
+        
+        prod_id = super(product_product,self).create(cr, uid, vals, context)
+       
+        if user.user_roles == "magicemart_supplier_portal":
+            part_obj.write(cr, uid, [user.partner_id.id], {'product_ids': [(4, prod_id)]}, context)
+            print "Product.......",prod_id
+        return prod_id
 
     # Overriden (No Changes)
     def _search_product_quantity(self, cr, uid, obj, name, domain, context):
@@ -645,134 +666,135 @@ class ir_rule(osv.osv):
         # This means also there is no implicit restriction (e.g. an object
         # references another object the user can't see).
         if uid and uid !=63:
-            
-            " This function is to set the rule domain for product_product object based on the user permissions"
-            if not context:
-                context = {}
-            newdom = []
-#             if not uid:
-#                 uid = SUPERUSER_ID
-            dom = self._compute_domain(cr, uid, model_name, mode) or []
-            custgrp_ids = []
-            if uid:
-                cr.execute("""select uid from res_groups_users_rel where gid in (select id  from res_groups where name in ('User', 'Manager') and  
-                              category_id in (select id from ir_module_category where name = 'Customer Portal'))""")
-                custgrp_ids = [x[0] for x in cr.fetchall()]
-                     
-            if uid and uid in custgrp_ids or context.get("uid") in custgrp_ids:
-    #             if dom:
-                if model_name == 'product.product':
-                    cr.execute("""select source_location_id from res_partner where id = (select partner_id from res_users where id = """+str(context.get("uid",uid))+""")""")
-                    loc_ids = cr.fetchone()
-                    
-                    if loc_ids and loc_ids[0]:
-                        cr.execute("""
+            if mode == "read":
+                " This function is to set the rule domain for product_product object based on the user permissions"
+                if not context:
+                    context = {}
+                newdom = []
+    #             if not uid:
+    #                 uid = SUPERUSER_ID
+                dom = self._compute_domain(cr, uid, model_name, mode) or []
+                custgrp_ids = []
+                if uid:
+                    cr.execute("""select uid from res_groups_users_rel where gid in (select id  from res_groups where name in ('User', 'Manager') and  
+                                  category_id in (select id from ir_module_category where name = 'Customer Portal'))""")
+                    custgrp_ids = [x[0] for x in cr.fetchall()]
+                         
+                if uid and uid in custgrp_ids or context.get("uid") in custgrp_ids:
+        #             if dom:
+                    if model_name == 'product.product':
+                        cr.execute("""select source_location_id from res_partner where id = (select partner_id from res_users where id = """+str(context.get("uid",uid))+""")""")
+                        loc_ids = cr.fetchone()
                         
-                            select p.id 
-                            from 
-                            (    select distinct(a.product) as product_id
-                                from(
-                                    select sl.product_id as product from  sale_order_line sl 
-                                    inner join sale_order s on s.id = sl.order_id 
-                                    inner join res_partner p on p.id = s.partner_id 
-                                    inner join res_users u on u.partner_id = p.id
-                                    where u.id = """ + str(context.get("uid",uid)) + """
+                        if loc_ids and loc_ids[0]:
+                            cr.execute("""
                             
-                                    union all 
-                                    
-                                    (   select pr.product_id as product from res_partner_prod_rel pr inner join res_partner p on p.id=pr.partner_id
-                                        where p.id = (select partner_id from res_users where id = """ + str(context.get("uid",uid)) + """)
-                                    )
-                            
-                                )a
-                            
-                            ) b
-                            inner join product_product p on b.product_id = p.id
-                            inner join product_template pt on pt.id = p.product_tmpl_id
-                            where pt.company_id is null or pt.company_id = (select u.company_id from res_users u where u.id = """ + str(context.get("uid",uid)) + """)
-                            
-                        """)
-                        prod_ids = cr.fetchall()
-                        
-                        
-                        if prod_ids:
-                            newdom = [('id', 'in', [x[0] for x in prod_ids])]
-                            
-                        else:   
-                            newdom = [('id', '=',1)]
-                            
-                        if len(dom):
-                            domain = list((['&'] + dom + newdom))
-                            
-                        else:
-                            domain = list(newdom)
-                        
-                        query = self.pool[model_name]._where_calc(cr, SUPERUSER_ID, domain, active_test=False)
-                        return query.where_clause, query.where_clause_params, query.tables
-    #             return [], [], ['"' + self.pool[model_name]._table + '"']
-            supgrp_ids = []
-            if uid:   
-                cr.execute("""select distinct(uid) from res_groups_users_rel 
-                                where gid in (select id  from res_groups where name in ('Supplier Manager') and  
-                                category_id in (select id from ir_module_category where name = 'Supplier Portal'))""")
-                supgrp_ids = [z[0] for z in cr.fetchall()]
-            
-            if uid and uid in supgrp_ids:
-    #             if dom:
-               if model_name == 'product.product':
-                   cr.execute("""
-                        select p.id 
-                            from 
-                            (    select distinct(a.product) as product_id
-                                from(
-                                   select m.product_id as product
-                                   from stock_move m
-                                   inner join stock_picking sp on sp.id = m.picking_id
-                                   inner join res_partner rp on rp.id = sp.partner_id
-                                   inner join res_users u on u.partner_id = rp.id
-                                   left outer join stock_picking_type spt on spt.id = sp.picking_type_id
-                                   where m.state='done' and spt.code='incoming' and u.id = """ + str(context.get("uid",uid)) + """
-                            
-                                    union all 
-                                    
-                                        (    select pr.product_id as product from res_partner_prod_rel pr inner join res_partner p on p.id=pr.partner_id
-                                             where p.id = (select partner_id from res_users where id = """ + str(context.get("uid",uid)) + """
+                                select p.id 
+                                from 
+                                (    select distinct(a.product) as product_id
+                                    from(
+                                        select sl.product_id as product from  sale_order_line sl 
+                                        inner join sale_order s on s.id = sl.order_id 
+                                        inner join res_partner p on p.id = s.partner_id 
+                                        inner join res_users u on u.partner_id = p.id
+                                        where u.id = """ + str(context.get("uid",uid)) + """
+                                
+                                        union all 
+                                        
+                                        (   select pr.product_id as product from res_partner_prod_rel pr inner join res_partner p on p.id=pr.partner_id
+                                            where p.id = (select partner_id from res_users where id = """ + str(context.get("uid",uid)) + """)
                                         )
-                                    )
-                            )a
+                                
+                                    )a
+                                
+                                ) b
+                                inner join product_product p on b.product_id = p.id
+                                inner join product_template pt on pt.id = p.product_tmpl_id
+                                where pt.company_id is null or pt.company_id = (select u.company_id from res_users u where u.id = """ + str(context.get("uid",uid)) + """)
+                                
+                            """)
+                            prod_ids = cr.fetchall()
                             
-                            ) b
-                            inner join product_product p on b.product_id = p.id
-                            inner join product_template pt on pt.id = p.product_tmpl_id
-                            where pt.company_id is null or pt.company_id = (select u.company_id from res_users u where u.id = """ + str(context.get("uid",uid)) + """)
-    
-    
-                                 """)
-                   prod_ids = cr.fetchall()
-                   
-                   if prod_ids:
-                       newdom = [('id', 'in', [x[0] for x in prod_ids])]
-                   else:   
-                       newdom = [('id', '=',1)]
+                            
+                            if prod_ids:
+                                newdom = [('id', 'in', [x[0] for x in prod_ids])]
+                                
+                            else:   
+                                newdom = [('id', '=',1)]
+                                
+                            if len(dom):
+                                domain = list((['&'] + dom + newdom))
+                                
+                            else:
+                                domain = list(newdom)
+                            
+                            query = self.pool[model_name]._where_calc(cr, SUPERUSER_ID, domain, active_test=False)
+                            return query.where_clause, query.where_clause_params, query.tables
+        #             return [], [], ['"' + self.pool[model_name]._table + '"']
+                supgrp_ids = []
+                if uid:   
+                    cr.execute("""select distinct(uid) from res_groups_users_rel 
+                                    where gid in (select id  from res_groups where name in ('Supplier Manager') and  
+                                    category_id in (select id from ir_module_category where name = 'Supplier Portal'))""")
+                    supgrp_ids = [z[0] for z in cr.fetchall()]
+                
+                if uid and uid in supgrp_ids:
+        #             if dom:
+                   if model_name == 'product.product' :
+                       if context and not context.get("new_product"):
+                           cr.execute("""
+                                select p.id 
+                                    from 
+                                    (    select distinct(a.product) as product_id
+                                        from(
+                                           select m.product_id as product
+                                           from stock_move m
+                                           inner join stock_picking sp on sp.id = m.picking_id
+                                           inner join res_partner rp on rp.id = sp.partner_id
+                                           inner join res_users u on u.partner_id = rp.id
+                                           left outer join stock_picking_type spt on spt.id = sp.picking_type_id
+                                           where m.state='done' and spt.code='incoming' and u.id = """ + str(context.get("uid",uid)) + """
+                                    
+                                            union all 
+                                            
+                                                (    select pr.product_id as product from res_partner_prod_rel pr inner join res_partner p on p.id=pr.partner_id
+                                                     where p.id = (select partner_id from res_users where id = """ + str(context.get("uid",uid)) + """
+                                                )
+                                            )
+                                    )a
+                                    
+                                    ) b
+                                    inner join product_product p on b.product_id = p.id
+                                    inner join product_template pt on pt.id = p.product_tmpl_id
+                                    where pt.company_id is null or pt.company_id = (select u.company_id from res_users u where u.id = """ + str(context.get("uid",uid)) + """)
+            
+            
+                                         """)
+                           prod_ids = cr.fetchall()
+                           
+                           if prod_ids:
+                               newdom = [('id', 'in', [x[0] for x in prod_ids])]
+                           else:   
+                               newdom = [('id', '=',1)]
+                                
+                           if len(dom):
+                               domain = list((['&'] + dom + newdom))
+                           else:
+                               domain = list(newdom)
+                           query = self.pool[model_name]._where_calc(cr, SUPERUSER_ID, domain, active_test=False)
+                           return query.where_clause, query.where_clause_params, query.tables
                         
-                   if len(dom):
-                       domain = list((['&'] + dom + newdom))
-                   else:
-                       domain = list(newdom)
-                   query = self.pool[model_name]._where_calc(cr, SUPERUSER_ID, domain, active_test=False)
-                   return query.where_clause, query.where_clause_params, query.tables
-                    
-    # If above both conditions not satisfies means, standard should work
-            if model_name == 'product.product':
-                if uid not in custgrp_ids and uid not in  supgrp_ids: 
+        # If above both conditions not satisfies means, standard should work
+                if model_name == 'product.product':
+                    if uid not in custgrp_ids and uid not in  supgrp_ids: 
+                        if dom:
+                            query = self.pool[model_name]._where_calc(cr, SUPERUSER_ID, dom, active_test=False)
+                            return query.where_clause, query.where_clause_params, query.tables
+                else:
                     if dom:
                         query = self.pool[model_name]._where_calc(cr, SUPERUSER_ID, dom, active_test=False)
                         return query.where_clause, query.where_clause_params, query.tables
-            else:
-                if dom:
-                    query = self.pool[model_name]._where_calc(cr, SUPERUSER_ID, dom, active_test=False)
-                    return query.where_clause, query.where_clause_params, query.tables
-                
+                    
         return [], [], ['"' + self.pool[model_name]._table + '"']
 ir_rule()     
 

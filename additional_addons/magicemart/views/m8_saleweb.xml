@@ -149,19 +149,49 @@
        
 <!--       Sign UP-->
         
-        <template id="m_auth_signup_fields" inherit_id = "auth_signup.fields" >
+<!--        <template id="m_auth_signup_fields" inherit_id = "auth_signup.fields" >
             <xpath expr="//div[@class='form-group field-confirm_password']" position="after">
-                <label>Select City</label>
-                <select name="company" id="company_select" class="form-control">
-                    <option selected="selected" value=""></option>
-                    <t t-foreach="company_id" t-as="company">
-                        <option t-att-value="company.id"><t t-esc="company.name[company.name.find('(' )+1:company.name.find(')' )]"/></option>
+                <t t-if ="company_id">
+                    <label>Select City</label>
+                    <select name="company" id="company_select" class="form-control">
+                        <option selected="selected" value=""></option>
+                        <t t-foreach="company_id" t-as="company">
+                            <option t-att-value="company.id"><t t-esc="company.name[company.name.find('(' )+1:company.name.find(')' )]"/></option>
+                            </t>
+                    </select>
+                    <br/>
+                </t>
+            </xpath>
+            
+        </template>-->
+        
+        
+        <template id="m_signup" inherit_id="auth_signup.signup" name="Sign up login">
+            <xpath expr="//form[@class='oe_signup_form']/input[@name='redirect']" position="before">
+                <t t-if ="company_id">
+                    <label>Select City</label>
+                    <select name="company" id="company_select" class="form-control">
+                        <option selected="selected" value=""></option>
+                        <t t-foreach="company_id" t-as="company">
+                            <option t-att-value="company.id"><t t-esc="company.name[company.name.find('(' )+1:company.name.find(')' )]"/></option>
                         </t>
-                </select>
-                <br/>
+                    </select>
+                    <br/>
+                </t>
+                
             </xpath>
             
         </template>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
        
        
 <!--       Favicon Image-->

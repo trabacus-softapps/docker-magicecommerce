@@ -201,15 +201,7 @@
                 <xpath expr="//page[@string='Inventory']" position="attributes">
                     <attribute name="groups">base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager,magicemart.magicemart_supplier_portal</attribute>
                     </xpath>    
-                
-                <xpath expr="//page[@string='Sales']" position="attributes">
-                    <attribute name="groups">base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
-                </xpath>
-                
-                <xpath expr="//page[@string='Information']" position="attributes">
-                    <attribute name="groups">base.group_erp_manager,base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager,magicemart.magicemart_portal_user,magicemart.magicemart_portal_manager</attribute>
-                </xpath>     
-                
+               
                 <xpath expr="//field[@name='lst_price']" position="attributes">
                     <attribute name = "string">MRP</attribute>
                 </xpath>
@@ -217,6 +209,250 @@
             </field>
             </record>   
         
+        
+        <record id="m_product_template_form_view_inheri" model="ir.ui.view">
+            <field name="name">m.product.template.common.form.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref = "product.product_template_form_view"/>
+            <field name="arch" type="xml">
+                
+                <xpath expr="//field[@name='sale_ok']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//label[@for='sale_ok']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                
+                <xpath expr="//notebook/page[@string='Information']/group/group/field[@name='type']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Information']/group/group[2]/field[@name='active']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Procurements']/group[@name='procurement']/group[@name='general']/field[@name='uom_po_id']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Procurements']/separator[@string='Suppliers']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Procurements']/field[@name='seller_ids']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                
+                <xpath expr="//notebook/page[@string='Procurements']/separator[@string='Description for Suppliers']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Procurements']/field[@name='description_purchase']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+<!--                
+                <xpath expr="//notebook/page[@string='Inventory']/group[@name='inventory']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>-->
+                
+                <xpath expr="//notebook/page[@string='Inventory']/group[@name='packaging']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Sales']/separator[@string='Description for Quotations']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Sales']/field[@name='description_sale']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Inventory']/group[@name='inventory']/group[@string='Status']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//notebook/page[@string='Inventory']/group[@name='inventory']/group[@string='Weights']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                
+            </field>
+        </record>
+        
+<!--        Product Masters-->
+        <!--      
+        
+        <record id="m_view_template_property_form" model="ir.ui.view">
+            <field name="name">m.product.template.stock.property.form.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="stock.view_template_property_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@string='Storage Location']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                
+                <xpath expr="//group[@string='Lots']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//group[@string='Counter-Part Locations Properties']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//group[@string='Supply Chain Information']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//button[@name='%(stock.act_make_procurement)d']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+
+            </field>
+        </record>
+        
+        
+        
+        <record id="m_stock_view_template_property_form" model="ir.ui.view">
+            <field name="name">m.stock.product.template.stock.property.form.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="stock_account.view_template_property_form"/>
+            <field name="arch" type="xml">
+                
+                <xpath expr="//separator[@string='Inventory Valuation']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//field[@name='valuation']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//field[@name='property_stock_account_input']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//field[@name='property_stock_account_output']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+
+            </field>
+        </record>
+        
+        
+        
+        <record model="ir.ui.view" id="m_view_product_form_expiry">
+            <field name="name">m.product.normal.form</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product_expiry.view_product_form_expiry" />
+            <field name="arch" type="xml">
+                <xpath expr="//group[@string='Dates']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+            </field>
+        </record>
+        
+
+        
+        <record model="ir.ui.view" id="m_event_sale_product_template_form1">
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="event_sale.event_sale_product_template_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='options']/div/field[@name='event_ok']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//div[@name='options']/div/label[@for='event_ok']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+
+            </field>
+        </record>
+        
+        <record id="m_product_template_form_view1" model="ir.ui.view">
+            <field name="name">m.product.template.form.inherit</field>
+            <field name="model">product.template</field>
+            <field name="priority">5</field>
+            <field name="inherit_id" ref="account.product_template_form_view"/>
+            <field name="arch" type="xml">
+                <page string="Sales" position="after">
+                    <page string="Accounting" >
+                        <group>
+                            <label for="categ_id" string="Internal Category" groups ="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" />
+                            <div><field name="categ_id" colspan="3" nolabel="1" groups ="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager" /></div>
+                        </group>
+                        <group name="properties">
+                            <group>
+                                <field name="property_account_income" domain="[('type','=','other')]" groups="base.group_system,account.group_account_user,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+                                <field name="taxes_id" colspan="2" widget="many2many_tags"/>
+                            </group>
+                            <group>
+                                <field name="property_account_expense" domain="[('type','=','other')]" groups="base.group_system,account.group_account_user,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+                                <field name="supplier_taxes_id" colspan="2" widget="many2many_tags"/>
+                            </group>
+                        </group>
+                    </page>
+                </page>
+                
+            </field>
+        </record>
+        
+        
+        
+        <record id="m_view_product_hr_expense_form" model="ir.ui.view">
+            <field name="name">product.template.expense.form</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="hr_expense.view_product_hr_expense_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='options']/div/field[@name='hr_expense_ok']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//div[@name='options']/div/field[@name='hr_expense_ok']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+            </field>
+        </record>
+        
+        
+        
+        <record id="m_view_product_landed_cost_form" model="ir.ui.view">
+            <field name="name">m.product.template.landed.cost.form</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="stock_landed_costs.view_product_landed_cost_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='options']/div/field[@name='landed_cost_ok']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//div[@name='options']/div/label[@for='landed_cost_ok']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+               
+            </field>
+        </record>
+        
+        
+        <record id="m_view_product_supplier_inherit" model="ir.ui.view">
+            <field name="name">m.product.template.supplier.form.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="purchase.view_product_supplier_inherit"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='options']/div/field[@name='purchase_ok']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//div[@name='options']/div/label[@for='purchase_ok']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+
+            </field>
+        </record>
+        
+       
         
         <record model="ir.ui.view" id="product_kanban_stock_view">
             <field name="name">M Product Kanban Stock</field>
@@ -242,7 +478,50 @@
                 </xpath>
 
             </field>
-        </record>             
+        </record>         
+        
+        <record id="m_view_product_template_form_inherit" model="ir.ui.view">
+            <field name="name">m.Product Template (form)</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="account_asset.view_product_template_form_inherit"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='asset_category_id']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//field[@name='deferred_revenue_category_id']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+            </field>
+        </record>
+        
+        
+        <record model="ir.ui.view" id="m_product_template_form_view">
+            <field name="name">m.product.template.product.website.form</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="website_sale.product_template_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='alternative_product_ids']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//field[@name='accessory_product_ids']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//field[@name='website_style_ids']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//field[@name='website_sequence']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+            </field>
+        </record>
+        -->
+        
     	
         <!--  TO BE UNCOMMENT               -->
                	
@@ -269,6 +548,7 @@
         </record>     
         
         <!-- view specific to product.template -->
+        
         <record id="m_product_template_only_form_view" model="ir.ui.view">
             <field name="name">m.product.template.product.form</field>
             <field name="model">product.template</field>
@@ -298,6 +578,16 @@
                     </header>
                     
                 </xpath>
+                
+                <xpath expr="//field[@name='barcode']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//field[@name='default_code']" position="attributes">
+                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                </xpath>
+                
+                
                 
             </field>
         </record>

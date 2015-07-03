@@ -29,6 +29,29 @@ class res_partner(osv.osv):
             'code'                  :   fields.char("Code", size=50),                
            }
     
+    # Overriden for Reset Password From Website
+    def signup_retrieve_info(self, cr, uid, token, context=None):
+        """ retrieve the user info about the token
+            :return: a dictionary with the user information:
+                - 'db': the name of the database
+                - 'token': the token, if token is valid
+                - 'name': the name of the partner, if token is valid
+                - 'login': the user login, if the user already exists
+                - 'email': the partner email, if the user does not exist
+        """
+        partner = self._signup_retrieve_partner(cr, uid, token, raise_exception=True, context=None)
+        res = {'db': cr.dbname}
+        if partner.signup_valid:
+            res['token'] = token
+            res['name'] = partner.name
+        if partner.user_ids:
+            res['login'] = partner.user_ids[0].login
+            res['company_id'] = partner.user_ids[0].company_id.id
+        else:
+            res['email'] = partner.email or ''
+        print "YES"
+        return res
+    
     
     # sales Pricelist Read only for Portal Customer & Supplier
     def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):

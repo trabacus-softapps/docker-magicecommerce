@@ -358,5 +358,7 @@ class res_users(osv.osv):
                     vals.update({'name':part.name or False,})       
 
         return super(res_users, self).write(cr, uid, ids, vals, context=context)
+    
+    
         
 res_users()

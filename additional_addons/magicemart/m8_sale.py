@@ -265,6 +265,27 @@ class sale_order(osv.osv):
              'warehouse_id':_get_default_warehouse
              }
     
+    # Duplicate Function.    
+    def reorder(self, cr, uid, ids, context=None):
+        context = context or {}
+        print "YES"
+        res = self.copy(cr, uid, ids[0], {}, context)
+        view_ref = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sale', 'view_order_form')
+        view_id = view_ref and view_ref[1] or False,
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Sales Order'),
+            'res_model': 'sale.order',
+            'res_id': res,
+            'view_type': 'form',
+            'view_mode': 'form',
+            'view_id': view_id,
+            'target': 'current',
+            'nodestroy': True,
+        }
+
+    
+    
     
     def _prepare_invoice(self, cr, uid, order, lines, context=None):
         stock_obj = self.pool.get("stock.picking.out")

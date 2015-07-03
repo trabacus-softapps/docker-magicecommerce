@@ -127,7 +127,7 @@
             <field name="inherit_id" ref="sale_margin.sale_margin_sale_order_line_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='order_line']/tree//field[@name='purchase_price']" position="attributes">
-                    <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
+                    <attribute name="invisible">1</attribute>
                 </xpath>
             </field>
         </record>
@@ -181,6 +181,7 @@
                     <attribute name="invisible">1</attribute>   
                 </xpath>
                 
+                
                 <xpath expr="//notebook/page/field[@name='order_line']/tree/field[@name='price_subtotal']" position="after">
                     <field name="product_image" widget="image" readonly="1"/>
                 </xpath>
@@ -194,9 +195,9 @@
                 </xpath>
 
                 
-<!--                <xpath expr="//notebook/page/field[@name='order_line']/tree/field[@name='name']" position="after">
-                    <field name="reference"/>
-                </xpath>-->
+                <xpath expr="//notebook/page/field[@name='order_line']/tree/field[@name='price_subtotal']" position="after">
+                    <field name="available_qty" groups="base.group_system,base.group_no_one,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+                </xpath>
                 
                 <xpath expr="//field[@name='partner_id']" position="attributes">
                     <attribute name="attrs">{'readonly':[('lock_it','=',True)]}</attribute>
@@ -297,6 +298,10 @@
                           
                 <button name="action_quotation_send" position="after">
                     <button name="%(magicemart.action_sales_quotation)d" type="action" String="Print Sale Quotation" states="draft" class="oe_highlight" groups="base.group_user,magicemart.magicemart_portal_manager"/>
+                </button>
+                
+                <button name="action_quotation_send" position="before">
+                    <button name="reorder" type="object" string="Reorder" class="oe_highlight"/>
                 </button>
                 
                 <button name="action_quotation_send" position="after">
