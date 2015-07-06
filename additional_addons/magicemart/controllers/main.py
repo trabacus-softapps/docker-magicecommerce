@@ -314,7 +314,6 @@ class AuthSignupHome(openerp.addons.auth_signup.controllers.main.AuthSignupHome)
         
         qcontext.update({'company_id':company})
         
-        print "kw",kw
         if 'company' in kw:
             company_id = int(kw.get('company'))
             if company_id:
@@ -343,7 +342,7 @@ class AuthSignupHome(openerp.addons.auth_signup.controllers.main.AuthSignupHome)
         values = dict((key, qcontext.get(key)) for key in ('login', 'name', 'password','company_id','company_ids'))
         
         loc_ids = loc_obj.search(cr, uid, [('complete_name','=','Partner Locations / Customers / Stock')])
-        prod_ids = prod_obj.search(cr, uid, []) 
+        prod_ids = prod_obj.search(cr, uid, [('website_published','=',True)]) 
         if loc_ids:
             loc_ids = loc_ids[0]
             values.update({
@@ -351,6 +350,7 @@ class AuthSignupHome(openerp.addons.auth_signup.controllers.main.AuthSignupHome)
                            'user_roles':'magicemart_portal_manager',
                            'location_id' : loc_ids,
                            'product_ids': [(6, 0, prod_ids)],
+                           'customer':True,
                            })
         
         assert any([k for k in values.values()]), "The form was not properly filled in."
