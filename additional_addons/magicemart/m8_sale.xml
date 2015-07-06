@@ -2,32 +2,7 @@
 <openerp>
     <data>
         
-        <!--	
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-       				Hiding  button Preview Quotation for Customer user group 
-  		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        -->  
-        
-        <record model="ir.ui.view" id="m_sale_order_form_quote">
-            <field name="name">m.sale.order.form.payment</field>
-            <field name="model">sale.order</field>
-            <field name="inherit_id" ref="website_quote.sale_order_form_quote"/>
-            <field name="arch" type="xml">
-                
-                <xpath expr="//header/button[@name='action_button_confirm']" position="before">
-                    <button name="open_quotation" string="Preview Quotation" type="object" class="oe_highlight"
-                        attrs="{'invisible': ['|',('template_id','=',False),('state','=','draft')]}"
-                        groups ="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager,magicemart.magicemart_portal_manager" />
-                </xpath>
-                <xpath expr="//header/button[@name='action_button_confirm']" position="before">
-                    <button name="open_quotation" string="Preview Quotation" type="object" attrs="{'invisible': ['|',('template_id','=',False),('state','!=','draft')]}"
-                        groups ="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager,magicemart.magicemart_portal_manager"/>
-                </xpath>
-                
-            </field>
-        </record>
-        
-        
+       
         <!--	
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
        				Hiding Quotation Template
@@ -49,6 +24,22 @@
                 <xpath expr="//page[@string='Suggested Products']" position="attributes">
                     <attribute name="invisible">1</attribute>
                 </xpath>
+                
+<!--                <xpath expr="//header/button[@name='action_button_confirm']" position="before">
+                    <button name="open_quotation" string="Preview Quotation" type="object" class="oe_highlight"
+                        attrs="{'invisible': ['|',('template_id','=',False),('state','=','draft')]}"
+                        groups ="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager,magicemart.magicemart_portal_manager" />
+                </xpath>
+                <xpath expr="//header/button[@name='action_button_confirm']" position="before">
+                    <button name="open_quotation" string="Preview Quotation" type="object" attrs="{'invisible': ['|',('template_id','=',False),('state','!=','draft')]}"
+                        groups ="base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager,magicemart.magicemart_portal_manager"/>
+                </xpath>-->
+                
+                <xpath expr="//button[@name='print_quotation']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                
+                
             </field>
         </record>
         
@@ -156,7 +147,6 @@
                     <field name="lock_it" invisible="1"/>
                 </field>
                 
-
 <!--                
                 <xpath expr="//notebook/page/field[@name='order_line']/form/group/group/field[@name='price_unit']" position="attributes">
                     <attribute name="string">PRAVEEN</attribute>
@@ -175,8 +165,9 @@
                     <attribute name="domain">[('is_company','=',True),('customer','=',True)]</attribute>
                     <attribute name="on_change">onchange_partner_id(partner_id)</attribute>
                 </xpath>-->
-                
-                
+               
+               
+               
                 <xpath expr="//notebook/page/field[@name='order_line']/tree/field[@name='name']" position="attributes">
                     <attribute name="invisible">1</attribute>   
                 </xpath>
@@ -196,7 +187,8 @@
 
                 
                 <xpath expr="//notebook/page/field[@name='order_line']/tree/field[@name='price_subtotal']" position="after">
-                    <field name="available_qty" groups="base.group_system,base.group_no_one,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"/>
+                    <field name="available_qty" groups="base.group_system,base.group_no_one,magicemart.magicemart_group_user,magicemart.magicemart_group_manager"
+                    readonly ="1"/>
                 </xpath>
                 
                 <xpath expr="//field[@name='partner_id']" position="attributes">
@@ -323,6 +315,7 @@
                     attrs="{'invisible': [('invoice_exists', '=', False)]}"  position="attributes">
                     <attribute name="groups">base.group_system,magicemart.magicemart_group_manager,magicemart.magicemart_group_user</attribute>
                 </button>
+                
                 
                 
             </field>

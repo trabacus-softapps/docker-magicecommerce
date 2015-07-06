@@ -680,7 +680,7 @@
                     <field name="act_window_id" ref="supplier_product_action"/>
                 </record>	 
                 
-        <menuitem name="Products" id="supplier_product" parent="menu_supplier_portal" action="supplier_product_action" sequence="3" groups="magicemart.magicemart_supplier_portal" />
+        <menuitem name="Products" id="supplier_product" parent="menu_supplier_portal" action="supplier_product_action" sequence="1" groups="magicemart.magicemart_supplier_portal" />
                 
         
     </data>

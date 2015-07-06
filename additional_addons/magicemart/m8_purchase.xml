@@ -137,13 +137,13 @@
                 </xpath>
 
 <!-- TO BE UNCOMENT-->
-<!--                <xpath expr="//button[@string='Print RFQ']" position="attributes">
+                <xpath expr="//button[@string='Print RFQ']" position="attributes">
                     <attribute name="groups">base.group_system</attribute>
                 </xpath>
                 
                 <xpath expr="//button[@string='Re-Print RFQ']" position="attributes">
                     <attribute name="groups">base.group_system</attribute>
-                </xpath>-->
+                </xpath>
                
                 <xpath expr="//button[@id='draft_confirm']" position="attributes">
                     <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
@@ -268,7 +268,7 @@
         
         <!--	
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-       				Hiding Shipment Button for Supplier Portal
+       				Hiding Shipment Button  and Invoice Buttons for Supplier Portal
   		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         -->      
         
@@ -281,9 +281,9 @@
                     <attribute name="groups">base.group_system</attribute>
                 </xpath>
                 
-<!--                <xpath expr="//div[@name='buttons']/button[@name='view_picking']/field[@name='shipment_count']" position="attributes">
+                <xpath expr="//div[@name='buttons']" position="attributes">
                     <attribute name="groups">base.group_system,magicemart.magicemart_group_user,magicemart.magicemart_group_manager</attribute>
-                </xpath>-->
+                </xpath>
 
             </field>
         </record>
@@ -337,8 +337,8 @@
         </record>
         
         
-        <menuitem name="Quotation" id="menu_supplier_portal_quotation"  parent="menu_supplier_portal" 
-            action="action_supplier_portal"  sequence="1" groups="magicemart.magicemart_supplier_portal" />
+        <menuitem name="Purchase Order" id="menu_supplier_portal_quotation"  parent="menu_supplier_portal" 
+            action="action_supplier_portal"  sequence="2" groups="magicemart.magicemart_supplier_portal" />
         
         </data>
 </openerp>
