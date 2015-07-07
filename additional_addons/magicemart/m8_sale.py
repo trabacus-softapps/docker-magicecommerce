@@ -843,7 +843,8 @@ class sale_order_line(osv.osv):
         available_qty = available_qty[product].get('qty_available',0)
         prod = prod_obj.browse(cr, uid, vals.get("product_id",False))
         vals.update({'available_qty' : available_qty and available_qty or 0,
-                     'product_image':prod.image_medium})
+                     'product_image':prod.image_medium,
+                     'sale_mrp':prod.lst_price})
 
         return super(sale_order_line, self).create(cr, uid, vals, context=context)
     
@@ -901,7 +902,8 @@ class sale_order_line(osv.osv):
             
             vals.update({
                          'available_qty' : available_qty,
-                         'product_image':prod.image_medium
+                         'product_image':prod.image_medium,
+                         'sale_mrp':prod.lst_price
                          })
                
             res = self.product_id_change_with_wh(cr, uid, [], case.order_id.pricelist_id.id,vals.get('product_id',case.product_id.id),vals.get('qty',0), vals.get('uom',case.product_uom.id), vals.get('qty_uos',0),
