@@ -665,6 +665,8 @@ class ir_rule(osv.osv):
         # involve objects on which the real uid has no acces rights.
         # This means also there is no implicit restriction (e.g. an object
         # references another object the user can't see).
+        dom = self._compute_domain(cr, uid, model_name, mode) or []
+        #print "model", model_name, dom
         if uid and uid !=63:
             if mode == "read":
                 " This function is to set the rule domain for product_product object based on the user permissions"
@@ -673,7 +675,7 @@ class ir_rule(osv.osv):
                 newdom = []
     #             if not uid:
     #                 uid = SUPERUSER_ID
-                dom = self._compute_domain(cr, uid, model_name, mode) or []
+                
                 custgrp_ids = []
                 if uid:
                     cr.execute("""select uid from res_groups_users_rel where gid in (select id  from res_groups where name in ('User', 'Manager') and  
@@ -794,6 +796,11 @@ class ir_rule(osv.osv):
                     if dom:
                         query = self.pool[model_name]._where_calc(cr, SUPERUSER_ID, dom, active_test=False)
                         return query.where_clause, query.where_clause_params, query.tables
+       
+        # Added by mani to filter un_published products for public user
+        if dom:
+            query = self.pool[model_name]._where_calc(cr, SUPERUSER_ID, dom, active_test=False)
+            return query.where_clause, query.where_clause_params, query.tables
                     
         return [], [], ['"' + self.pool[model_name]._table + '"']
 ir_rule()     
