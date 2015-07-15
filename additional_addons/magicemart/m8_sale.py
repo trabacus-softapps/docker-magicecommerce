@@ -880,11 +880,11 @@ class sale_order_line(osv.osv):
             # Calling This method update price_unit as Pricelist Price or Price After Discount or Sales Price 
             prodtemp = prodtemp_obj._product_template_price(cr, uid, [prod.product_tmpl_id.id], 'price', False, context=context)
             price_unit = prodtemp[prod.product_tmpl_id.id]
-            if price_unit <=0.00:
+            if price_unit <=0.00 and not prod.type == 'service':
                 raise osv.except_osv(_('Warning'), _('Please Enter The Unit Price For \'%s\'.') % (case.name))
             if not price_unit:
                 price_unit = case.price_unit
-                if price_unit <= 0.00:
+                if price_unit <= 0.00 and not prod.type == 'service':
                     raise osv.except_osv(_('Warning'), _('Please Enter The Unit Price For \'%s\'.') % (case.name))
              
             if price_unit:
