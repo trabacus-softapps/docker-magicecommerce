@@ -191,7 +191,7 @@ class account_invoice(osv.osv):
                  
                  
                 }
-    _order = 'id asc'
+    _order = "id desc"
 
     def unlink(self, cr, uid, ids, context=None):
         pick_obj = self.pool.get("stock.picking")

@@ -8,7 +8,7 @@ import datetime
 
 class account_invoice(models.Model):
     _inherit = "account.invoice"
-
+    _order = "id desc"
 
     @api.one
     @api.depends('invoice_line.price_subtotal', 'tax_line.amount')
@@ -95,4 +95,8 @@ class account_invoice_line(models.Model):
 
         price_subtotal = Fields.Float(string='Amount', digits= dp.get_precision('Account'),
                                           store=True, readonly=True, compute='_compute_price')
+        
+        # creating this field  coz created in new version of saas-6
+        price_subtotal_signed = Fields.Float(string='Amount Signed', digits=0,
+                                             store=True, readonly=True, compute='_compute_price'),
         
