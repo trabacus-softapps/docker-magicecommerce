@@ -56,7 +56,7 @@ class sale_order(osv.osv):
     #                 
     #         if portal_user:
             if view_type == 'form':
-                domain  = "[('id','=',"+str(user.partner_id.id)+")]"
+                domain  = "[('id','child_of',"+str(user.partner_id.id)+")]"
                 for node in doc.xpath("//field[@name='pricelist_id']"):
                     node.set('options', '{"no_open":True}')
                     node.set('readonly','1')
