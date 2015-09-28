@@ -911,6 +911,16 @@ class account_bank_statement_line(osv.osv):
         
 account_bank_statement_line()
 
+class tr_ledger(osv.osv):
+    _name = 'tr.ledger'
+    _columns = {
+                'name'      :   fields.char("Ledger", size=100),
+                
+                }
+
+tr_ledger()
+
+
 
         
                     

@@ -498,6 +498,115 @@
         <menuitem action="action_itemwise_gross_profit" id="m_itemwise_gross_profit" name="Itemwise Gross Profit" parent="account.menu_finance_reports" sequence="9"/>
         
         
+
+
+        <!--	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+       		                         General Ledger   
+  		        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~	-->
+        
+        
+        <record id="account_report_general_ledger_view_tr" model="ir.ui.view">
+            <field name="name">account_report_general_ledger_view_tr</field>
+            <field name="model">account.report.general.ledger</field>
+            <field name="inherit_id" ref="account.account_report_general_ledger_view"/>
+            <field name="arch" type="xml">
+                
+                <!-- Replacing Radio Buttons with Selection-->
+                <xpath expr="//field[@name='target_move']" position="attributes">
+                    <attribute name="widget">"selection"</attribute>
+                </xpath>
+                
+                <xpath expr="//field[@name='filter']" position="attributes">
+                    <attribute name="widget">"selection"</attribute>
+                </xpath>
+                
+                <xpath expr="//field[@name='display_account']" position="attributes">
+                    <attribute name="widget">"selection"</attribute>
+                </xpath>
+                <xpath expr="//field[@name='display_account']" position="after">
+                    <field name="partner_id" 
+                        
+                        context="{'default_customer':1, 'search_default_customer': 1, 'default_supplier': 0, 'default_other': 0}"
+                        options="{'no_quick_create': True}"/>
+<!--                    <field name="tledger_id" on_change="onchange_tledger_id(tledger_id,company_id)"
+                        invisible="context.get('client_heading')"
+                        domain="[('company_id','=',company_id)]"/>-->
+                    <field name="account_id"
+                        domain="[('type','not in',('view','consolidation')), ('company_id','=',company_id)]"
+                        invisible="context.get('client_heading')"
+                        options="{'no_quick_create': True}"/>
+<!--                    <field name="account_analytic_id" domain="[('company_id','=',company_id)]"/>-->
+                    <field name="output_type" required="1"/>
+                </xpath>
+                <xpath expr="//field[@name='company_id']" position="attributes">
+                    <attribute name="invisible">0</attribute>
+                </xpath>
+                <xpath expr="//field[@name='sortby']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='landscape']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='amount_currency']" position="after">
+                    <field name="client_heading" invisible="1"/>
+                </xpath>
+                <xpath expr="//field[@name='amount_currency']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//button[@string='Print']" position="replace">
+                    <button name="print_penreport" string="Print " type="object"
+                        class="oe_highlight"/>
+                    or
+                </xpath>
+                <xpath expr="//button[@string='Cancel']" position="replace">
+                    <span class="oe_button oe_form_button oe_link">
+                        <span data-dismiss="modal">Cancel</span>
+                    </span>
+                </xpath>
+                
+                <xpath expr="//field[@name='period_from']" position="attributes">
+                    <attribute name="domain">[('fiscalyear_id', '=',
+                        fiscalyear_id),('company_id','=',company_id)]
+                    </attribute>
+                </xpath>
+                
+                <xpath expr="//field[@name='period_to']" position="attributes">
+                    <attribute name="domain">[('fiscalyear_id', '=',
+                        fiscalyear_id),('company_id','=',company_id)]
+                    </attribute>
+                </xpath>
+                <xpath expr="//page/field[@name='journal_ids']" position="attributes">
+                    <attribute name="domain">[('company_id','=',company_id)]</attribute>
+                </xpath>
+                
+<!--                <xpath expr="//field[name='initial_balance']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>-->
+                
+                
+            </field>
+        </record>
+        <record id="tr_account_report_general_ledger_view_inherit" model="ir.ui.view">
+            <field name="name">tr_account_report_general_ledger_view_inherit</field>
+            <field name="model">account.report.general.ledger</field>
+            <field name="inherit_id" ref="account.account_report_general_ledger_view_inherit"/>
+            <field name="arch" type="xml">
+                <field name="fiscalyear_id" position="replace">
+                    <field name="fiscalyear_id" on_change="onchange_fiscalyear(fiscalyear_id)"
+                        domain="[('company_id','=',company_id)]"/>
+                </field>
+            </field>
+        </record>
+        <record id="account.action_account_general_ledger_menu" model="ir.actions.act_window">
+            <field name="name">Ledger</field>
+            <field name="view_id" ref="account_report_general_ledger_view_tr"/>
+        </record>
+        
+        
+        
+        <menuitem  parent="account.menu_finance_reports" id="m_menu_general_ledger"
+            name="Ledger" action="account.action_account_general_ledger_menu" sequence="10"/>
+        
         
     </data>
 </openerp>

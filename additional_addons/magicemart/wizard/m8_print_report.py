@@ -480,3 +480,226 @@ sale_reportwiz()
 
 
 
+# For General Ledger
+class account_report_general_ledger(osv.osv_memory):
+    _inherit='account.report.general.ledger'
+    _columns={
+              'partner_id':fields.many2one('res.partner','Partner'),
+              'account_id':fields.many2one('account.account','Account'),
+              'client_heading' : fields.boolean('Client Heading'),
+              'account_analytic_id': fields.many2one('account.analytic.account', 'Analytic Account'),
+              'output_type' : fields.selection([('pdf', 'Portable Document (pdf)'),
+                                                 ('xls', 'Excel Spreadsheet (xls)')],
+                                                'Report format', help='Choose the format for the output'),
+               'tledger_id': fields.many2one('tr.ledger', 'Ledger'),
+
+              }
+#     def _get_all_journal(self, cr, uid, context=None):
+#         cid = self.pool.get('res.users')._get_company(cr, uid, context=None)
+#         return self.pool.get('account.journal').search(cr, uid ,[('company_id', '=', cid)])
+
+    _defaults={
+               'output_type' : 'pdf',
+               'client_heading' : False,
+               'landscape' : False,
+               'filter':'filter_date',
+               'initial_balance':False,
+               'amount_currency' : False,
+#                'date_from' : time.strftime("%Y-%m-%d")
+#                'journal_ids' : _get_all_journal
+               }
+
+    def default_get(self, cr, uid, fields, context=None):
+        if context is None:
+            context = {}
+
+        res = super(account_report_general_ledger, self).default_get(cr, uid, fields, context=context)
+        res.update({'partner_id': context.get('frm_custview') and context.get('active_id') or False})
+        return res
+
+    def xls_export(self, cr, uid, ids, context=None):
+        return self.check_report(cr, uid, ids, context=context)
+
+
+# # Overriden
+#     def _print_report(self, cr, uid, ids, data, context=None):
+#         if context is None:
+#             context = {}
+#         data = self.pre_print_report(cr, uid, ids, data, context=context)
+#         data['form'].update(self.read(cr, uid, ids, ['landscape', 'initial_balance', 'amount_currency', 'sortby'])[0])
+# #         data['form'].update(self.read(cr, uid, ids, ['account_id'], context=context)[0])
+#         for case in self.browse(cr, uid, ids):
+#             data['form'].update({'chart_account_id':case.account_id and case.account_id.id or case.chart_account_id.id,
+#                                  'chart_account_name' : case.chart_account_id and case.chart_account_id.name or '',
+#                                  'account_id':case.account_id and case.account_id.id or 0,
+#                                  'output_type':case.output_type or 'pdf',
+#                                  'tledger_id' : case.tledger_id and case.tledger_id.id or False,
+#                                  'company_id' : case.company_id and case.company_id.id or 0})
+#         data['form'].update(self.read(cr, uid, ids, ['partner_id', 'account_analytic_id'], context=context)[0])
+#         if 'client_heading' in context:
+#             data['form'].update({'client_heading':True})
+#         else:
+#             data['form'].update({'client_heading':False})
+#         if not data['form']['fiscalyear_id']:  # GTK client problem onchange does not consider in save record
+#             data['form'].update({'initial_balance': False})
+#         if 'client_heading' in context:
+#             if data['form']['output_type'] == 'xls':
+#                 return { 'type': 'ir.actions.report.xml', 'report_name': 'account.account_report_general_ledger_xls', 'name' : 'Client Satement', 'datas': data}
+#             if data['form']['landscape']:
+#                 return { 'type': 'ir.actions.report.xml', 'report_name': 'account.general.ledger_landscape', 'name' : 'Client Satement', 'datas': data}
+#             return { 'type': 'ir.actions.report.xml', 'report_name': 'account.general.ledger', 'name' : 'Client Satement', 'datas': data}
+#         if data['form']['output_type'] == 'xls':
+#             return { 'type': 'ir.actions.report.xml', 'report_name': 'account.account_report_general_ledger_xls', 'datas': data}
+#         if data['form']['landscape']:
+#             return { 'type': 'ir.actions.report.xml', 'report_name': 'account.general.ledger_landscape', 'datas': data}
+#         # Update model to pass account_id in set_context
+#         if data.get('model') == 'res.partner' : data.update({'model' : 'ir.ui.menu'})
+#         return { 'type': 'ir.actions.report.xml', 'report_name': 'account.general.ledger', 'datas': data}
+
+    def print_penreport(self, cr, uid, ids, data, context=None):
+        for case in self.browse(cr, uid, ids):
+
+            if context is None : context = {}
+            if case.filter == 'filter_date':
+                if case.date_to < case.date_from:
+    #                 raise UserError(_('Please Check the given dates!!!'))
+                    raise osv.except_osv(_('User Error'), _('Please Check the given dates!'))
+
+            #~~~ To show Partner name in details
+            show_partner = False
+            if not case.partner_id and not case.account_id and case.tledger_id:
+                show_partner = True
+            if not case.partner_id and case.account_id  and not case.tledger_id:
+                if case.account_id.type not in ('receivable', 'payable'):
+                    show_partner = True
+            if not case.partner_id and not case.account_id  and not case.tledger_id:
+                show_partner = True
+
+            address = ''
+            address = case.company_id and ((case.company_id.street or '')
+                                           + (case.company_id.street2 and (', ' + case.company_id.street2) or '')
+                                           + (case.company_id.state_id and (', ' + case.company_id.state_id.name) or '')
+                                           + (case.company_id.city and (', ' + case.company_id.city) or '')
+                                           + (case.company_id.country_id and (', ' + case.company_id.country_id.name) or '')
+                                           + (case.company_id.zip and (' - ' + case.company_id.zip) or '')
+                                           )
+
+            heading = 'Ledger Report'
+            if case.client_heading:
+                heading = 'Client Statement' + (case.partner_id and (' - ' + case.partner_id.name) or '')
+            if case.tledger_id:
+                heading = case.tledger_id.name
+            data = {}
+            data['ids'] = ids
+            data['model'] = context.get('active_model', 'ir.ui.menu')
+            data['output_type'] = case.output_type
+            data['variables'] = {
+                                'start_date'        : case.date_from or time.strftime("%Y-%m-%d"),
+                                'end_date'          : case.date_to or time.strftime("%Y-%m-%d"),
+                                'company_id'        : case.company_id and case.company_id.id or 0,
+                                'company_name'      : case.company_id and case.company_id.name or case.company_id.name,
+                                'company_address'   : address or '',
+                                'chart_account_id'  : case.chart_account_id and case.chart_account_id.id or 0,
+                                'target_move'       : case.target_move or 'all',
+                                'display_account'   : case.display_account or '',
+                                'partner_id'        : case.partner_id and case.partner_id.id or 0,
+                                'partner_name'      : case.partner_id and case.partner_id.name or '',
+                                'partner_code'      : case.partner_id and case.partner_id.ref or '',
+                                'account_id'        : case.account_id and case.account_id.id or 0,
+                                'account_name'      : case.account_id and case.account_id.code
+                                                        and ('[' + case.account_id.code + '] ' + case.account_id.name)
+                                                        or (case.account_id and case.account_id.name or ''),
+                                'account_type'      : case.account_id and case.account_id.type in ('receivable', 'payable') and 1 or 0,
+                                'analytic_account_id' : case.account_analytic_id and case.account_analytic_id.id or 0,
+                                'analytic_account_name' : case.account_analytic_id and case.account_analytic_id.name or '',
+                                'tledger_id'        : case.tledger_id and case.tledger_id.id or 0,
+                                'tledger_name'      : case.tledger_id and case.tledger_id.name or '',
+                                'output_type'       : case.output_type or 'pdf',
+                                'ids'               : [x.id for x in case.journal_ids] or 0,
+                                'currency_symbol'   : case.company_id and case.company_id.currency_id and case.company_id.currency_id.name or 0,
+                                'show_partner'      : show_partner and 1 or 0,
+                                'heading'           : heading or '',
+#                                 'rundate'           : tg.UTC_To_LocalTime(self, cr, uid, datetime.today().strftime("%Y-%m-%d %H:%M:%S"), context),
+#                                 'date_format'       : tg.dateFormat(self, cr, uid, context),
+                                }
+            return {
+                    'report_name': 'general_ledger_report',
+                    'type': 'ir.actions.report.xml',
+                    'datas': data,
+                }
+
+#     def onchange_account(self, cr, uid, ids, account_id,):
+#         result = {}
+#         acc_obj = self.pool.get('account.account')
+#         prop_obj = self.pool.get('ir.property')
+#
+#         if account_id:
+#             acc_id = 'account.account' + ',' + str(account_id)
+#             if acc_id:
+#                 ir_ids = prop_obj.search(cr, uid, [('value_reference', '=', acc_id)], limit=1)
+#                 ir_id = ir_ids and ir_ids[0] or False
+#                 if not ir_id:
+#                     return False  # return {'value':{'partner_id' : False}}
+#
+#                 prop = prop_obj.browse(cr, uid, ir_id)
+#                 res = prop.res_id
+#                 if res and res[0:res.find(',') + 1] == 'res.partner,' or False:
+#                     p_id = int(res[res.find(',') + 1:].strip())
+#                     result = {
+#                            'partner_id' : p_id and p_id or False
+#                           }
+#         return {'value':result}
+
+    def onchange_partner_id(self, cr, uid, ids, partner_id, company_id=False):
+        result = {}
+        opt = [('uid', str(uid))]
+        acc_id = False
+        partner_obj = self.pool.get('res.partner')
+        if partner_id:
+            p = partner_obj.browse(cr, uid, partner_id)
+            sql = """select substring(value_reference,17) from ir_property
+                            where (name ilike '%property_account_receivable%' or name ilike '%property_account_payable%')
+                             and company_id =""" + str(company_id) +"""
+                             and res_id = 'res.partner,""" + str(p.id)  + """'"""
+            cr.execute(sql)
+            acc_id = [x[0] for x in cr.fetchall()]
+        result = {'value': {'account_id': acc_id and int(acc_id[0]) }}
+        return result
+
+    #Inherited:
+    def onchange_chart_id(self, cr, uid, ids, chart_account_id=False, context=None):
+        res = {}
+        res = super(account_report_general_ledger, self).onchange_chart_id(cr, uid, ids, chart_account_id, context=context)
+        acc_obj = self.pool.get('account.account')
+        if 'company_id' in res['value']:
+            company_id = res['value']['company_id'] or acc_obj.browse(cr, uid, chart_account_id, context=context).company_id.id
+            jids = self.pool.get('account.journal').search(cr, uid ,[('company_id', '=', company_id)])
+            res['value'].update({'journal_ids' : jids
+                            ,'company_id': company_id
+                            , 'account_id' : False
+                            , 'tledger_id' : False})
+            res['domain'] = {
+                            'account_id' : [('type', '!=', 'view'), ('type', '!=', 'consolidation'),('company_id','=',company_id)]
+                                  }
+        return res
+
+    def onchange_tledger_id(self, cr, uid, ids, tledger_id, company_id):
+        domain = [('type', '!=', 'view'), ('type', '!=', 'consolidation'),('company_id','=',company_id)]
+        if tledger_id:
+            domain += [('tledger_id', '=', tledger_id)]
+        result = {'domain' : {'account_id' : domain}}
+        return result
+
+    def onchange_filter(self, cr, uid, ids, filter='filter_no', fiscalyear_id=False, context=None):
+        res = super(account_report_general_ledger, self).onchange_filter(cr, uid, ids, filter=filter, fiscalyear_id=fiscalyear_id, context=context)
+        fiscal_obj = self.pool.get('account.fiscalyear')
+        fid = fiscal_obj.browse(cr, uid, fiscalyear_id)
+        if fid : res['value'].update({'date_from' : time.strftime("%Y-%m-%d"), })
+        return res
+
+
+account_report_general_ledger()
+
+
+
+
